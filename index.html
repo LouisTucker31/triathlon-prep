@@ -21,7 +21,7 @@
 </head>
 <body>
 <div class="page">
-<button type="button" class="lg-button lg-surface" id="openSettings" aria-label="Settings" hidden>
+<button type="button" class="lg-button lg-surface" id="openSettings" aria-label="Settings">
   <span class="lg-surface__lens" aria-hidden="true"></span>
   <span class="lg-surface__frost" aria-hidden="true"></span>
   <span class="lg-button__icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960"><path d="M421-80q-14 0-25-9t-13-23l-15-94q-19-7-40-19t-37-25l-86 40q-14 6-28 1.5T155-226L97-330q-8-13-4.5-27t15.5-23l80-59q-2-9-2.5-20.5T185-480q0-9 .5-20.5T188-521l-80-59q-12-9-15.5-23t4.5-27l58-104q8-13 22-17.5t28 1.5l86 40q16-13 37-25t40-18l15-95q2-14 13-23t25-9h118q14 0 25 9t13 23l15 94q19 7 40.5 18.5T669-710l86-40q14-6 27.5-1.5T804-734l59 104q8 13 4.5 27.5T852-580l-80 57q2 10 2.5 21.5t.5 21.5q0 10-.5 21t-2.5 21l80 58q12 8 15.5 22.5T863-330l-58 104q-8 13-22 17.5t-28-1.5l-86-40q-16 13-36.5 25.5T592-206l-15 94q-2 14-13 23t-25 9H421Zm59-270q54 0 92-38t38-92q0-54-38-92t-92-38q-54 0-92 38t-38 92q0 54 38 92t92 38Z"/></svg></span>
@@ -86,48 +86,57 @@
 
     <p class="save-note">Changes save automatically on this device</p>
   </section>
-
-  <section class="view" id="view-settings" hidden>
-    <h1 tabindex="-1">Settings</h1>
-
-    <h2 class="settings-heading">My details</h2>
-    <div class="field-group">
-      <label class="field"><span>Name</span><input data-key="name" type="text" autocapitalize="words" placeholder="Your name" autocomplete="name"></label>
-      <label class="field"><span>Club (optional)</span><input data-key="club" type="text" autocapitalize="words" placeholder="Your triathlon club"></label>
-      <div class="field-row">
-        <label class="field"><span>British Triathlon no.</span><input data-key="btNumber" type="text" autocapitalize="words" placeholder="Add number" autocomplete="off"></label>
-        <label class="field"><span>Membership expiry</span><input data-key="btExpiry" type="date"></label>
-      </div>
-      <label class="field"><span>Emergency contact</span><input data-key="iceName" type="text" autocapitalize="words" placeholder="Name" autocomplete="off"></label>
-      <label class="field"><span>Emergency contact phone</span><input data-key="icePhone" type="tel" placeholder="Phone number" autocomplete="off"></label>
-      <label class="field"><span>Notes</span><textarea data-key="notes" autocapitalize="sentences" rows="2" placeholder="Anything else for race day"></textarea></label>
-    </div>
-
-    <h2 class="settings-heading">Appearance</h2>
-    <div class="segmented" role="group" aria-label="Theme">
-      <button type="button" data-theme-choice="light">Light</button>
-      <button type="button" data-theme-choice="dark">Dark</button>
-      <button type="button" data-theme-choice="system">System</button>
-    </div>
-    <p class="settings-note">System follows your phone's light or dark setting.</p>
-
-    <h2 class="settings-heading">Reset</h2>
-    <button type="button" class="button-danger" id="resetApp">Reset for a new race</button>
-    <p class="settings-note">Clears Packing, Tasks and Events. Everything on this Settings page is kept.</p>
-
-    <dialog class="confirm" id="resetDialog" aria-labelledby="resetTitle" aria-describedby="resetDesc">
-      <h2 id="resetTitle">Reset for a new race?</h2>
-      <p id="resetDesc">This unticks everything on Packing and Tasks and clears Events. Your settings stay. You can't undo this.</p>
-      <div class="confirm__actions">
-        <button type="button" class="confirm__cancel" id="resetCancel" autofocus>Keep everything</button>
-        <button type="button" class="confirm__ok" id="resetConfirm">Reset</button>
-      </div>
-    </dialog>
-
-    <p class="save-note">Changes save automatically on this device</p>
-  </section>
 </main>
 </div>
+
+<!-- Settings: a full-screen pop-up over everything, including the nav. The
+     close button sits exactly where the settings button was. -->
+<dialog class="settings-sheet" id="settingsDialog" aria-labelledby="settingsTitle">
+  <button type="button" class="lg-button lg-surface" id="closeSettings" aria-label="Close settings">
+    <span class="lg-surface__lens" aria-hidden="true"></span>
+    <span class="lg-surface__frost" aria-hidden="true"></span>
+    <span class="lg-button__icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960"><path d="M480-438 270-228q-9 9-21 9t-21-9q-9-9-9-21t9-21l210-210-210-210q-9-9-9-21t9-21q9-9 21-9t21 9l210 210 210-210q9-9 21-9t21 9q9 9 9 21t-9 21L522-480l210 210q9 9 9 21t-9 21q-9 9-21 9t-21-9L480-438Z"/></svg></span>
+  </button>
+  <div class="settings-sheet__content view--has-button">
+    <h1 id="settingsTitle" tabindex="-1">Settings</h1>
+
+      <h2 class="settings-heading">My details</h2>
+      <div class="field-group">
+        <label class="field"><span>Name</span><input data-key="name" type="text" autocapitalize="words" placeholder="Your name" autocomplete="name"></label>
+        <label class="field"><span>Club (optional)</span><input data-key="club" type="text" autocapitalize="words" placeholder="Your triathlon club"></label>
+        <div class="field-row">
+          <label class="field"><span>British Triathlon no.</span><input data-key="btNumber" type="text" autocapitalize="words" placeholder="Add number" autocomplete="off"></label>
+          <label class="field"><span>Membership expiry</span><input data-key="btExpiry" type="date"></label>
+        </div>
+        <label class="field"><span>Emergency contact</span><input data-key="iceName" type="text" autocapitalize="words" placeholder="Name" autocomplete="off"></label>
+        <label class="field"><span>Emergency contact phone</span><input data-key="icePhone" type="tel" placeholder="Phone number" autocomplete="off"></label>
+        <label class="field"><span>Notes</span><textarea data-key="notes" autocapitalize="sentences" rows="2" placeholder="Anything else for race day"></textarea></label>
+      </div>
+
+      <h2 class="settings-heading">Appearance</h2>
+      <div class="segmented" role="group" aria-label="Theme">
+        <button type="button" data-theme-choice="light">Light</button>
+        <button type="button" data-theme-choice="dark">Dark</button>
+        <button type="button" data-theme-choice="system">System</button>
+      </div>
+      <p class="settings-note">System follows your phone's light or dark setting.</p>
+
+      <h2 class="settings-heading">Reset</h2>
+      <button type="button" class="button-danger" id="resetApp">Reset for a new race</button>
+      <p class="settings-note">Clears Packing, Tasks and Events. Everything on this Settings page is kept.</p>
+
+      <dialog class="confirm" id="resetDialog" aria-labelledby="resetTitle" aria-describedby="resetDesc">
+        <h2 id="resetTitle">Reset for a new race?</h2>
+        <p id="resetDesc">This unticks everything on Packing and Tasks and clears Events. Your settings stay. You can't undo this.</p>
+        <div class="confirm__actions">
+          <button type="button" class="confirm__cancel" id="resetCancel" autofocus>Keep everything</button>
+          <button type="button" class="confirm__ok" id="resetConfirm">Reset</button>
+        </div>
+      </dialog>
+
+      <p class="save-note">Changes save automatically on this device</p>
+  </div>
+</dialog>
 
 <!-- Liquid glass distortion for the tab bar: soft noise (feTurbulence) bends
      the blurred background (feDisplacementMap), like looking through uneven glass -->

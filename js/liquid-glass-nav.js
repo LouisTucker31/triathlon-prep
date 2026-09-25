@@ -206,8 +206,19 @@
     fallbackFilter: "blur(var(--lg-lens-blur)) saturate(var(--lg-saturate))"
   };
 
-  // Glass lens plus the little iOS-style "squish" on press, for any glass control
+  // Glass lens plus the little iOS-style "squish" on press, for any glass control.
+  // A control that's hidden at start (the settings close button) is set up the
+  // first time it appears, as the glass needs its real size.
   function initSurface(surface) {
+    if (!surface.offsetHeight) {
+      const waitForSize = new ResizeObserver(() => {
+        if (!surface.offsetHeight) return;
+        waitForSize.disconnect();
+        initSurface(surface);
+      });
+      waitForSize.observe(surface);
+      return;
+    }
     const lens = surface.querySelector(".lg-surface__lens");
     const glass = lens ? createLiquidGlass(lens, { ...GLASS_OPTIONS, borderRadius: surface.offsetHeight / 2 }) : null;
     if (glass && glass.isActive) surface.classList.add("lg--refract");
@@ -221,13 +232,10 @@
     const indicator = nav.querySelector(".lg-nav__indicator");
     initSurface(nav);
 
-    // null when the current page isn't one of the tabs (e.g. settings)
-    const activeTab = () => tabs.find(tab => tab.classList.contains("is-active")) || null;
+    const activeTab = () => tabs.find(tab => tab.classList.contains("is-active")) || tabs[0];
 
     function moveIndicator(tab, animate) {
-      if (!indicator) return;
-      indicator.classList.toggle("is-hidden", !tab);
-      if (!tab) return;
+      if (!indicator || !tab) return;
       if (!animate) indicator.classList.add("no-anim");
       const overhang = parseFloat(getComputedStyle(nav).getPropertyValue("--lg-nav-bubble-overhang")) || 0;
       indicator.style.width = (tab.offsetWidth + overhang * 2) + "px";
@@ -238,18 +246,16 @@
       }
     }
 
-    function select(tab, announce) {
+    function select(tab) {
       tabs.forEach(t => {
         t.classList.toggle("is-active", t === tab);
         if (t === tab) t.setAttribute("aria-current", "page"); else t.removeAttribute("aria-current");
       });
       moveIndicator(tab, true);
-      if (announce) nav.dispatchEvent(new CustomEvent("lg:change", { detail: { index: tabs.indexOf(tab), item: tab } }));
+      nav.dispatchEvent(new CustomEvent("lg:change", { detail: { index: tabs.indexOf(tab), item: tab } }));
     }
 
-    tabs.forEach(tab => tab.addEventListener("click", () => select(tab, true)));
-    // Lets the page change the highlighted tab without a click; index -1 clears it
-    nav.addEventListener("lg:set", e => select(tabs[e.detail.index] || null, false));
+    tabs.forEach(tab => tab.addEventListener("click", () => select(tab)));
 
     moveIndicator(activeTab(), false);
     new ResizeObserver(() => moveIndicator(activeTab(), false)).observe(nav);

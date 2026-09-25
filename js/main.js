@@ -118,7 +118,7 @@ function formatNumber(raw) {
   whole = whole.replace(/^0+(?=\d)/, "").slice(0, 7).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   return fraction === undefined ? whole : `${whole || "0"}.${fraction.slice(0, 2)}`;
 }
-document.querySelectorAll(".views [data-number]").forEach(input => {
+document.querySelectorAll("[data-number]").forEach(input => {
   // Registered before the save handler below, so the formatted value is what's saved
   input.addEventListener("input", () => {
     const before = input.value;
@@ -133,7 +133,7 @@ document.querySelectorAll(".views [data-number]").forEach(input => {
   }, { capture: true });
 });
 
-document.querySelectorAll(".views [data-key]").forEach(field => {
+document.querySelectorAll("[data-key]").forEach(field => {
   const key = field.dataset.key;
   if (settings.fields[key] != null) field.value = settings.fields[key];
   // Tidy older free-text distances, e.g. "1.9km" -> "1.9"
@@ -280,46 +280,58 @@ document.querySelectorAll("[data-theme-choice]").forEach(button => button.addEve
 darkQuery.addEventListener("change", applyTheme);
 applyTheme();
 
-// Views: the nav tabs are packing, tasks and events (in that order); settings
-// is opened from the round button shown on every tab page
-const TAB_VIEWS = ["packing", "tasks", "events"];
-const VIEWS = [...TAB_VIEWS, "settings"];
-const VIEWS_WITH_SETTINGS_BUTTON = TAB_VIEWS;
+// Views: packing, tasks and events, one per nav tab (in that order)
+const VIEWS = ["packing", "tasks", "events"];
 const APP_TITLE = "Triathlon packing list";
 const nav = document.querySelector(".lg-nav");
 const tabs = [...nav.querySelectorAll(".lg-nav__item")];
-const settingsButton = document.getElementById("openSettings");
+const pageTitle = title => title === APP_TITLE ? APP_TITLE : `${title} – ${APP_TITLE}`;
 
 function showView(name) {
   VIEWS.forEach(view => { document.getElementById("view-" + view).hidden = view !== name; });
-  settingsButton.hidden = !VIEWS_WITH_SETTINGS_BUTTON.includes(name);
   const title = document.querySelector(`#view-${name} h1`);
-  document.title = title.textContent === APP_TITLE ? APP_TITLE : `${title.textContent} – ${APP_TITLE}`;
+  document.title = pageTitle(title.textContent);
   storage.write(STORAGE_KEYS.view, name);
   return title;
 }
-function goToView(name) {
-  const title = showView(name);
-  window.scrollTo(0, 0);
-  title.focus({ preventScroll: true }); // so screen readers announce the new view
-}
 
-storage.remove("tri-tab"); // replaced by tri-view when settings left the nav
+storage.remove("tri-tab"); // older key for the current page, replaced by tri-view
 const savedView = storage.read(STORAGE_KEYS.view, "packing");
 const startView = VIEWS.includes(savedView) ? savedView : "packing";
-// Set the highlighted tab before the nav script reads it (none for settings)
+// Set the highlighted tab before the nav script reads it
 tabs.forEach((tab, i) => {
-  const active = TAB_VIEWS[i] === startView;
+  const active = VIEWS[i] === startView;
   tab.classList.toggle("is-active", active);
   if (active) tab.setAttribute("aria-current", "page"); else tab.removeAttribute("aria-current");
 });
 showView(startView);
 
-nav.addEventListener("lg:change", e => goToView(TAB_VIEWS[e.detail.index]));
-settingsButton.addEventListener("click", () => {
-  nav.dispatchEvent(new CustomEvent("lg:set", { detail: { index: -1 } }));
-  goToView("settings");
+nav.addEventListener("lg:change", e => {
+  const title = showView(VIEWS[e.detail.index]);
+  window.scrollTo(0, 0);
+  title.focus({ preventScroll: true }); // so screen readers announce the new view
 });
+
+// Settings pop-up: covers everything, including the nav. Its close button sits
+// where the settings button was, so the cog appears to turn into a cross.
+// Closing (button or Escape) leaves you on the page you were on, and the
+// browser returns focus to the settings button.
+const settingsDialog = document.getElementById("settingsDialog");
+let titleBeforeSettings = document.title;
+document.getElementById("openSettings").addEventListener("click", () => {
+  titleBeforeSettings = document.title;
+  settingsDialog.showModal();
+  settingsDialog.scrollTop = 0;
+  document.title = pageTitle("Settings");
+});
+const restoreTitle = () => { document.title = titleBeforeSettings; };
+document.getElementById("closeSettings").addEventListener("click", () => {
+  settingsDialog.close();
+  restoreTitle();
+});
+// Escape fires "cancel" then "close"; either restores the title (it is harmless twice)
+settingsDialog.addEventListener("cancel", restoreTitle);
+settingsDialog.addEventListener("close", restoreTitle);
 
 // Reset for a new race: clears everything outside settings (packing and task
 // ticks, and the race details on the events page). My details,
