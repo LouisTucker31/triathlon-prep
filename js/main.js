@@ -109,49 +109,31 @@ settings.theme = settings.theme || "light";
 settings.fields = settings.fields || {};
 const saveSettings = () => storage.write(STORAGE_KEYS.settings, settings);
 
-// Goal times are picked with three dropdowns each (hours, minutes, seconds),
-// which iPhone shows as its native scroll wheel. Each part is saved as its own
-// field, e.g. goalSwimH / goalSwimM / goalSwimS.
+// Goal times use the same time picker as the start time (one scroll wheel on
+// iPhone), read as a duration: "01:15" is an hour and a quarter. Hours and
+// minutes only, as that picker has no seconds.
 const GOAL_LEGS = ["goalSwim", "goalT1", "goalBike", "goalT2", "goalRun"];
-const DURATION_PARTS = [
-  { suffix: "H", unit: "h", name: "hours", max: 23 },
-  { suffix: "M", unit: "min", name: "minutes", max: 59 },
-  { suffix: "S", unit: "s", name: "seconds", max: 59 }
-];
+const pad2 = n => String(n).padStart(2, "0");
 
-// Older versions stored goals as typed text ("15:00") plus typed paces and total;
-// convert the times once and drop the rest, which are now worked out
+// Convert goals saved by earlier versions, once, to the nearest minute:
+// typed text ("15:00" was 15 minutes) or separate h/m/s dropdowns. The new
+// keys end in "Time" so the old text can never be misread as hours.
 const toSeconds = text => String(text).split(":").reduce((total, part) => total * 60 + (Number(part) || 0), 0);
-if (GOAL_LEGS.some(leg => leg in settings.fields) || "goalTotal" in settings.fields) {
-  GOAL_LEGS.forEach(leg => {
-    if (!(leg in settings.fields)) return;
-    const seconds = toSeconds(settings.fields[leg]);
-    settings.fields[leg + "H"] = String(Math.floor(seconds / 3600));
-    settings.fields[leg + "M"] = String(Math.floor(seconds / 60) % 60);
-    settings.fields[leg + "S"] = String(seconds % 60);
-    delete settings.fields[leg];
-  });
-  ["goalTotal", "paceSwim", "speedBike", "paceRun"].forEach(key => delete settings.fields[key]);
-  saveSettings();
-}
-
-document.querySelectorAll("[data-duration]").forEach(picker => {
-  const leg = picker.dataset.duration;
-  const legName = document.getElementById(leg + "Label").textContent;
-  DURATION_PARTS.forEach(part => {
-    const select = document.createElement("select");
-    select.dataset.key = leg + part.suffix;
-    select.setAttribute("aria-label", `${legName} ${part.name}`);
-    for (let n = 0; n <= part.max; n++) {
-      select.add(new Option(part.suffix === "H" ? String(n) : String(n).padStart(2, "0"), String(n)));
-    }
-    const unit = document.createElement("span");
-    unit.className = "duration__unit";
-    unit.setAttribute("aria-hidden", "true");
-    unit.textContent = part.unit;
-    picker.append(select, unit);
-  });
+const OLD_GOAL_KEYS = ["goalTotal", "paceSwim", "speedBike", "paceRun"];
+let migratedGoals = false;
+GOAL_LEGS.forEach(leg => {
+  const f = settings.fields;
+  let seconds = null;
+  if (leg in f) seconds = toSeconds(f[leg]);
+  else if (leg + "H" in f) seconds = (Number(f[leg + "H"]) || 0) * 3600 + (Number(f[leg + "M"]) || 0) * 60 + (Number(f[leg + "S"]) || 0);
+  if (seconds === null) return;
+  const minutes = Math.round(seconds / 60);
+  if (minutes && !f[leg + "Time"]) f[leg + "Time"] = `${pad2(Math.min(23, Math.floor(minutes / 60)))}:${pad2(minutes % 60)}`;
+  [leg, leg + "H", leg + "M", leg + "S"].forEach(key => delete f[key]);
+  migratedGoals = true;
 });
+OLD_GOAL_KEYS.forEach(key => { if (key in settings.fields) { delete settings.fields[key]; migratedGoals = true; } });
+if (migratedGoals) saveSettings();
 
 // Formatted-as-you-type boxes (data-format="number"): digits and one decimal
 // point, with commas for thousands (1,500). Used for the custom distances.
@@ -218,9 +200,10 @@ function raceDistances() {
   const read = value => parseFloat(String(value || "").replace(/,/g, "")) || 0;
   return { swim: read(f.swimDistance), bike: read(f.bikeDistance), run: read(f.runDistance) };
 }
-const legSeconds = leg => DURATION_PARTS.reduce((total, part) =>
-  total * 60 + (Number(settings.fields[leg + part.suffix]) || 0), 0);
-const pad2 = n => String(n).padStart(2, "0");
+const legSeconds = leg => {
+  const [hours, minutes] = String(settings.fields[leg + "Time"] || "0:0").split(":").map(Number);
+  return (hours || 0) * 3600 + (minutes || 0) * 60;
+};
 const formatClock = seconds => {
   seconds = Math.round(seconds);
   const h = Math.floor(seconds / 3600), m = Math.floor(seconds / 60) % 60, s = seconds % 60;

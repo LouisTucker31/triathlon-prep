@@ -4,7 +4,7 @@
   --border: #e3e3e3; --line: #f0f0f0; --head: #fafafa;
   --done-border: #bcd9bc; --done-head: #f1f8f1;
   --bar: #eee; --bar-fill: #1a1a1a; --check: #1a1a1a;
-  --field: #ffffff; --seg-bg: #efeff0; --seg-on: #ffffff; --picker: #efeff0;
+  --field: #ffffff; --seg-bg: #efeff0; --seg-on: #ffffff;
   --focus: #2563eb; --danger: #d70015; --on-danger: #fff;
 
   --radius-sm: 8px;
@@ -19,7 +19,7 @@
   --border: #2c2c2e; --line: #242426; --head: #1c1c1e;
   --done-border: #2e5a38; --done-head: #14261a;
   --bar: #2c2c2e; --bar-fill: #f2f2f7; --check: #f2f2f7;
-  --field: #1c1c1e; --seg-bg: #1c1c1e; --seg-on: #3a3a3c; --picker: #3a3a3c;
+  --field: #1c1c1e; --seg-bg: #1c1c1e; --seg-on: #3a3a3c;
   --focus: #64a0ff; --danger: #ff6961; --on-danger: #000;
 }
 html, body { background: var(--bg) !important; min-height: 100%; }
@@ -134,13 +134,6 @@ input, select, textarea { font-size: max(var(--input-size), 1em) !important; }
 .unit-field input { flex: 1; min-width: 0; }
 .unit-field__unit { color: var(--muted-2); font-size: var(--input-size); }
 
-/* Goal times: hours / minutes / seconds dropdowns (the scroll wheel on iPhone) */
-.field > .duration { display: flex; align-items: center; gap: 4px; margin: 0; font-size: inherit; color: inherit; }
-.field .duration select {
-  width: auto; min-width: 2.75em; padding: 2px 8px; border-radius: 6px;
-  background: var(--picker); text-align: center; text-align-last: center;
-}
-.duration__unit { color: var(--muted-2); font-size: var(--input-size); margin-right: 8px; }
 
 /* Worked-out values (goal total and paces): read-only */
 .computed-field output { display: block; min-height: 26px; font-size: max(var(--input-size), 1rem); color: var(--text); }
