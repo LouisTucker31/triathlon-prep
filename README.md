@@ -16,7 +16,7 @@ js/theme.js             applies the saved theme before first paint
 js/lists.js             packing and task list content (triathlon; other event types have none yet)
 js/main.js              app logic
 js/event-pdf.js         builds the one-page "Download this event" PDF (no library)
-js/event-image.js       draws the 4:5 social image (PNG, light style) for the same button pair
+js/event-image.js       draws the 4:5 social image (PNG, light or dark) for the same button pair
 js/liquid-glass-nav.js  floating tab bar
 assets/icons/
 ```

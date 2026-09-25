@@ -687,12 +687,20 @@ function imageSummary() {
   };
 }
 
-// Both download buttons first ask for actual times (optional), then download
+// Both download buttons first ask for actual times (optional); the image then
+// asks for a light or dark style before downloading
+const styleDialog = document.getElementById("styleDialog");
+document.querySelectorAll("[data-image-theme]").forEach(button => button.addEventListener("click", () => {
+  styleDialog.close();
+  saveFile(EventImage.build(imageSummary(), button.dataset.imageTheme), summaryFilename("png"));
+}));
+document.getElementById("styleCancel").addEventListener("click", () => styleDialog.close());
+styleDialog.addEventListener("click", e => { if (e.target === styleDialog) styleDialog.close(); }); // tap outside
 const actualsDialog = document.getElementById("actualsDialog");
 const actualsDownload = document.getElementById("actualsDownload");
 const DOWNLOADS = {
   pdf: { label: "Download PDF", save: () => saveFile(EventPdf.build(eventSummary()), summaryFilename("pdf")) },
-  image: { label: "Download image", save: () => EventImage.build(imageSummary()).then(blob => saveFile(blob, summaryFilename("png"))) }
+  image: { label: "Next", save: () => styleDialog.showModal() }   // asks light or dark first
 };
 let pendingDownload = "pdf";
 function askForActuals(kind) {

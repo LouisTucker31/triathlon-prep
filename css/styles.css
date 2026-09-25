@@ -196,6 +196,22 @@ html:has(.settings-sheet[open]) { overflow: hidden; }  /* stop the page behind s
 .confirm__cancel { border: 1px solid var(--border); background: var(--seg-bg); color: var(--text); }
 .confirm__ok { border: 0; background: var(--danger); color: var(--on-danger); }
 .confirm__primary { border: 0; background: var(--text); color: var(--bg); }
+/* Style choice for the social image: two tappable previews side by side */
+.style-options { display: flex; gap: 12px; margin-bottom: 12px; }
+.style-option {
+  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 16px 12px;
+  border: 1px solid var(--border); border-radius: var(--radius); background: var(--field);
+  color: var(--text); font: inherit; font-weight: 600; cursor: pointer;
+}
+/* A mini race card: background with one panel, in each style */
+.style-option__swatch { display: grid; place-items: end center; width: 64px; height: 80px; padding: 10px; border-radius: 12px; border: 1px solid var(--border); }
+.style-option__swatch > span { width: 100%; height: 34px; border-radius: 8px; }
+.style-option__swatch--light { background: #f2f2f7; }
+.style-option__swatch--light > span { background: #fff; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1); }
+.style-option__swatch--dark { background: #0b0b0c; }
+.style-option__swatch--dark > span { background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); }
+.style-cancel { width: 100%; min-height: 44px; padding: 8px 12px; border-radius: var(--radius); font: inherit; font-weight: 600; cursor: pointer; }
+
 /* Actual times pop-up: wider, to fit two time boxes per row */
 .confirm.actuals { width: min(420px, calc(100% - 32px)); }
 .confirm.actuals .field-group { margin-bottom: 16px; }
