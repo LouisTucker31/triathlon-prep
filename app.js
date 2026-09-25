@@ -426,15 +426,8 @@ function renderRaceLine() {
   const bits = [];
   if (f.raceDate) {
     const d = new Date(f.raceDate + "T00:00:00");
-    let t = d.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", year: "numeric" });
-    const today = new Date(); today.setHours(0, 0, 0, 0);
-    const days = Math.round((d - today) / 86400000);
-    if (days > 1) t += ` · ${days} days to go`;
-    else if (days === 1) t += " · tomorrow";
-    else if (days === 0) t += " · race day!";
-    bits.push(t);
+    bits.push(d.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", year: "numeric" }));
   }
-  if (f.raceLocation) bits.push(f.raceLocation);
   el.textContent = "";
   if (f.raceName) { const b = document.createElement("strong"); b.textContent = f.raceName; el.append(b); }
   if (bits.length) el.append((f.raceName ? " · " : "") + bits.join(" · "));
