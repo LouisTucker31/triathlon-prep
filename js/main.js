@@ -109,10 +109,52 @@ settings.theme = settings.theme || "light";
 settings.fields = settings.fields || {};
 const saveSettings = () => storage.write(STORAGE_KEYS.settings, settings);
 
-// Formatted-as-you-type boxes (data-format):
-//   number  digits and one decimal point, commas for thousands (1,500)
-//   hms     a duration typed as digits, filled in from the right (45 -> 0:45, 12345 -> 1:23:45)
-//   ms      the same, minutes and seconds only (430 -> 4:30)
+// Goal times are picked with three dropdowns each (hours, minutes, seconds),
+// which iPhone shows as its native scroll wheel. Each part is saved as its own
+// field, e.g. goalSwimH / goalSwimM / goalSwimS.
+const GOAL_LEGS = ["goalSwim", "goalT1", "goalBike", "goalT2", "goalRun"];
+const DURATION_PARTS = [
+  { suffix: "H", unit: "h", name: "hours", max: 23 },
+  { suffix: "M", unit: "min", name: "minutes", max: 59 },
+  { suffix: "S", unit: "s", name: "seconds", max: 59 }
+];
+
+// Older versions stored goals as typed text ("15:00") plus typed paces and total;
+// convert the times once and drop the rest, which are now worked out
+const toSeconds = text => String(text).split(":").reduce((total, part) => total * 60 + (Number(part) || 0), 0);
+if (GOAL_LEGS.some(leg => leg in settings.fields) || "goalTotal" in settings.fields) {
+  GOAL_LEGS.forEach(leg => {
+    if (!(leg in settings.fields)) return;
+    const seconds = toSeconds(settings.fields[leg]);
+    settings.fields[leg + "H"] = String(Math.floor(seconds / 3600));
+    settings.fields[leg + "M"] = String(Math.floor(seconds / 60) % 60);
+    settings.fields[leg + "S"] = String(seconds % 60);
+    delete settings.fields[leg];
+  });
+  ["goalTotal", "paceSwim", "speedBike", "paceRun"].forEach(key => delete settings.fields[key]);
+  saveSettings();
+}
+
+document.querySelectorAll("[data-duration]").forEach(picker => {
+  const leg = picker.dataset.duration;
+  const legName = document.getElementById(leg + "Label").textContent;
+  DURATION_PARTS.forEach(part => {
+    const select = document.createElement("select");
+    select.dataset.key = leg + part.suffix;
+    select.setAttribute("aria-label", `${legName} ${part.name}`);
+    for (let n = 0; n <= part.max; n++) {
+      select.add(new Option(part.suffix === "H" ? String(n) : String(n).padStart(2, "0"), String(n)));
+    }
+    const unit = document.createElement("span");
+    unit.className = "duration__unit";
+    unit.setAttribute("aria-hidden", "true");
+    unit.textContent = part.unit;
+    picker.append(select, unit);
+  });
+});
+
+// Formatted-as-you-type boxes (data-format="number"): digits and one decimal
+// point, with commas for thousands (1,500). Used for the custom distances.
 function formatNumber(raw) {
   let digits = raw.replace(/[^\d.]/g, "");
   const dot = digits.indexOf(".");
@@ -121,18 +163,7 @@ function formatNumber(raw) {
   whole = whole.replace(/^0+(?=\d)/, "").slice(0, 7).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   return fraction === undefined ? whole : `${whole || "0"}.${fraction.slice(0, 2)}`;
 }
-function formatDuration(raw, maxDigits) {
-  const digits = raw.replace(/\D/g, "").replace(/^0+(?=\d)/, "").slice(0, maxDigits);
-  if (!digits) return "";
-  if (digits.length <= 2) return `0:${digits.padStart(2, "0")}`;  // 45 -> 0:45, so seconds are never mistaken for minutes
-  const seconds = digits.slice(-2), minutes = digits.slice(-4, -2), hours = digits.slice(0, -4);
-  return hours ? `${hours}:${minutes}:${seconds}` : `${minutes}:${seconds}`;
-}
-const FORMATTERS = {
-  number: formatNumber,
-  hms: raw => formatDuration(raw, 6),
-  ms: raw => formatDuration(raw, 4)
-};
+const FORMATTERS = { number: formatNumber };
 document.querySelectorAll("[data-format]").forEach(input => {
   const format = FORMATTERS[input.dataset.format];
   // Registered before the save handler below, so the formatted value is what's saved
@@ -165,26 +196,60 @@ document.querySelectorAll("[data-key]").forEach(field => {
   });
 });
 
-// Goal total: until you type your own, it suggests the sum of the legs
-const goalLegs = [...document.querySelectorAll("[data-goal-leg]")];
-const goalTotal = document.getElementById("goalTotal");
-const toSeconds = text => text.split(":").reduce((total, part) => total * 60 + Number(part), 0);
-function suggestGoalTotal() {
-  const seconds = goalLegs.reduce((sum, leg) => sum + (leg.value ? toSeconds(leg.value) : 0), 0);
-  const hms = [Math.floor(seconds / 3600), Math.floor(seconds / 60) % 60, seconds % 60];
-  goalTotal.placeholder = seconds
-    ? `${hms[0]}:${String(hms[1]).padStart(2, "0")}:${String(hms[2]).padStart(2, "0")}`
-    : "h:mm:ss";
-}
-goalLegs.forEach(leg => leg.addEventListener("input", suggestGoalTotal));
-suggestGoalTotal();
-
 // Custom swim / bike / run distances, shown when distance is "Other"
 const distanceSelect = document.querySelector('[data-key="raceDistance"]');
 const customDistance = document.getElementById("customDistance");
 function toggleCustomDistance() { customDistance.hidden = distanceSelect.value !== "Other"; }
 distanceSelect.addEventListener("change", toggleCustomDistance);
 toggleCustomDistance();
+
+// Goal total and paces, worked out from the goal times and the race distance
+// (swim in metres, bike and run in kilometres)
+const DISTANCE_PRESETS = {
+  "Super sprint": { swim: 400, bike: 10, run: 2.5 },
+  "Sprint": { swim: 750, bike: 20, run: 5 },
+  "Olympic / Standard": { swim: 1500, bike: 40, run: 10 },
+  "Middle (70.3)": { swim: 1900, bike: 90, run: 21.1 },
+  "Full (Ironman)": { swim: 3800, bike: 180, run: 42.2 }
+};
+function raceDistances() {
+  const f = settings.fields;
+  if (f.raceDistance !== "Other") return DISTANCE_PRESETS[f.raceDistance] || {};
+  const read = value => parseFloat(String(value || "").replace(/,/g, "")) || 0;
+  return { swim: read(f.swimDistance), bike: read(f.bikeDistance), run: read(f.runDistance) };
+}
+const legSeconds = leg => DURATION_PARTS.reduce((total, part) =>
+  total * 60 + (Number(settings.fields[leg + part.suffix]) || 0), 0);
+const pad2 = n => String(n).padStart(2, "0");
+const formatClock = seconds => {
+  seconds = Math.round(seconds);
+  const h = Math.floor(seconds / 3600), m = Math.floor(seconds / 60) % 60, s = seconds % 60;
+  return h ? `${h}:${pad2(m)}:${pad2(s)}` : `${m}:${pad2(s)}`;
+};
+const NOT_SET = "–";
+
+function updateGoalMaths() {
+  const d = raceDistances();
+  const times = Object.fromEntries(GOAL_LEGS.map(leg => [leg, legSeconds(leg)]));
+  const total = Object.values(times).reduce((sum, t) => sum + t, 0);
+  document.getElementById("goalTotal").textContent = total ? formatClock(total) : NOT_SET;
+
+  document.getElementById("paceSwim").textContent =
+    times.goalSwim && d.swim ? `${formatClock(times.goalSwim / (d.swim / 100))} /100m` : NOT_SET;
+  document.getElementById("speedBike").textContent =
+    times.goalBike && d.bike ? `${(d.bike / (times.goalBike / 3600)).toFixed(1)} km/h` : NOT_SET;
+  document.getElementById("paceRun").textContent =
+    times.goalRun && d.run ? `${formatClock(times.goalRun / d.run)} /km` : NOT_SET;
+
+  // Show the distance each pace is based on, e.g. "Swim, 750 m"
+  document.getElementById("paceSwimLabel").textContent = d.swim ? `Swim, ${d.swim.toLocaleString("en-GB")} m` : "Swim";
+  document.getElementById("speedBikeLabel").textContent = d.bike ? `Bike, ${d.bike.toLocaleString("en-GB")} km` : "Bike";
+  document.getElementById("paceRunLabel").textContent = d.run ? `Run, ${d.run.toLocaleString("en-GB")} km` : "Run";
+}
+// Fields save on "input" first (registered above), so settings are current here
+document.getElementById("view-events").addEventListener("input", updateGoalMaths);
+document.getElementById("view-events").addEventListener("change", updateGoalMaths);
+updateGoalMaths();
 
 // Venue search: suggests real places (OpenStreetMap, via Photon) as you type.
 // If the search fails (offline, service down) the suggestions just close and

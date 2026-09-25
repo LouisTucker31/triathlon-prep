@@ -94,27 +94,23 @@
 
     <h2 class="settings-heading">Goal times</h2>
     <div class="field-group">
-      <div class="field-row field-row--3">
-        <label class="field"><span>Swim<span class="sr-only"> goal time</span></span><input data-key="goalSwim" data-format="hms" data-goal-leg type="text" inputmode="numeric" placeholder="0:15:00" autocomplete="off"></label>
-        <label class="field"><span>Bike<span class="sr-only"> goal time</span></span><input data-key="goalBike" data-format="hms" data-goal-leg type="text" inputmode="numeric" placeholder="0:40:00" autocomplete="off"></label>
-        <label class="field"><span>Run<span class="sr-only"> goal time</span></span><input data-key="goalRun" data-format="hms" data-goal-leg type="text" inputmode="numeric" placeholder="0:25:00" autocomplete="off"></label>
-      </div>
-      <div class="field-row field-row--3">
-        <label class="field"><span>T1<span class="sr-only"> goal time</span></span><input data-key="goalT1" data-format="hms" data-goal-leg type="text" inputmode="numeric" placeholder="0:02:00" autocomplete="off"></label>
-        <label class="field"><span>T2<span class="sr-only"> goal time</span></span><input data-key="goalT2" data-format="hms" data-goal-leg type="text" inputmode="numeric" placeholder="0:01:30" autocomplete="off"></label>
-        <label class="field"><span>Total<span class="sr-only"> goal time</span></span><input data-key="goalTotal" id="goalTotal" data-format="hms" type="text" inputmode="numeric" placeholder="h:mm:ss" autocomplete="off"></label>
-      </div>
+      <div class="field duration-field" role="group" aria-labelledby="goalSwimLabel"><span id="goalSwimLabel">Swim</span><span class="duration" data-duration="goalSwim"></span></div>
+      <div class="field duration-field" role="group" aria-labelledby="goalT1Label"><span id="goalT1Label">T1</span><span class="duration" data-duration="goalT1"></span></div>
+      <div class="field duration-field" role="group" aria-labelledby="goalBikeLabel"><span id="goalBikeLabel">Bike</span><span class="duration" data-duration="goalBike"></span></div>
+      <div class="field duration-field" role="group" aria-labelledby="goalT2Label"><span id="goalT2Label">T2</span><span class="duration" data-duration="goalT2"></span></div>
+      <div class="field duration-field" role="group" aria-labelledby="goalRunLabel"><span id="goalRunLabel">Run</span><span class="duration" data-duration="goalRun"></span></div>
+      <div class="field computed-field"><span id="goalTotalLabel">Total</span><output id="goalTotal" aria-labelledby="goalTotalLabel">–</output></div>
     </div>
-    <p class="settings-note">Type the numbers only: 12345 becomes 1:23:45. Total adds up the others until you enter your own.</p>
 
     <h2 class="settings-heading">Goal paces</h2>
     <div class="field-group">
       <div class="field-row field-row--3">
-        <label class="field"><span>Swim<span class="sr-only"> pace, minutes per 100 metres</span></span><span class="unit-field"><input data-key="paceSwim" data-format="ms" type="text" inputmode="numeric" placeholder="2:00" autocomplete="off"><span class="unit-field__unit" aria-hidden="true">/100m</span></span></label>
-        <label class="field"><span>Bike<span class="sr-only"> speed, kilometres per hour</span></span><span class="unit-field"><input data-key="speedBike" data-format="number" type="text" inputmode="decimal" placeholder="30" autocomplete="off"><span class="unit-field__unit" aria-hidden="true">km/h</span></span></label>
-        <label class="field"><span>Run<span class="sr-only"> pace, minutes per kilometre</span></span><span class="unit-field"><input data-key="paceRun" data-format="ms" type="text" inputmode="numeric" placeholder="5:00" autocomplete="off"><span class="unit-field__unit" aria-hidden="true">/km</span></span></label>
+        <div class="field computed-field"><span id="paceSwimLabel">Swim</span><output id="paceSwim" aria-labelledby="paceSwimLabel">–</output></div>
+        <div class="field computed-field"><span id="speedBikeLabel">Bike</span><output id="speedBike" aria-labelledby="speedBikeLabel">–</output></div>
+        <div class="field computed-field"><span id="paceRunLabel">Run</span><output id="paceRun" aria-labelledby="paceRunLabel">–</output></div>
       </div>
     </div>
+    <p class="settings-note">Worked out from your goal times and the race distance.</p>
 
     <p class="save-note">Changes save automatically on this device</p>
   </section>
