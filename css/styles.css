@@ -91,7 +91,7 @@ input, select, textarea { font-size: max(var(--input-size), 1em) !important; }
 .field-group { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; background: var(--field); }
 .field { display: block; padding: 8px var(--gutter) 12px; border-bottom: 1px solid var(--line); }
 .field:last-child { border-bottom: 0; }
-.field > span { display: block; font-size: 0.8rem; color: var(--muted-2); margin-bottom: 4px; }
+.field > span, .field > label { display: block; font-size: 0.8rem; color: var(--muted-2); margin-bottom: 4px; }
 .field input, .field select, .field textarea {
   display: block; width: 100%; min-height: 26px; margin: 0; padding: 0; border: 0; outline: 0;
   background: transparent; color: var(--text); font: inherit; font-size: max(var(--input-size), 1rem);
@@ -138,17 +138,24 @@ input, select, textarea { font-size: max(var(--input-size), 1em) !important; }
 /* Worked-out values (goal total and paces): read-only */
 .computed-field output { display: block; min-height: 26px; font-size: max(var(--input-size), 1rem); color: var(--text); }
 
-/* Venue suggestions */
-.place-suggestions[hidden] { display: none; }
-.place-suggestions { border-bottom: 1px solid var(--line); }
-.place-suggestions ul {
-  list-style: none; margin: 0; padding: 0;
-  /* Scroll inside the list, never the page behind it */
-  max-height: 216px; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
+/* Address boxes with a map button (venue, accommodation) */
+.field > .map-field { display: flex; align-items: center; gap: 8px; margin: 0; font-size: inherit; color: inherit; }
+.map-field input { flex: 1; min-width: 0; }
+.map-button {
+  flex: none; display: grid; place-items: center; width: 40px; height: 32px; margin: -4px 0;
+  padding: 0; border: 0; border-radius: var(--radius-sm); background: var(--head); color: var(--focus); cursor: pointer;
 }
-.place-suggestions li { padding: 12px var(--gutter); min-height: 44px; cursor: pointer; border-top: 1px solid var(--line); }
-.place-suggestions li:hover, .place-suggestions li[aria-selected="true"] { background: var(--head); box-shadow: inset 3px 0 0 var(--focus); }
-.place-suggestions__credit { margin: 0; padding: 8px var(--gutter); font-size: 0.75rem; color: var(--muted-2); border-top: 1px solid var(--line); }
+.map-button[hidden] { display: none; }
+.map-button svg { width: 22px; height: 22px; fill: currentColor; }
+
+/* Maps app chooser */
+.map-apps { display: grid; gap: 8px; margin-bottom: 8px; }
+.map-app {
+  display: block; padding: 12px var(--gutter); border: 1px solid var(--border); border-radius: var(--radius);
+  background: var(--field); color: var(--text); font-weight: 600; text-align: center; text-decoration: none;
+}
+.map-apps__cancel { width: 100%; min-height: 44px; padding: 8px 12px; border-radius: var(--radius); font: inherit; font-weight: 600; cursor: pointer; }
+#mapsAddress { overflow-wrap: anywhere; }
 
 /* Settings pop-up: full screen, over the nav, scrolls on its own */
 .settings-sheet {
@@ -168,6 +175,7 @@ html:has(.settings-sheet[open]) { overflow: hidden; }  /* stop the page behind s
 }
 .confirm::backdrop { background: rgba(0, 0, 0, 0.45); }
 .confirm h2 { font-size: 1.1rem; margin: 0 0 8px; }
+.confirm h2:focus { outline: none; }  /* focused on open so no button shows a focus ring */
 .confirm p { margin: 0 0 16px; color: var(--muted); }
 .confirm__actions { display: flex; gap: 8px; }
 .confirm__actions button {

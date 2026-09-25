@@ -2,7 +2,7 @@
 <html lang="en-GB" data-theme="light">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self' https://photon.komoot.io; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
@@ -53,13 +53,7 @@
         <label class="field"><span>Date</span><input data-key="raceDate" type="date"></label>
         <label class="field"><span>Start / wave time</span><input data-key="raceStart" type="time"></label>
       </div>
-      <label class="field"><span>Venue</span><input data-key="raceLocation" id="raceLocation" type="text" autocapitalize="words" placeholder="Start typing a place or postcode" autocomplete="off"
-        role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="locationList"></label>
-      <div class="place-suggestions" id="locationSuggest" hidden>
-        <ul role="listbox" id="locationList" aria-label="Suggested places"></ul>
-        <p class="place-suggestions__credit">Places from © OpenStreetMap contributors</p>
-      </div>
-      <p class="sr-only" id="locationStatus" aria-live="polite"></p>
+      <div class="field"><label for="raceLocation">Venue</label><span class="map-field"><input data-key="raceLocation" id="raceLocation" type="text" autocapitalize="words" placeholder="Address, postcode or maps link" autocomplete="off"><button type="button" class="map-button" data-map-for="raceLocation" aria-label="Open venue in maps" hidden><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960"><path d="m592-127-243-86-188 75q-8 3-15 1.5t-13-5.5q-6-4-9.5-10t-3.5-14v-565q0-13 7.5-23t19.5-15l182-64q5-2 10-2.5t10-.5q5 0 10 .5t10 2.5l243 85 187-75q8-3 15-2t13 5q6 4 9.5 10.5T840-795v572q0 11-7.5 19T814-192l-182 65q-5 2-10 2.5t-10 .5q-5 0-10-.5t-10-2.5Zm-14-68v-505l-196-66v505l196 66Z"/></svg></button></span></div>
       <label class="field"><span>Distance</span>
         <select data-key="raceDistance">
           <option value="">Choose…</option>
@@ -88,7 +82,7 @@
 
     <h2 class="settings-heading">Accommodation and website</h2>
     <div class="field-group">
-      <label class="field"><span>Accommodation</span><input data-key="raceStay" type="text" autocapitalize="words" placeholder="Hotel or address for the night before" autocomplete="off"></label>
+      <div class="field"><label for="raceStay">Accommodation</label><span class="map-field"><input data-key="raceStay" id="raceStay" type="text" autocapitalize="words" placeholder="Address, postcode or maps link" autocomplete="off"><button type="button" class="map-button" data-map-for="raceStay" aria-label="Open accommodation in maps" hidden><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960"><path d="m592-127-243-86-188 75q-8 3-15 1.5t-13-5.5q-6-4-9.5-10t-3.5-14v-565q0-13 7.5-23t19.5-15l182-64q5-2 10-2.5t10-.5q5 0 10 .5t10 2.5l243 85 187-75q8-3 15-2t13 5q6 4 9.5 10.5T840-795v572q0 11-7.5 19T814-192l-182 65q-5 2-10 2.5t-10 .5q-5 0-10-.5t-10-2.5Zm-14-68v-505l-196-66v505l196 66Z"/></svg></button></span></div>
       <label class="field"><span>Event website</span><input data-key="raceWebsite" type="url" placeholder="https://" autocomplete="off"></label>
     </div>
 
@@ -123,6 +117,19 @@
   </section>
 </main>
 </div>
+
+<!-- Choose a maps app for a venue or accommodation address. iPhone doesn't let
+     websites open the system app chooser, so these links open each app directly. -->
+<dialog class="confirm" id="mapsDialog" aria-labelledby="mapsTitle" aria-describedby="mapsAddress">
+  <h2 id="mapsTitle" tabindex="-1" autofocus>Open in maps</h2>
+  <p id="mapsAddress"></p>
+  <div class="map-apps">
+    <a class="map-app" id="mapsApple" target="_blank" rel="noopener noreferrer">Apple Maps</a>
+    <a class="map-app" id="mapsGoogle" target="_blank" rel="noopener noreferrer">Google Maps</a>
+    <a class="map-app" id="mapsWaze" target="_blank" rel="noopener noreferrer">Waze</a>
+  </div>
+  <button type="button" class="confirm__cancel map-apps__cancel" id="mapsCancel">Cancel</button>
+</dialog>
 
 <!-- Settings: a full-screen pop-up over everything, including the nav. The
      close button sits exactly where the settings button was. -->
@@ -161,10 +168,10 @@
       <p class="settings-note">Clears Packing, Tasks and Events. Everything on this Settings page is kept.</p>
 
       <dialog class="confirm" id="resetDialog" aria-labelledby="resetTitle" aria-describedby="resetDesc">
-        <h2 id="resetTitle">Reset for a new race?</h2>
+        <h2 id="resetTitle" tabindex="-1" autofocus>Reset for a new race?</h2>
         <p id="resetDesc">This unticks everything on Packing and Tasks and clears Events. Your settings stay. You can't undo this.</p>
         <div class="confirm__actions">
-          <button type="button" class="confirm__cancel" id="resetCancel" autofocus>Keep everything</button>
+          <button type="button" class="confirm__cancel" id="resetCancel">Keep everything</button>
           <button type="button" class="confirm__ok" id="resetConfirm">Reset</button>
         </div>
       </dialog>

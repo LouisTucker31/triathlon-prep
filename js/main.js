@@ -253,95 +253,36 @@ document.getElementById("view-events").addEventListener("input", updateGoalMaths
 document.getElementById("view-events").addEventListener("change", updateGoalMaths);
 updateGoalMaths();
 
-// Venue search: suggests real places (OpenStreetMap, via Photon) as you type.
-// If the search fails (offline, service down) the suggestions just close and
-// the box carries on working as plain text, which is the fallback.
-(() => {
-  const input = document.getElementById("raceLocation");
-  const suggestions = document.getElementById("locationSuggest");
-  const list = document.getElementById("locationList");
-  const status = document.getElementById("locationStatus");
-  let debounce = 0, pending = null, places = [], active = -1;
+// Map buttons for the venue and accommodation: shown once there's an address.
+// A pasted maps link opens as it is; plain text opens a choice of maps apps,
+// each searching for that address.
+const mapsDialog = document.getElementById("mapsDialog");
+const MAP_APPS = {
+  mapsApple: q => `https://maps.apple.com/?q=${q}`,
+  mapsGoogle: q => `https://www.google.com/maps/search/?api=1&query=${q}`,
+  mapsWaze: q => `https://waze.com/ul?q=${q}&navigate=yes`
+};
+document.querySelectorAll("[data-map-for]").forEach(button => {
+  const input = document.getElementById(button.dataset.mapFor);
+  const showButton = () => { button.hidden = !input.value.trim(); };
+  input.addEventListener("input", showButton);
+  showButton();
 
-  function describePlace(p) {
-    const parts = [p.name || [p.housenumber, p.street].filter(Boolean).join(" "),
-      p.city || p.town || p.village || p.district || p.county, p.postcode,
-      p.countrycode !== "GB" ? p.country : ""];
-    return parts.filter((part, i) => part && parts.indexOf(part) === i).join(", ");
-  }
-  function setActive(index) {
-    active = index;
-    [...list.children].forEach((option, i) => option.setAttribute("aria-selected", String(i === index)));
-    if (index >= 0) {
-      input.setAttribute("aria-activedescendant", list.children[index].id);
-      list.children[index].scrollIntoView({ block: "nearest" });
-    } else {
-      input.removeAttribute("aria-activedescendant");
-    }
-  }
-  function close() {
-    suggestions.hidden = true;
-    input.setAttribute("aria-expanded", "false");
-    setActive(-1);
-  }
-  function render() {
-    list.textContent = "";
-    places.forEach((label, i) => {
-      const option = document.createElement("li");
-      option.id = "loc-opt-" + i;
-      option.setAttribute("role", "option");
-      option.setAttribute("aria-selected", "false");
-      option.textContent = label;
-      option.addEventListener("mousedown", e => e.preventDefault()); // keep focus in the input
-      option.addEventListener("click", () => choose(i));
-      list.append(option);
-    });
-    suggestions.hidden = !places.length;
-    input.setAttribute("aria-expanded", String(!!places.length));
-    setActive(-1);
-    status.textContent = places.length ? `${places.length} places found. Use the up and down arrows to choose.` : "";
-  }
-  function choose(index) {
-    input.value = places[index];
-    input.dispatchEvent(new Event("input")); // saves it, like typing would
-    close();
-  }
-  async function search(query) {
-    if (pending) pending.abort();
-    pending = new AbortController();
-    try {
-      const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=10&lang=en&lat=54.5&lon=-2.5`;
-      // Only the search text is sent: no referrer, no cookies
-      const result = await (await fetch(url, { signal: pending.signal, referrerPolicy: "no-referrer", credentials: "omit" })).json();
-      places = [...new Set(result.features.map(f => describePlace(f.properties)).filter(Boolean))];
-      if (document.activeElement === input) render();
-    } catch (err) {
-      if (err.name !== "AbortError") { places = []; close(); }
-    }
-  }
-
-  input.addEventListener("input", e => {
-    if (!e.isTrusted) return; // our own event from choose()
-    clearTimeout(debounce);
-    const query = input.value.trim();
-    if (query.length < 3) {
-      if (pending) pending.abort();
-      places = [];
-      close();
+  button.addEventListener("click", () => {
+    const address = input.value.trim();
+    if (/^https?:\/\//i.test(address)) {
+      window.open(address, "_blank", "noopener,noreferrer");
       return;
     }
-    debounce = setTimeout(() => search(query), 300);
+    const query = encodeURIComponent(address);
+    Object.entries(MAP_APPS).forEach(([id, link]) => { document.getElementById(id).href = link(query); });
+    document.getElementById("mapsAddress").textContent = address;
+    mapsDialog.showModal();
   });
-  input.addEventListener("keydown", e => {
-    if (suggestions.hidden) return;
-    if (e.key === "ArrowDown") { e.preventDefault(); setActive((active + 1) % places.length); }
-    else if (e.key === "ArrowUp") { e.preventDefault(); setActive(active <= 0 ? places.length - 1 : active - 1); }
-    else if (e.key === "Enter" && active >= 0) { e.preventDefault(); choose(active); }
-    else if (e.key === "Escape") { e.preventDefault(); close(); }
-  });
-  // Delay so a tap on a suggestion lands before the list closes
-  input.addEventListener("blur", () => setTimeout(close, 150));
-})();
+});
+document.querySelectorAll(".map-app").forEach(link => link.addEventListener("click", () => mapsDialog.close()));
+document.getElementById("mapsCancel").addEventListener("click", () => mapsDialog.close());
+mapsDialog.addEventListener("click", e => { if (e.target === mapsDialog) mapsDialog.close(); }); // tap outside
 
 // Race name under the packing and tasks titles
 function renderRaceLine() {
