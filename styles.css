@@ -120,6 +120,11 @@ input, select, textarea { font-size: max(16px, 1em) !important; }
 }
 .empty { color: var(--muted); margin-top: 8px; }
 
+/* Number box with a unit after it (custom distances) */
+.field > .unit-wrap { display: flex; align-items: center; gap: 4px; margin: 0; font-size: inherit; color: inherit; }
+.unit-wrap input { flex: 1; min-width: 0; }
+.unit { color: var(--muted-2); font-size: 16px; }
+
 /* Venue suggestions */
 .suggest[hidden] { display: none; }
 .suggest { border-bottom: 1px solid var(--line); }

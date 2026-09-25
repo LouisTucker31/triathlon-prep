@@ -65,15 +65,15 @@
         </select>
       </label>
       <div class="row row--3" id="customDistance" hidden>
-        <label class="field"><span>Swim</span><input data-key="swimDistance" type="text" autocapitalize="words" placeholder="e.g. 750m" autocomplete="off"></label>
-        <label class="field"><span>Bike</span><input data-key="bikeDistance" type="text" autocapitalize="words" placeholder="e.g. 20km" autocomplete="off"></label>
-        <label class="field"><span>Run</span><input data-key="runDistance" type="text" autocapitalize="words" placeholder="e.g. 5km" autocomplete="off"></label>
+        <label class="field"><span>Swim<span class="sr-only"> in metres</span></span><span class="unit-wrap"><input data-key="swimDistance" data-number type="text" inputmode="decimal" placeholder="750" autocomplete="off"><span class="unit" aria-hidden="true">m</span></span></label>
+        <label class="field"><span>Bike<span class="sr-only"> in kilometres</span></span><span class="unit-wrap"><input data-key="bikeDistance" data-number type="text" inputmode="decimal" placeholder="20" autocomplete="off"><span class="unit" aria-hidden="true">km</span></span></label>
+        <label class="field"><span>Run<span class="sr-only"> in kilometres</span></span><span class="unit-wrap"><input data-key="runDistance" data-number type="text" inputmode="decimal" placeholder="5" autocomplete="off"><span class="unit" aria-hidden="true">km</span></span></label>
       </div>
       <div class="row">
         <label class="field"><span>Race number</span><input data-key="raceNumber" type="text" autocapitalize="words" inputmode="numeric" placeholder="Add when known"></label>
         <label class="field"><span>Booking reference (optional)</span><input data-key="raceRef" type="text" autocapitalize="words" placeholder="From your entry email" autocomplete="off"></label>
       </div>
-      <label class="field"><span>Accommodation</span><input data-key="raceStay" type="text" autocapitalize="words" placeholder="Hotel / address for the night before" autocomplete="off"></label>
+      <label class="field"><span>Accommodation</span><input data-key="raceStay" type="text" autocapitalize="words" placeholder="Hotel or address for the night before" autocomplete="off"></label>
       <label class="field"><span>Event website</span><input data-key="raceWebsite" type="url" placeholder="https://" autocomplete="off"></label>
     </div>
 

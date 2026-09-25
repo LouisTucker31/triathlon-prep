@@ -6,7 +6,7 @@ const DATA = [
     { t: "Friday evening clothes", sub: ["T-shirt", "Casual trousers or joggers", "Underwear", "Socks", "Comfortable shoes or trainers"] },
     "Sleepwear", "Warm hoodie or jumper", "Warm jacket", "Waterproof coat", "Toothbrush", "Toothpaste", "Deodorant", "Shower gel",
     "Lip balm", "Vitamins and supplements you normally take", "Wallet", "British Triathlon licence or membership",
-    "Breakfast for race morning", "Evening snacks"
+    "Breakfast for race morning", "Evening snacks", "AeroPress and coffee"
   ]},
   { title: "Camera and electronics bag", items: [
     "DSLR camera", "Lens 1", "Lens 2", "Spare DSLR batteries", "GoPro", "GoPro charger and cable", "Phone", "Phone charger",
@@ -413,9 +413,36 @@ settings.theme = settings.theme || "light";
 settings.fields = settings.fields || {};
 function saveSettings() { try { localStorage.setItem(SKEY, JSON.stringify(settings)); } catch {} }
 
+/* Number-only boxes: digits and one decimal point, with commas for thousands (1,500) */
+function formatNumber(raw) {
+  let s = raw.replace(/[^\d.]/g, "");
+  const dot = s.indexOf(".");
+  if (dot !== -1) s = s.slice(0, dot + 1) + s.slice(dot + 1).replace(/\./g, "");
+  let [whole, frac] = s.split(".");
+  whole = whole.replace(/^0+(?=\d)/, "").slice(0, 7).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  return frac === undefined ? whole : `${whole || "0"}.${frac.slice(0, 2)}`;
+}
+document.querySelectorAll("#view-settings [data-number]").forEach(el => {
+  // capture: runs before the save handler below, so the formatted value is what's saved
+  el.addEventListener("input", () => {
+    const before = el.value, caret = el.selectionStart ?? before.length;
+    const kept = before.slice(0, caret).replace(/[^\d.]/g, "").length; // digits/dot left of the caret
+    const after = formatNumber(before);
+    if (after === before) return;
+    el.value = after;
+    let pos = 0, seen = 0;
+    while (pos < after.length && seen < kept) { if (/[\d.]/.test(after[pos])) seen++; pos++; }
+    el.setSelectionRange(pos, pos);
+  }, { capture: true });
+});
+
 document.querySelectorAll("#view-settings [data-key]").forEach(el => {
   const k = el.dataset.key;
   if (settings.fields[k] != null) el.value = settings.fields[k];
+  // tidy older free-text distances, e.g. "1.9km" -> "1.9"
+  if ("number" in el.dataset && el.value && formatNumber(el.value) !== el.value) {
+    el.value = settings.fields[k] = formatNumber(el.value); saveSettings();
+  }
   el.addEventListener("input", () => {
     settings.fields[k] = el.value.trim() === "" ? "" : el.value;
     saveSettings(); renderRaceLine();
