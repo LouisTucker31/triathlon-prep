@@ -33,7 +33,7 @@ const PACKING_SECTIONS = [
     null, null, null  // removed: flip-flops, hoodie and coat are packed in other bags
   ]},
   { title: "T1 transition bag: swim to bike", items: [
-    "Cycling helmet", "Cycling shoes", "Socks", "Cycling glasses", "Cycling gloves", "Race belt", "Race number attached to race belt",
+    "Cycling helmet", "Cycling shoes", "Socks", "Cycling glasses", null, "Race belt", "Race number attached to race belt",
     "Small towel for drying feet", "Gel or snack for the start of the bike"
   ]},
   { title: "On the bike", items: [
