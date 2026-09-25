@@ -30,8 +30,7 @@ const PACKING_SECTIONS = [
     "Garmin watch", "Heart-rate monitor", "Timing chip",
     { h: "Apply BodyGlide to" }, null,
     "Neck", "Shoulders", "Wrists", "Ankles",
-    { h: "While waiting" },
-    "Flip-flops or sliders", "Warm hoodie or jumper", "Waterproof coat"
+    null, null, null  // removed: flip-flops, hoodie and coat are packed in other bags
   ]},
   { title: "T1 transition bag: swim to bike", items: [
     "Cycling helmet", "Cycling shoes", "Socks", "Cycling glasses", "Cycling gloves", "Race belt", "Race number attached to race belt",
