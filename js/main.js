@@ -356,6 +356,7 @@ function updateGoalMaths() {
   document.getElementById("speedBike").textContent = legPace("Bike", legSeconds("goalBike"), d) || NOT_SET;
   document.getElementById("paceRun").textContent = legPace("Run", legSeconds("goalRun"), d) || NOT_SET;
   document.getElementById("splitRun").textContent = runSplit(legSeconds("goalRun"), d) || NOT_SET;
+  document.querySelectorAll(".computed-field output").forEach(out => out.classList.toggle("is-set", out.textContent !== NOT_SET));
 
   // Show the distance each pace is based on, e.g. "Swim: 750 m"
   document.getElementById("paceSwimLabel").textContent = d.swim ? `Swim: ${d.swim.toLocaleString("en-GB")} m` : "Swim";

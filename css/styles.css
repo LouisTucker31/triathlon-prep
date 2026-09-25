@@ -91,6 +91,7 @@ input:checked + span { text-decoration: line-through; color: var(--faint); }
 html { touch-action: manipulation; }
 
 input, select, textarea { font-size: max(var(--input-size), 1em) !important; }
+input, textarea { caret-color: var(--accent); }   /* a green text cursor, as iOS tints it */
 
 /* Settings */
 .settings-heading { font-size: 0.9rem; font-weight: 600;
@@ -155,7 +156,7 @@ input, select, textarea { font-size: max(var(--input-size), 1em) !important; }
   padding: 12px var(--gutter); border: 1px solid var(--border); border-radius: var(--radius);
   background: var(--field); color: var(--text); font: inherit; font-weight: 600; cursor: pointer;
 }
-.button-secondary svg { width: 20px; height: 20px; fill: currentColor; flex: none; }
+.button-secondary svg { width: 20px; height: 20px; fill: var(--accent); flex: none; }
 
 /* Number box with a unit after it (custom distances) */
 .field > .unit-field { display: flex; align-items: center; gap: 4px; margin: 0; font-size: inherit; color: inherit; }
@@ -165,6 +166,7 @@ input, select, textarea { font-size: max(var(--input-size), 1em) !important; }
 
 /* Worked-out values (goal total and paces): read-only */
 .computed-field output { display: block; min-height: 26px; font-size: max(var(--input-size), 1rem); color: var(--text); }
+.computed-field output.is-set { color: var(--accent); font-weight: 600; }   /* green once worked out */
 
 /* Address boxes with a map button (venue, accommodation) */
 .field > .map-field { display: flex; align-items: center; gap: 8px; margin: 0; font-size: inherit; color: inherit; }
