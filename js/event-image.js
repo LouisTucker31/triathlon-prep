@@ -1,7 +1,7 @@
 // Draws the "Download this event" social image as a PNG race card on a canvas,
 // in the app's light or dark style with glass panels like the nav. Sizes suit
-// the main social formats; the layout is one column (scaled to fit, centred
-// vertically) or, for landscape, two columns side by side.
+// the main social formats; the layout is one column, scaled to fit and centred
+// vertically.
 // Takes a model from main.js ({ kicker, title, location, heroLabel, heroTime,
 // legs for triathlon or stats for single-sport events, footer }), a theme and a
 // size, and returns a PNG blob. No library, so it works offline.
@@ -10,9 +10,9 @@ const EventImage = (() => {
     square: [1080, 1080],      // 1:1 posts
     portrait: [1080, 1350],    // 4:5 feed posts
     story: [1080, 1920],       // 9:16 stories and reels
-    landscape: [1920, 1080]    // 16:9 X, Facebook, Strava
+    landscape: [1350, 1080]    // 5:4 landscape posts
   };
-  const PAD = 80, FOOTER_H = 60, COLUMN_GAP = 96;
+  const PAD = 80, FOOTER_H = 60;
   const FONT = '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
   const THEMES = {
     light: {
@@ -196,7 +196,7 @@ const EventImage = (() => {
   }
 
   // A column of blocks with gaps between them; returns a function with the same
-  // shape as a block, so columns can be measured and painted like one
+  // shape as a block, so the whole card can be measured and painted like one
   const column = parts => (ctx, model, x, y, w, paint) => parts.reduce((h, part, i) =>
     h + (i ? part.gap : 0) + part.block(ctx, model, x, y + h + (i ? part.gap : 0), w, paint), 0);
 
@@ -218,30 +218,20 @@ const EventImage = (() => {
     ctx.fillStyle = glow;
     ctx.fillRect(0, 0, W, H);
 
-    const body = { block: model.stats ? statsBlock : legsBlock, gap: 56 };
-    const intro = [{ block: headerBlock }, { block: heroBlock, gap: 54 }];
-    if (!model.stats && model.legs.filter(leg => leg.seconds).length > 1) intro.push({ block: splitBlock, gap: 38 });
+    const parts = [{ block: headerBlock }, { block: heroBlock, gap: 54 }];
+    if (!model.stats && model.legs.filter(leg => leg.seconds).length > 1) parts.push({ block: splitBlock, gap: 38 });
+    parts.push({ block: model.stats ? statsBlock : legsBlock, gap: 56 });
+    const card = column(parts);
     const availW = W - PAD * 2, availH = H - PAD * 2 - FOOTER_H;
 
-    // Columns side by side for landscape, otherwise one column; each is scaled
-    // down if needed to fit the height, then centred vertically
-    const columns = size === "landscape"
-      ? [{ draw: column(intro), share: 0.44 }, { draw: column([{ block: body.block }]), share: 0.56 }]
-      : [{ draw: column([...intro, body]), share: 1 }];
-    const gapTotal = COLUMN_GAP * (columns.length - 1);
-    const widthOf = col => (availW - gapTotal) * col.share;
-    const heightAt = scale => Math.max(...columns.map(col => col.draw(ctx, model, 0, 0, widthOf(col) / scale, false)));
+    // Scale down if needed to fit the height, then centre vertically
+    const heightAt = scale => card(ctx, model, 0, 0, availW / scale, false);
     let scale = Math.min(1, availH / heightAt(1));
     scale = Math.min(scale, availH / heightAt(scale));   // re-check once: a wider column can wrap differently
-
-    let colX = PAD;
-    columns.forEach(col => {
-      const w = widthOf(col), h = col.draw(ctx, model, 0, 0, w / scale, false) * scale;
-      ctx.setTransform(scale, 0, 0, scale, colX, PAD + (availH - h) / 2);
-      col.draw(ctx, model, 0, 0, w / scale, true);
-      ctx.setTransform(1, 0, 0, 1, 0, 0);
-      colX += w + COLUMN_GAP;
-    });
+    const h = heightAt(scale) * scale;
+    ctx.setTransform(scale, 0, 0, scale, PAD, PAD + (availH - h) / 2);
+    card(ctx, model, 0, 0, availW / scale, true);
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
 
     text(ctx, model.footer, PAD, H - PAD + 20, 600, 26, C.faint);
     return canvas;

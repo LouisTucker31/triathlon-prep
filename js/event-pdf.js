@@ -2,7 +2,8 @@
 // Hand-written rather than a library, so it works offline and needs no
 // third-party script: text in PDF's built-in Helvetica fonts, lines, rounded
 // boxes and clickable links.
-// Takes a summary model from main.js ({ title, subtitle, sections, footer }).
+// Takes a summary model from main.js ({ title, subtitle, sections,
+// landscapeColumns, footer }) and an orientation.
 const EventPdf = (() => {
   // A4 in points, either way up
   const PAGES = { portrait: [595.28, 841.89], landscape: [841.89, 595.28] }, MARGIN = 40;
@@ -152,13 +153,15 @@ const EventPdf = (() => {
     y += 20;
 
     if (orientation === "landscape") {
-      // Details on the left, the goals and results table on the right
+      // Two columns. model.landscapeColumns names the sections for each (by
+      // heading, in order); anything it doesn't name goes at the end of the left
       const GAP = 24, leftW = contentW * 0.46, rightW = contentW - leftW - GAP;
-      let leftY = y, rightY = y;
-      model.sections.forEach(section => {
-        if (section.table) rightY = drawSection(section, MARGIN + leftW + GAP, rightW, rightY);
-        else leftY = drawSection(section, MARGIN, leftW, leftY);
-      });
+      const [leftNames = [], rightNames = []] = model.landscapeColumns || [[], []];
+      const byName = names => names.map(name => model.sections.find(s => s.heading === name)).filter(Boolean);
+      const right = byName(rightNames);
+      const left = [...byName(leftNames), ...model.sections.filter(s => !leftNames.includes(s.heading) && !right.includes(s))];
+      left.reduce((colY, section) => drawSection(section, MARGIN, leftW, colY), y);
+      right.reduce((colY, section) => drawSection(section, MARGIN + leftW + GAP, rightW, colY), y);
     } else {
       model.sections.forEach(section => { y = drawSection(section, MARGIN, contentW, y); });
     }

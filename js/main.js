@@ -607,6 +607,8 @@ function eventSummary() {
     title: value("raceName") || `${EVENT_TYPES[type]} event`,
     subtitle: subtitle.filter(Boolean).join("  ·  "),
     sections,
+    // Landscape PDF: one large and one smaller section in each column
+    landscapeColumns: [["Race", "Entry"], ["Goals and results", "Accommodation"]],
     footer: `Made with the Tri packing app on ${pad2(today.getDate())} ${MONTHS[today.getMonth()]} ${today.getFullYear()}`
   };
 }
@@ -708,7 +710,7 @@ const CHOICES = {
       { value: "square", label: "Square", note: "1:1 · posts", ratio: [1, 1] },
       { value: "portrait", label: "Portrait", note: "4:5 · feed posts", ratio: [4, 5] },
       { value: "story", label: "Story", note: "9:16 · stories, reels", ratio: [9, 16] },
-      { value: "landscape", label: "Landscape", note: "16:9 · X, Facebook", ratio: [16, 9] }
+      { value: "landscape", label: "Landscape", note: "5:4 · posts", ratio: [5, 4] }
     ]
   },
   imageStyle: {
