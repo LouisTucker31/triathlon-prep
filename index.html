@@ -92,13 +92,13 @@
 <!-- Settings: a full-screen pop-up over everything, including the nav. The
      close button sits exactly where the settings button was. -->
 <dialog class="settings-sheet" id="settingsDialog" aria-labelledby="settingsTitle">
-  <button type="button" class="lg-button lg-surface" id="closeSettings" aria-label="Close settings">
-    <span class="lg-surface__lens" aria-hidden="true"></span>
-    <span class="lg-surface__frost" aria-hidden="true"></span>
-    <span class="lg-button__icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960"><path d="M480-438 270-228q-9 9-21 9t-21-9q-9-9-9-21t9-21l210-210-210-210q-9-9-9-21t9-21q9-9 21-9t21 9l210 210 210-210q9-9 21-9t21 9q9 9 9 21t-9 21L522-480l210 210q9 9 9 21t-9 21q-9 9-21 9t-21-9L480-438Z"/></svg></span>
-  </button>
   <div class="settings-sheet__content view--has-button">
-    <h1 id="settingsTitle" tabindex="-1">Settings</h1>
+    <h1 id="settingsTitle" tabindex="-1" autofocus>Settings</h1>
+    <button type="button" class="lg-button lg-surface" id="closeSettings" aria-label="Close settings">
+      <span class="lg-surface__lens" aria-hidden="true"></span>
+      <span class="lg-surface__frost" aria-hidden="true"></span>
+      <span class="lg-button__icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960"><path d="M480-438 270-228q-9 9-21 9t-21-9q-9-9-9-21t9-21l210-210-210-210q-9-9-9-21t9-21q9-9 21-9t21 9l210 210 210-210q9-9 21-9t21 9q9 9 9 21t-9 21L522-480l210 210q9 9 9 21t-9 21q-9 9-21 9t-21-9L480-438Z"/></svg></span>
+    </button>
 
       <h2 class="settings-heading">My details</h2>
       <div class="field-group">
