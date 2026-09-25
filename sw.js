@@ -1,21 +1,25 @@
 // Offline support: pre-cache the app shell, then fetch network-first so the
 // installed app always picks up the latest version, falling back to the cache
 // when offline or on a slow connection. Bump VERSION to force a clean re-cache.
-const VERSION = "v3";
+//
+// This file stays in the site root (not js/) because a service worker can only
+// control pages at or below its own folder.
+const VERSION = "v4";
 const CACHE = "tri-packing-" + VERSION;
 const NETWORK_TIMEOUT = 3000;
 const ASSETS = [
   "./",
   "index.html",
-  "styles.css",
-  "theme.js",
-  "app.js",
-  "liquid-glass-nav.js",
+  "css/styles.css",
+  "js/theme.js",
+  "js/lists.js",
+  "js/main.js",
+  "js/liquid-glass-nav.js",
   "manifest.webmanifest",
-  "icons/icon.svg",
-  "icons/icon-192.png",
-  "icons/icon-512.png",
-  "icons/apple-touch-icon.png"
+  "assets/icons/icon.svg",
+  "assets/icons/icon-192.png",
+  "assets/icons/icon-512.png",
+  "assets/icons/apple-touch-icon.png"
 ];
 
 self.addEventListener("install", e => {
@@ -47,6 +51,8 @@ self.addEventListener("fetch", e => {
     });
     const fallback = () => cache.match(req, { ignoreSearch: true })
       .then(hit => hit || (req.mode === "navigate" ? cache.match("index.html") : undefined));
+    // Keep the worker alive until the background refresh finishes. Its failure is
+    // already handled below (cache fallback), so it is not rethrown here.
     e.waitUntil(network.catch(() => {}));
     try {
       const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error("timeout")), NETWORK_TIMEOUT));

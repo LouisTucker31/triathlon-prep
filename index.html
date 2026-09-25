@@ -5,52 +5,52 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#ffffff">
-<script src="theme.js"></script>
+<script src="js/theme.js"></script>
 <title>Triathlon packing list</title>
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
-<link rel="icon" href="icons/icon-192.png" type="image/png" sizes="192x192">
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" href="assets/icons/icon.svg" type="image/svg+xml">
+<link rel="icon" href="assets/icons/icon-192.png" type="image/png" sizes="192x192">
+<link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Tri packing">
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
 <div class="page">
-<main class="wrap">
+<main class="views">
   <section class="view" id="view-packing">
     <h1 tabindex="-1">Triathlon packing list</h1>
     <div class="race-line" hidden></div>
-    <div class="overall" id="overall"></div>
-    <div class="bar" aria-hidden="true"><div id="barFill"></div></div>
-    <div id="list"></div>
+    <div class="progress-text" id="packingProgressText"></div>
+    <div class="progress" aria-hidden="true"><div id="packingProgressFill"></div></div>
+    <div id="packingList"></div>
   </section>
 
   <section class="view" id="view-tasks" hidden>
     <h1 tabindex="-1">Race prep tasks</h1>
     <div class="race-line" hidden></div>
-    <div class="overall" id="tasksOverall"></div>
-    <div class="bar" aria-hidden="true"><div id="tasksBarFill"></div></div>
+    <div class="progress-text" id="tasksProgressText"></div>
+    <div class="progress" aria-hidden="true"><div id="tasksProgressFill"></div></div>
     <div id="tasksList"></div>
   </section>
 
   <section class="view" id="view-settings" hidden>
     <h1 tabindex="-1">Settings</h1>
 
-    <h2 class="set-title">Race details</h2>
-    <div class="group">
+    <h2 class="settings-heading">Race details</h2>
+    <div class="field-group">
       <label class="field"><span>Race name</span><input data-key="raceName" type="text" autocapitalize="words" placeholder="e.g. Weymouth Triathlon" autocomplete="off"></label>
-      <div class="row">
+      <div class="field-row">
         <label class="field"><span>Date</span><input data-key="raceDate" type="date"></label>
         <label class="field"><span>Start / wave time</span><input data-key="raceStart" type="time"></label>
       </div>
       <label class="field"><span>Venue</span><input data-key="raceLocation" id="raceLocation" type="text" autocapitalize="words" placeholder="Start typing a place or postcode" autocomplete="off"
         role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="locationList"></label>
-      <div class="suggest" id="locationSuggest" hidden>
+      <div class="place-suggestions" id="locationSuggest" hidden>
         <ul role="listbox" id="locationList" aria-label="Suggested places"></ul>
-        <p class="suggest__credit">Places from © OpenStreetMap contributors</p>
+        <p class="place-suggestions__credit">Places from © OpenStreetMap contributors</p>
       </div>
       <p class="sr-only" id="locationStatus" aria-live="polite"></p>
       <label class="field"><span>Distance</span>
@@ -64,12 +64,12 @@
           <option>Other</option>
         </select>
       </label>
-      <div class="row row--3" id="customDistance" hidden>
-        <label class="field"><span>Swim<span class="sr-only"> in metres</span></span><span class="unit-wrap"><input data-key="swimDistance" data-number type="text" inputmode="decimal" placeholder="750" autocomplete="off"><span class="unit" aria-hidden="true">m</span></span></label>
-        <label class="field"><span>Bike<span class="sr-only"> in kilometres</span></span><span class="unit-wrap"><input data-key="bikeDistance" data-number type="text" inputmode="decimal" placeholder="20" autocomplete="off"><span class="unit" aria-hidden="true">km</span></span></label>
-        <label class="field"><span>Run<span class="sr-only"> in kilometres</span></span><span class="unit-wrap"><input data-key="runDistance" data-number type="text" inputmode="decimal" placeholder="5" autocomplete="off"><span class="unit" aria-hidden="true">km</span></span></label>
+      <div class="field-row field-row--3" id="customDistance" hidden>
+        <label class="field"><span>Swim<span class="sr-only"> in metres</span></span><span class="unit-field"><input data-key="swimDistance" data-number type="text" inputmode="decimal" placeholder="750" autocomplete="off"><span class="unit-field__unit" aria-hidden="true">m</span></span></label>
+        <label class="field"><span>Bike<span class="sr-only"> in kilometres</span></span><span class="unit-field"><input data-key="bikeDistance" data-number type="text" inputmode="decimal" placeholder="20" autocomplete="off"><span class="unit-field__unit" aria-hidden="true">km</span></span></label>
+        <label class="field"><span>Run<span class="sr-only"> in kilometres</span></span><span class="unit-field"><input data-key="runDistance" data-number type="text" inputmode="decimal" placeholder="5" autocomplete="off"><span class="unit-field__unit" aria-hidden="true">km</span></span></label>
       </div>
-      <div class="row">
+      <div class="field-row">
         <label class="field"><span>Race number</span><input data-key="raceNumber" type="text" autocapitalize="words" inputmode="numeric" placeholder="Add when known"></label>
         <label class="field"><span>Booking ref (optional)</span><input data-key="raceRef" type="text" autocapitalize="words" placeholder="From your entry email" autocomplete="off"></label>
       </div>
@@ -77,11 +77,11 @@
       <label class="field"><span>Event website</span><input data-key="raceWebsite" type="url" placeholder="https://" autocomplete="off"></label>
     </div>
 
-    <h2 class="set-title">My details</h2>
-    <div class="group">
+    <h2 class="settings-heading">My details</h2>
+    <div class="field-group">
       <label class="field"><span>Name</span><input data-key="name" type="text" autocapitalize="words" placeholder="Your name" autocomplete="name"></label>
       <label class="field"><span>Club (optional)</span><input data-key="club" type="text" autocapitalize="words" placeholder="Your triathlon club"></label>
-      <div class="row">
+      <div class="field-row">
         <label class="field"><span>British Triathlon no.</span><input data-key="btNumber" type="text" autocapitalize="words" placeholder="Add number" autocomplete="off"></label>
         <label class="field"><span>Membership expiry</span><input data-key="btExpiry" type="date"></label>
       </div>
@@ -90,17 +90,17 @@
       <label class="field"><span>Notes</span><textarea data-key="notes" autocapitalize="sentences" rows="2" placeholder="Anything else for race day"></textarea></label>
     </div>
 
-    <h2 class="set-title">Appearance</h2>
-    <div class="seg" role="group" aria-label="Theme">
+    <h2 class="settings-heading">Appearance</h2>
+    <div class="segmented" role="group" aria-label="Theme">
       <button type="button" data-theme-choice="light">Light</button>
       <button type="button" data-theme-choice="dark">Dark</button>
       <button type="button" data-theme-choice="system">System</button>
     </div>
-    <p class="set-note">System follows your phone's light or dark setting.</p>
+    <p class="settings-note">System follows your phone's light or dark setting.</p>
 
-    <h2 class="set-title">Reset</h2>
-    <button type="button" class="danger" id="resetApp">Reset app</button>
-    <p class="set-note">Unticks every packing item and task, and clears all your settings on this device.</p>
+    <h2 class="settings-heading">Reset</h2>
+    <button type="button" class="button-danger" id="resetApp">Reset app</button>
+    <p class="settings-note">Unticks every packing item and task, and clears all your settings on this device.</p>
 
     <dialog class="confirm" id="resetDialog" aria-labelledby="resetTitle" aria-describedby="resetDesc">
       <h2 id="resetTitle">Reset the app?</h2>
@@ -111,12 +111,12 @@
       </div>
     </dialog>
 
-    <p class="saved" id="savedNote">Changes save automatically on this device</p>
+    <p class="save-note">Changes save automatically on this device</p>
   </section>
 </main>
 </div>
 
-<!-- Liquid Glass Nav (icons: Google Material Symbols Rounded, Apache 2.0) -->
+<!-- Tab bar icons: Google Material Symbols Rounded (Apache 2.0) -->
 <nav class="lg-nav lg-surface" aria-label="Main">
   <span class="lg-surface__lens" aria-hidden="true"></span>
   <span class="lg-surface__frost" aria-hidden="true"></span>
@@ -137,7 +137,8 @@
   </div>
 </nav>
 
-<script src="app.js"></script>
-<script src="liquid-glass-nav.js"></script>
+<script src="js/lists.js"></script>
+<script src="js/main.js"></script>
+<script src="js/liquid-glass-nav.js"></script>
 </body>
 </html>

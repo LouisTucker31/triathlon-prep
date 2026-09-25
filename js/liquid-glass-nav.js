@@ -1,23 +1,15 @@
-/* =====================================================================
-   Liquid Glass Nav - reusable floating tab bar
-   Pair with liquid-glass-nav.css. Plain script, no build step, works
-   from file:// - include it at the end of the body with a
-     script tag: src="liquid-glass-nav.js"
-
-   Every <nav class="lg-nav"> on the page is set up automatically.
-   Listen for tab changes:
-     nav.addEventListener('lg:change', e => console.log(e.detail.index, e.detail.item))
-   Tune the refraction (Chromium only) with data-lg-scale on the nav, or
-   call LiquidGlass.initNav(nav, { scale: -120, ... }) yourself and add
-   data-lg-manual to the nav to skip auto-init.
-
-   Includes core/liquid-glass.js from https://github.com/rizzytoday/liquid-glass
-   (MIT, (c) Riz Roze), unchanged apart from being wrapped for plain script-tag use.
-   ===================================================================== */
+// Floating tab bar with a "liquid glass" refraction effect. Sets up the
+// <nav class="lg-nav"> on the page and fires an "lg:change" event with
+// { index, item } when a tab is chosen (main.js listens for it).
+//
+// createLiquidGlass and its helpers below are the core of
+// https://github.com/rizzytoday/liquid-glass (MIT, (c) Riz Roze), kept unchanged
+// so it can be compared with upstream. Refraction only works in Chromium; other
+// browsers get a plain blur.
 (function () {
   "use strict";
 
-  /* ---------- rizzytoday/liquid-glass core ---------- */
+  // rizzytoday/liquid-glass core
   function resolveConfig(el, opts) {
     const rect = el.getBoundingClientRect();
     const ab = opts.aberration ?? [0, 10, 20];
@@ -205,9 +197,8 @@
     };
   }
 
-  /* ---------- Nav behaviour ---------- */
-  var DEFAULTS = {
-    // identical in every kit
+  // Nav behaviour
+  const GLASS_OPTIONS = {
     scale: -45,             // refraction strength (Chrome/Edge only)
     aberration: [0, 2, 4],  // subtle rainbow fringing at the edge
     displaceBlur: 1.2,
@@ -215,71 +206,49 @@
     fallbackFilter: "blur(var(--lg-lens-blur)) saturate(var(--lg-saturate))"
   };
 
-  function initNav(nav, opts) {
-    if (nav.__lg) return nav.__lg;
-    var glass = nav.querySelector(".lg-surface__lens");
-    var items = Array.prototype.slice.call(nav.querySelectorAll(".lg-nav__item"));
-    var indicator = nav.querySelector(".lg-nav__indicator");
+  function initNav(nav) {
+    const lens = nav.querySelector(".lg-surface__lens");
+    const tabs = [...nav.querySelectorAll(".lg-nav__item")];
+    const indicator = nav.querySelector(".lg-nav__indicator");
 
-    var o = Object.assign({}, DEFAULTS, opts || {});
-    if (nav.dataset.lgScale) o.scale = Number(nav.dataset.lgScale);
-    if (o.borderRadius == null) o.borderRadius = nav.offsetHeight / 2;
+    const glass = lens ? createLiquidGlass(lens, { ...GLASS_OPTIONS, borderRadius: nav.offsetHeight / 2 }) : null;
+    if (glass && glass.isActive) nav.classList.add("lg--refract");
 
-    var glassInst = glass ? createLiquidGlass(glass, o) : null;
-    nav.classList.add(glassInst && glassInst.isActive ? "lg--refract" : "lg--fallback");
+    const activeTab = () => tabs.find(tab => tab.classList.contains("is-active")) || tabs[0];
 
-    function activeItem() {
-      return items.find(function (i) { return i.classList.contains("is-active"); }) || items[0];
-    }
-    function moveIndicator(el, animate) {
-      if (!indicator || !el) return;
+    function moveIndicator(tab, animate) {
+      if (!indicator || !tab) return;
       if (!animate) indicator.classList.add("no-anim");
-      var over = parseFloat(getComputedStyle(nav).getPropertyValue("--lg-nav-bubble-overhang")) || 0;
-      indicator.style.width = (el.offsetWidth + over * 2) + "px";
-      indicator.style.transform = "translateX(" + (el.offsetLeft - over) + "px)";
-      if (!animate) { indicator.offsetWidth; indicator.classList.remove("no-anim"); }
-    }
-    function select(el, emit) {
-      items.forEach(function (i) {
-        var on = i === el;
-        i.classList.toggle("is-active", on);
-        if (on) i.setAttribute("aria-current", "page"); else i.removeAttribute("aria-current");
-      });
-      moveIndicator(el, true);
-      if (emit) nav.dispatchEvent(new CustomEvent("lg:change", { detail: { index: items.indexOf(el), item: el } }));
+      const overhang = parseFloat(getComputedStyle(nav).getPropertyValue("--lg-nav-bubble-overhang")) || 0;
+      indicator.style.width = (tab.offsetWidth + overhang * 2) + "px";
+      indicator.style.transform = "translateX(" + (tab.offsetLeft - overhang) + "px)";
+      if (!animate) {
+        indicator.offsetWidth; // force a layout so the jump isn't animated
+        indicator.classList.remove("no-anim");
+      }
     }
 
-    items.forEach(function (item) {
-      item.addEventListener("click", function (e) {
-        if (item.getAttribute("href") === "#" || item.tagName === "BUTTON") e.preventDefault();
-        select(item, true);
+    function select(tab) {
+      tabs.forEach(t => {
+        t.classList.toggle("is-active", t === tab);
+        if (t === tab) t.setAttribute("aria-current", "page"); else t.removeAttribute("aria-current");
       });
-    });
+      moveIndicator(tab, true);
+      nav.dispatchEvent(new CustomEvent("lg:change", { detail: { index: tabs.indexOf(tab), item: tab } }));
+    }
+
+    tabs.forEach(tab => tab.addEventListener("click", () => select(tab)));
 
     // Little "squish" when pressed, like iOS
-    nav.addEventListener("pointerdown", function () { nav.classList.add("is-pressed"); });
-    ["pointerup", "pointercancel", "pointerleave"].forEach(function (t) {
-      nav.addEventListener(t, function () { nav.classList.remove("is-pressed"); });
-    });
+    nav.addEventListener("pointerdown", () => nav.classList.add("is-pressed"));
+    ["pointerup", "pointercancel", "pointerleave"].forEach(type =>
+      nav.addEventListener(type, () => nav.classList.remove("is-pressed")));
 
-    moveIndicator(activeItem(), false);
-    var ro = new ResizeObserver(function () { moveIndicator(activeItem(), false); });
-    ro.observe(nav);
-
-    nav.__lg = {
-      glass: glassInst,
-      select: function (i) { select(items[i], false); },
-      destroy: function () { ro.disconnect(); if (glassInst) glassInst.destroy(); delete nav.__lg; }
-    };
-    return nav.__lg;
+    moveIndicator(activeTab(), false);
+    new ResizeObserver(() => moveIndicator(activeTab(), false)).observe(nav);
   }
 
-  function autoInit() {
-    document.querySelectorAll(".lg-nav:not([data-lg-manual])").forEach(function (n) { initNav(n); });
-  }
-
-  window.LiquidGlass = { createLiquidGlass: createLiquidGlass, isChromium: isChromium, initNav: initNav };
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", autoInit);
-  else autoInit();
+  const initAll = () => document.querySelectorAll(".lg-nav").forEach(initNav);
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", initAll);
+  else initAll();
 })();
-
