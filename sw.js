@@ -4,7 +4,7 @@
 //
 // This file stays in the site root (not js/) because a service worker can only
 // control pages at or below its own folder.
-const VERSION = "v13";
+const VERSION = "v14";
 const CACHE = "tri-packing-" + VERSION;
 const NETWORK_TIMEOUT = 3000;
 const ASSETS = [
