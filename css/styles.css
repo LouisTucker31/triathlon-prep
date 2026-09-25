@@ -140,6 +140,15 @@ input, select, textarea { font-size: max(var(--input-size), 1em) !important; }
   background: var(--field); color: var(--danger); font: inherit; font-weight: 600; cursor: pointer;
 }
 
+/* Download buttons at the bottom of the events page, side by side */
+.download-buttons { display: flex; gap: 8px; }
+.button-secondary {
+  flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px;
+  padding: 12px var(--gutter); border: 1px solid var(--border); border-radius: var(--radius);
+  background: var(--field); color: var(--text); font: inherit; font-weight: 600; cursor: pointer;
+}
+.button-secondary svg { width: 20px; height: 20px; fill: currentColor; flex: none; }
+
 /* Number box with a unit after it (custom distances) */
 .field > .unit-field { display: flex; align-items: center; gap: 4px; margin: 0; font-size: inherit; color: inherit; }
 .unit-field input { flex: 1; min-width: 0; }
