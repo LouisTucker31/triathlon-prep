@@ -1,5 +1,5 @@
 // Draws the "Download this event" social image: a 1080 x 1350 (4:5) PNG race
-// card on a canvas, in the app's dark style with a glass panel like the nav.
+// card on a canvas, in the app's light style with glass panels like the nav.
 // Takes a model from main.js ({ kicker, title, location, heroLabel, heroTime,
 // legs for triathlon or stats for single-sport events, footer }) and resolves
 // to a PNG blob. No library, so it works offline.
@@ -7,16 +7,16 @@ const EventImage = (() => {
   const W = 1080, H = 1350, PAD = 80;
   const FONT = '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
   const COLOURS = {
-    bg: "#0b0b0c",
-    text: "#f2f2f7",
-    muted: "rgba(235, 235, 245, 0.6)",
-    faint: "rgba(235, 235, 245, 0.35)",
-    panel: "rgba(255, 255, 255, 0.06)",
-    rim: "rgba(255, 255, 255, 0.14)",
-    divider: "rgba(255, 255, 255, 0.08)"
+    bg: "#f2f2f7",
+    text: "#1a1a1a",
+    muted: "rgba(60, 60, 67, 0.62)",
+    faint: "rgba(60, 60, 67, 0.4)",
+    panel: "rgba(255, 255, 255, 0.85)",
+    rim: "rgba(0, 0, 0, 0.08)",
+    divider: "rgba(0, 0, 0, 0.07)"
   };
   // Split bar shades, one per leg in race order, like the app's monochrome greys
-  const SPLIT_SHADES = { Swim: "rgba(255,255,255,0.95)", T1: "rgba(255,255,255,0.25)", Bike: "rgba(255,255,255,0.65)", T2: "rgba(255,255,255,0.25)", Run: "rgba(255,255,255,0.4)" };
+  const SPLIT_SHADES = { Swim: "rgba(26,26,26,0.95)", T1: "rgba(26,26,26,0.15)", Bike: "rgba(26,26,26,0.6)", T2: "rgba(26,26,26,0.15)", Run: "rgba(26,26,26,0.35)" };
 
   function roundedRect(ctx, x, y, w, h, r) {
     ctx.beginPath();
@@ -49,13 +49,19 @@ const EventImage = (() => {
     return lines.map(l => fit(ctx, l, maxWidth));
   }
 
-  // Rounded glass panel: faint fill, with a rim that's brighter at the top like light on glass
+  // Rounded glass panel: near-white fill lifted by a soft shadow, with a rim
+  // that's brightest at the top like light on glass
   function glassPanel(ctx, x, y, w, h, r) {
     roundedRect(ctx, x, y, w, h, r);
+    ctx.save();
+    ctx.shadowColor = "rgba(0, 0, 0, 0.06)";
+    ctx.shadowBlur = 30;
+    ctx.shadowOffsetY = 8;
     ctx.fillStyle = COLOURS.panel;
     ctx.fill();
+    ctx.restore();
     const rim = ctx.createLinearGradient(0, y, 0, y + h);
-    rim.addColorStop(0, "rgba(255, 255, 255, 0.28)");
+    rim.addColorStop(0, "rgba(255, 255, 255, 1)");
     rim.addColorStop(1, COLOURS.rim);
     ctx.strokeStyle = rim;
     ctx.lineWidth = 2;
@@ -75,11 +81,11 @@ const EventImage = (() => {
     const ctx = canvas.getContext("2d");
     const contentW = W - PAD * 2;
 
-    // Background: near-black with a soft light in the top corner
+    // Background: light grey with a soft white glow in the top corner
     ctx.fillStyle = COLOURS.bg;
     ctx.fillRect(0, 0, W, H);
     const glow = ctx.createRadialGradient(W * 0.85, 0, 0, W * 0.85, 0, W * 0.9);
-    glow.addColorStop(0, "rgba(255, 255, 255, 0.09)");
+    glow.addColorStop(0, "rgba(255, 255, 255, 0.9)");
     glow.addColorStop(1, "rgba(255, 255, 255, 0)");
     ctx.fillStyle = glow;
     ctx.fillRect(0, 0, W, H);
