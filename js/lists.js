@@ -22,7 +22,7 @@ const PACKING_SECTIONS = [
     "Warm hoodie or jumper", "Waterproof coat", "Wet bag or dry bag for wetsuit", "Foam roller"
   ]},
   { title: "Race morning clothes", items: [
-    "Socks", "T-shirt", "Comfortable shorts", "Hoodie or warm jumper", "Waterproof coat", "Comfortable trainers", "Flip-flops or sliders"
+    "Socks", "T-shirt", "Comfortable shorts", "Hoodie or warm jumper", null, "Comfortable trainers", "Flip-flops or sliders"
   ]},
   { title: "Worn to the swim start", items: [
     { h: "Kit" },
