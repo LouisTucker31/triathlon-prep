@@ -6,8 +6,8 @@ const PACKING_SECTIONS = [
     { h: "Friday evening clothes" }, null,
     "T-shirt", "Casual trousers or joggers", "Underwear", "Socks", "Comfortable shoes or trainers",
     { h: "Overnight essentials" },
-    "Sleepwear", "Warm hoodie or jumper", "Warm jacket", "Waterproof coat", "Toothbrush", "Toothpaste", "Deodorant", "Shower gel",
-    "Lip balm", "Vitamins and supplements you normally take", "Wallet", "British Triathlon licence or membership",
+    "Sleepwear", "Warm hoodie or jumper", null, "Waterproof coat", "Toothbrush", "Toothpaste", "Deodorant", "Shower gel",
+    null, "Vitamins and supplements", "Wallet", "British Triathlon licence or membership",
     "Breakfast for race morning", "Evening snacks", "AeroPress and coffee"
   ]},
   { title: "Camera and electronics bag", items: [
