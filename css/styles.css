@@ -183,49 +183,51 @@ html:has(.settings-sheet[open]) { overflow: hidden; }  /* stop the page behind s
 
    Glass layers, bottom to top, on any .lg-surface element:
      .lg-surface__lens   light blur (real refraction in Chrome/Edge)
-     .lg-surface__frost  heavy frost and tint, with a 3px soft edge
+     .lg-surface__frost  light frost and tint, with a 3px soft edge
      ::after             rim light and specular highlight
      then the content */
 :root {
-  --lg-lens-blur: 2px;
-  --lg-lens-tint: rgba(255, 255, 255, 0.22);
-  --lg-frost-blur: 12px;
-  --lg-frost-tint: rgba(250, 250, 252, 0.66);
-  --lg-frost-brightness: 1.04;
-  --lg-saturate: 150%;
+  /* Tuned to Apple's Files tab bar: mostly clear glass, light blur, strong
+     colour pick-up from behind, and a crisp bright rim */
+  --lg-lens-blur: 1px;
+  --lg-lens-tint: rgba(255, 255, 255, 0.1);
+  --lg-frost-blur: 5px;
+  --lg-frost-tint: rgba(255, 255, 255, 0.4);
+  --lg-frost-brightness: 1.06;
+  --lg-saturate: 180%;
   --lg-lip: 3px;                                  /* soft clear edge */
-  --lg-rim-top: rgba(255, 255, 255, 0.95);
-  --lg-rim-bottom: rgba(255, 255, 255, 0.6);
-  --lg-rim-side: rgba(255, 255, 255, 0.5);
-  --lg-rim-glow: rgba(255, 255, 255, 0.16);
-  --lg-specular: rgba(255, 255, 255, 0.32);
-  --lg-outline: rgba(0, 0, 0, 0.1);
-  --lg-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), 0 1px 4px rgba(0, 0, 0, 0.06);
+  --lg-rim-top: rgba(255, 255, 255, 1);
+  --lg-rim-bottom: rgba(255, 255, 255, 0.85);
+  --lg-rim-side: rgba(255, 255, 255, 0.8);
+  --lg-rim-glow: rgba(255, 255, 255, 0.35);
+  --lg-specular: rgba(255, 255, 255, 0.45);
+  --lg-outline: rgba(0, 0, 0, 0.07);
+  --lg-shadow: 0 6px 24px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.05);
 
   --lg-ink: #000;
   --lg-accent: #1d5fd1;
-  --lg-bubble: rgba(0, 0, 0, 0.08);
-  --lg-bubble-rim: rgba(255, 255, 255, 0.55);
-  --lg-edge-light: rgba(255, 255, 255, 0.75);    /* 1px lit edge, top-left */
+  --lg-bubble: rgba(0, 0, 0, 0.06);
+  --lg-bubble-rim: rgba(255, 255, 255, 0.7);
+  --lg-edge-light: rgba(255, 255, 255, 0.95);    /* 1px lit edge, top-left */
   --lg-distortion: url(#lg-distortion);          /* SVG filter in index.html */
   --lg-font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro", system-ui, "Helvetica Neue", Arial, sans-serif;
 }
 :root[data-theme="dark"] {
-  --lg-lens-tint: rgba(140, 140, 150, 0.08);
-  --lg-frost-tint: rgba(140, 140, 150, 0.3);
-  --lg-frost-brightness: 0.95;
-  --lg-rim-top: rgba(255, 255, 255, 0.5);
-  --lg-rim-bottom: rgba(255, 255, 255, 0.3);
-  --lg-rim-side: rgba(255, 255, 255, 0.1);
-  --lg-rim-glow: rgba(255, 255, 255, 0.08);
-  --lg-specular: rgba(255, 255, 255, 0.12);
+  --lg-lens-tint: rgba(120, 120, 128, 0.06);
+  --lg-frost-tint: rgba(60, 60, 66, 0.34);
+  --lg-frost-brightness: 1;
+  --lg-rim-top: rgba(255, 255, 255, 0.6);
+  --lg-rim-bottom: rgba(255, 255, 255, 0.35);
+  --lg-rim-side: rgba(255, 255, 255, 0.25);
+  --lg-rim-glow: rgba(255, 255, 255, 0.12);
+  --lg-specular: rgba(255, 255, 255, 0.16);
   --lg-outline: rgba(0, 0, 0, 0.5);
-  --lg-shadow: 0 8px 32px rgba(0, 0, 0, 0.35), 0 1px 4px rgba(0, 0, 0, 0.25);
+  --lg-shadow: 0 6px 24px rgba(0, 0, 0, 0.35), 0 1px 3px rgba(0, 0, 0, 0.25);
   --lg-ink: #fff;
   --lg-accent: #3e91ff;
   --lg-bubble: rgba(255, 255, 255, 0.14);
-  --lg-bubble-rim: rgba(255, 255, 255, 0.14);
-  --lg-edge-light: rgba(255, 255, 255, 0.3);
+  --lg-bubble-rim: rgba(255, 255, 255, 0.18);
+  --lg-edge-light: rgba(255, 255, 255, 0.45);
 }
 
 /* :where() keeps this at zero specificity, so .lg-nav's position: fixed always wins */
@@ -305,7 +307,7 @@ html:has(.settings-sheet[open]) { overflow: hidden; }  /* stop the page behind s
   --lg-nav-bubble-inset: 5px;     /* bubble gap from top/bottom */
   --lg-nav-bubble-overhang: 3px;  /* bubble a touch wider than its tab */
   --lg-nav-gutter: 16px;
-  --lg-nav-bottom: max(16px, calc(env(safe-area-inset-bottom, 0px) - 6px));
+  --lg-nav-bottom: max(16px, calc(env(safe-area-inset-bottom, 0px) - 12px));  /* 22pt on iPhone, as in Files */
 }
 
 .lg-nav {
@@ -356,7 +358,7 @@ html:has(.settings-sheet[open]) { overflow: hidden; }  /* stop the page behind s
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 3px;
+  gap: 1px;
   padding: 0 0 1px;
   color: var(--lg-ink);
   font: 510 clamp(10px, 0.625rem, 15px)/1.2 var(--lg-font);
@@ -366,10 +368,10 @@ html:has(.settings-sheet[open]) { overflow: hidden; }  /* stop the page behind s
   cursor: pointer;
   transition: color 0.2s ease;
 }
-.lg-nav__icon { display: grid; place-items: center; width: 28px; height: 25px; }
+.lg-nav__icon { display: grid; place-items: center; width: 30px; height: 27px; }
 .lg-nav__icon svg {
-  width: 28px;
-  height: 28px;
+  width: 30px;
+  height: 30px;
   fill: currentColor;
   transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
