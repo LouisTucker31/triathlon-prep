@@ -60,7 +60,7 @@ h1:focus { outline: none; } /* focused only to announce the view change */
 .body { display: none; padding: 6px 14px 12px; }
 .section.open .body { display: block; }
 
-.sub { font-weight: 600; font-size: 0.85rem; text-transform: uppercase; letter-spacing: .04em;
+.sub { font-weight: 600; font-size: 0.9rem;
        color: var(--muted-2); margin: 12px 0 4px; }
 label.item {
   display: flex; align-items: flex-start; gap: 10px; padding: 7px 0; cursor: pointer;
@@ -78,7 +78,7 @@ html { touch-action: manipulation; }
 input, select, textarea { font-size: max(16px, 1em) !important; }
 
 /* ---------- Settings ---------- */
-.set-title { font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: .05em;
+.set-title { font-size: 0.9rem; font-weight: 600;
              color: var(--muted-2); margin: 22px 4px 8px; }
 .set-title:first-of-type { margin-top: 14px; }
 .group { border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: var(--field); }
@@ -119,6 +119,30 @@ input, select, textarea { font-size: max(16px, 1em) !important; }
   background: var(--field); color: var(--danger); font: inherit; font-weight: 600; cursor: pointer;
 }
 .empty { color: var(--muted); margin-top: 8px; }
+
+/* Venue suggestions */
+.suggest[hidden] { display: none; }
+.suggest { border-bottom: 1px solid var(--line); }
+.suggest ul { list-style: none; margin: 0; padding: 0; }
+.suggest li { padding: 11px 14px; min-height: 44px; cursor: pointer; border-top: 1px solid var(--line); }
+.suggest li:hover, .suggest li[aria-selected="true"] { background: var(--head); box-shadow: inset 3px 0 0 var(--focus); }
+.suggest__credit { margin: 0; padding: 6px 14px 8px; font-size: 0.75rem; color: var(--muted-2); border-top: 1px solid var(--line); }
+
+/* Reset confirmation dialog */
+.confirm {
+  width: min(340px, calc(100% - 32px)); padding: 20px; border: 1px solid var(--border); border-radius: 14px;
+  background: var(--field); color: var(--text);
+}
+.confirm::backdrop { background: rgba(0, 0, 0, 0.45); }
+.confirm h2 { font-size: 1.1rem; margin: 0 0 8px; }
+.confirm p { margin: 0 0 18px; color: var(--muted); }
+.confirm__actions { display: flex; gap: 10px; }
+.confirm__actions button {
+  flex: 1; min-height: 44px; padding: 10px 12px; border-radius: 10px; font: inherit; font-weight: 600; cursor: pointer;
+}
+.confirm__cancel { border: 1px solid var(--border); background: var(--seg-bg); color: var(--text); }
+.confirm__ok { border: 0; background: var(--danger); color: #fff; }
+:root[data-theme="dark"] .confirm__ok { color: #000; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; scroll-behavior: auto !important; }

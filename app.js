@@ -1,97 +1,99 @@
-// Item formats: "text" | {t:"text", sub:["child", ...]} | {h:"Subheading"}
+// Item formats: "text" | {t:"text", sub:["child", ...]} | {h:"Subheading"} | null
+// Ticks are saved by position, so a removed item is left as null to keep the
+// items after it lined up with their saved ticks.
 const DATA = [
   { title: "Overnight bag", items: [
-    { t: "Friday evening clothes", sub: ["T-shirt", "Casual trousers / joggers", "Underwear", "Socks", "Comfortable shoes / trainers"] },
-    "Sleepwear", "Warm hoodie / jumper", "Warm jacket", "Waterproof coat", "Toothbrush", "Toothpaste", "Deodorant", "Shower gel",
-    "Lip balm", "Vitamins / supplements normally taken", "Wallet", "British Triathlon licence / membership",
+    { t: "Friday evening clothes", sub: ["T-shirt", "Casual trousers or joggers", "Underwear", "Socks", "Comfortable shoes or trainers"] },
+    "Sleepwear", "Warm hoodie or jumper", "Warm jacket", "Waterproof coat", "Toothbrush", "Toothpaste", "Deodorant", "Shower gel",
+    "Lip balm", "Vitamins and supplements you normally take", "Wallet", "British Triathlon licence or membership",
     "Breakfast for race morning", "Evening snacks"
   ]},
-  { title: "Camera / electronics bag", items: [
-    "DSLR camera", "Lens 1", "Lens 2", "Spare DSLR batteries", "GoPro", "GoPro charger / cable", "Phone", "Phone charger",
-    "Garmin watch", "Garmin watch charger", "Bike computer", "Bike computer charger", "Heart-rate monitor / chest strap", "AirPods"
+  { title: "Camera and electronics bag", items: [
+    "DSLR camera", "Lens 1", "Lens 2", "Spare DSLR batteries", "GoPro", "GoPro charger and cable", "Phone", "Phone charger",
+    "Garmin watch", "Garmin watch charger", "Bike computer", "Bike computer charger", "Heart-rate monitor chest strap", "AirPods"
   ]},
   { title: "Race-day kit bag", items: [
-    "Race documents / registration details", "Race packet if issued", "Photo ID", "British Triathlon licence / membership", "Phone",
-    "Wallet / bank card", "Car keys", "Timing chip", "Timing chip ankle strap", "Race numbers", "Bike number / stickers",
-    "Helmet stickers", "Safety pins", "Permanent marker", "Sunscreen", "Lip balm", "Vaseline", "BodyGlide / anti-chafe",
-    "First-aid kit", "Goggles", "Anti-fog / demister solution", "Swim cap", "Nose clip", "Flip-flops / sandals",
-    "Warm hoodie / jumper", "Waterproof coat", "Wet bag / waterproof dry bag for wetsuit", "Foam roller"
+    "Race documents and registration details", "Race pack, if issued", "Photo ID", "British Triathlon licence or membership", "Phone",
+    "Wallet or bank card", "Car keys", "Timing chip", "Timing chip ankle strap", "Race numbers", "Bike number and stickers",
+    "Helmet stickers", "Safety pins", "Permanent marker", "Sunscreen", "Lip balm", "Vaseline", "BodyGlide or anti-chafe balm",
+    "First-aid kit", "Goggles", "Anti-fog solution", "Swim cap", "Nose clip", "Flip-flops or sandals",
+    "Warm hoodie or jumper", "Waterproof coat", "Wet bag or dry bag for wetsuit", "Foam roller"
   ]},
-  { title: "Morning-of-the-race clothes", items: [
-    "Socks", "T-shirt", "Comfortable shorts", "Hoodie / warm jumper", "Waterproof coat", "Comfortable trainers", "Flip-flops / sliders"
+  { title: "Race morning clothes", items: [
+    "Socks", "T-shirt", "Comfortable shorts", "Hoodie or warm jumper", "Waterproof coat", "Comfortable trainers", "Flip-flops or sliders"
   ]},
-  { title: "Swim / worn to the start", items: [
-    "Trisuit", "Wetsuit", "Goggles", "Anti-fog applied to goggles", "Swim cap", "Race-issued swim cap if required", "Nose clip",
+  { title: "Worn to the swim start", items: [
+    "Trisuit", "Wetsuit", "Goggles", "Anti-fog applied to goggles", "Swim cap", "Race-issued swim cap, if required", "Nose clip",
     "Garmin watch", "Heart-rate monitor", "Timing chip",
     { t: "BodyGlide", sub: ["Neck", "Shoulders", "Wrists", "Ankles"] },
-    "Flip-flops / sliders", "Warm hoodie / jumper while waiting", "Waterproof coat"
+    "Flip-flops or sliders", "Warm hoodie or jumper for waiting", "Waterproof coat"
   ]},
-  { title: "T1 transition bag: Swim → Bike", items: [
+  { title: "T1 transition bag: swim to bike", items: [
     "Cycling helmet", "Cycling shoes", "Socks", "Cycling glasses", "Cycling gloves", "Race belt", "Race number attached to race belt",
-    "Small towel for drying feet", "Gel / nutrition for start of bike"
+    "Small towel for drying feet", "Gel or snack for the start of the bike"
   ]},
-  { title: "Bike: fitted / carried on bike", items: [
+  { title: "On the bike", items: [
     "Boardman road bike", "Bike computer", "Bike number fitted", "Water bottle 1", "Water bottle 2",
-    "Electrolytes / hydration mix in bottles", "Bike gels", "Other bike nutrition", "Nutrition / tool bag", "Saddle bag",
+    "Electrolytes or hydration mix in bottles", "Bike gels", "Other bike nutrition", "Nutrition and tool bag", "Saddle bag",
     "Spare inner tube", "Tyre levers", "Mini pump", "Multi-tool"
   ]},
-  { title: "T2 transition bag: Bike → Run", items: [
-    "Running shoes", "Fresh running socks", "Running glasses", "Running cap / visor",
-    "Race belt / race number if not already wearing it", "Running gels", "Small towel"
+  { title: "T2 transition bag: bike to run", items: [
+    "Running shoes", "Fresh running socks", "Running glasses", "Running cap or visor",
+    "Race belt and race number, if not already wearing it", "Running gels", "Small towel"
   ]},
-  { title: "Bike equipment: carried separately", items: [
+  { title: "Spare bike kit (in the car)", items: [
     "Track pump", "Second spare inner tube", "Allen keys", "Spare water bottle", "Spare electrolytes",
     "Spare hydration tablets", "Spare gels", "Spare nutrition"
   ]},
-  { title: "Nutrition & hydration", items: [
-    { h: "Before race" }, "Race-morning breakfast", "Oranges", "Water", "Pre-race electrolyte drink", "Hydration tablets", "Pre-race gel if planned",
-    { h: "Bike" }, "2 × water bottles", "Electrolytes / hydration mix", "Bike gels", "Bike food / bars if using them",
-    { h: "Run" }, "Running gels",
-    { h: "After race" }, "Water", "Electrolytes", "Hydration tablet", "Meal replacement shake", "Recovery food / snacks"
+  { title: "Food and drink", items: [
+    { h: "Before the race" }, null, "Oranges", "Water", "Pre-race electrolyte drink", "Hydration tablets", "Pre-race gel, if planned",
+    null, null, null, null,
+    null,
+    { h: "After the race" }, "Water", "Electrolytes", "Hydration tablet", "Meal replacement shake", "Recovery food or snacks"
   ]},
-  { title: "Warm / dry clothes for immediately after", items: [
-    "Dry underwear", "Dry socks", "Dry T-shirt", "Warm hoodie / jumper", "Warm trousers / joggers", "Waterproof coat",
-    "Dry comfortable trainers", "Beanie / warm hat if cold", "Large towel", "Wet bag for wetsuit",
-    "Plastic bag for wet trisuit / other kit", "Dry robe"
+  { title: "Warm, dry clothes for after the race", items: [
+    "Dry underwear", "Dry socks", "Dry T-shirt", "Warm hoodie or jumper", "Warm trousers or joggers", "Waterproof coat",
+    "Dry comfortable trainers", "Beanie or warm hat, if cold", "Large towel", "Wet bag for wetsuit",
+    "Plastic bag for wet trisuit and other kit", "Dry robe"
   ]},
   { title: "Bike checks before leaving", items: [
-    "Bike mechanically sound", "Tyres checked", "Tyres inflated to chosen pressure", "No obvious tyre cuts / damage", "Wheels secure",
-    "Thru-axles / quick releases secure", "Brakes working", "Gears working", "Chain clean and lubricated", "Pedals secure",
+    "Bike mechanically sound", "Tyres checked", "Tyres inflated to chosen pressure", "No obvious tyre cuts or damage", "Wheels secure",
+    "Thru-axles or quick releases secure", "Brakes working", "Gears working", "Chain clean and lubricated", "Pedals secure",
     "Bottle cages secure", "Bike computer secure", "Bike computer fully charged", "Bike computer working", "Sensors connected",
     "Heart-rate monitor connected", "Spare tube on bike", "Mini pump on bike", "Multi-tool on bike", "Tyre levers on bike",
-    "Gels / nutrition attached or stored", "Both water bottles filled"
+    "Gels and nutrition attached or stored", "Both water bottles filled"
   ]}
 ];
 
 const TASKS = [
   { title: "14 days out", items: [
     "Confirm race entry and registration details",
-    "Read race information / athlete guide",
+    "Read race information or athlete guide",
     "Confirm race distances and format",
     "Check start time and wave time",
-    "Check registration / race-pack collection requirements",
+    "Check how to register and collect your race pack",
     "Check transition rules",
     "Check wetsuit rules",
     "Check parking and venue access",
     "Confirm hotel booking",
     "Plan travel to the hotel and race venue",
-    "Check British Triathlon membership / licence",
+    "Check British Triathlon membership or licence",
     "Check bike is mechanically sound",
     "Book bike service if anything needs attention",
-    "Check tyres for wear / damage",
+    "Check tyres for wear or damage",
     "Check brake pads",
-    "Check gears / drivetrain",
+    "Check gears and drivetrain",
     "Check running shoes are in good condition",
     "Make sure wetsuit, goggles and trisuit fit correctly",
-    "Confirm race nutrition strategy",
-    "Confirm hydration strategy",
-    "Use only nutrition / equipment already tested",
-    "Start reducing unnecessary training fatigue"
+    "Decide what you'll eat during the race",
+    "Decide what you'll drink during the race",
+    "Use only nutrition and equipment you've already tested",
+    "Start easing off training"
   ]},
   { title: "7 days out", items: [
     "Re-read race instructions",
     "Check provisional weather forecast",
-    "Check water temperature if available",
+    "Check water temperature, if available",
     "Confirm travel times",
     "Confirm hotel check-in",
     "Confirm parking arrangements",
@@ -101,22 +103,22 @@ const TASKS = [
     "Plan run nutrition",
     "Plan post-race nutrition",
     "Buy any missing gels",
-    "Buy electrolytes / hydration tablets",
-    "Buy oranges / pre-race food",
-    "Buy meal replacement / recovery shake",
+    "Buy electrolytes or hydration tablets",
+    "Buy oranges and pre-race food",
+    "Buy meal replacement or recovery shake",
     "Check all chargers work",
     "Check Garmin",
     "Check bike computer",
     "Check heart-rate monitor battery",
     "Check GoPro",
-    "Check camera memory / storage",
+    "Check camera memory cards",
     "Charge spare DSLR batteries",
     "Make sure race belt is ready",
     "Make sure wet bag is ready",
     "Start organising equipment into packing-list categories"
   ]},
   { title: "3–4 days out", items: [
-    "Complete final meaningful training sessions",
+    "Do your last hard training sessions",
     "Keep remaining training easy",
     "Prioritise sleep",
     "Prioritise hydration",
@@ -124,17 +126,17 @@ const TASKS = [
     "Avoid experimenting with new foods",
     "Check updated weather forecast",
     "Decide race clothing based on forecast",
-    "Decide whether extra warm / waterproof clothing is needed",
+    "Decide whether extra warm or waterproof clothing is needed",
     "Clean bike",
     "Lubricate chain",
-    "Check gears",
-    "Check brakes",
-    "Check tyres",
+    null,
+    null,
+    null,
     "Check wheels",
     "Check bottle cages",
     "Check pedals",
     "Check bike computer mount",
-    "Check saddle bag / tool storage",
+    "Check saddle bag and tool storage",
     "Check spare inner tube",
     "Check mini pump",
     "Check multi-tool",
@@ -147,15 +149,15 @@ const TASKS = [
   ]},
   { title: "2 days out", items: [
     "Pack overnight bag",
-    "Pack camera / electronics bag",
+    "Pack camera and electronics bag",
     "Pack race-day kit bag",
     "Pack T1 transition bag",
     "Pack T2 transition bag",
-    "Prepare separately carried bike equipment",
-    "Prepare warm / dry post-race clothes",
+    "Pack the spare bike kit",
+    "Prepare warm, dry post-race clothes",
     "Put all nutrition and hydration together",
     "Put race documents together",
-    "Download / screenshot race information",
+    "Download or screenshot race information",
     "Save race venue location",
     "Save parking location",
     "Charge phone",
@@ -164,68 +166,68 @@ const TASKS = [
     "Charge GoPro",
     "Charge DSLR batteries",
     "Charge AirPods",
-    "Empty / format camera memory cards if required",
-    "Empty / format GoPro memory card if required"
+    "Empty or format camera memory cards, if needed",
+    "Empty or format GoPro memory card, if needed"
   ]},
   { title: "Day before", items: [
-    { h: "Final packing & bike prep" },
+    { h: "Final packing and bike prep" },
     "Run through the full packing list",
     "Check bike one final time",
-    "Inflate tyres to approximately the correct pressure",
-    "Check front wheel / thru-axle if removing the wheel for transport",
+    "Pump tyres to about race pressure",
+    "Check front wheel and thru-axle if removing the wheel for transport",
     "Fit bike number if already issued",
     "Fit bike stickers if already issued",
     "Fit helmet stickers if already issued",
-    "Mount / check bike computer",
+    "Mount and check bike computer",
     "Put spare tube, mini pump, tyre levers and multi-tool on bike",
     "Prepare bike nutrition",
     "Prepare running gels",
     "Prepare hydration products for the morning",
     "Prepare race-morning breakfast",
-    "Put oranges / pre-race food somewhere obvious",
+    "Put oranges and pre-race food somewhere obvious",
     "Prepare meal replacement shake for after",
-    "Lay out morning-of-race clothes",
+    "Lay out race morning clothes",
     "Put race documents, wallet and car keys together",
     "Load everything into the car except items needed overnight",
-    "Put bike in / on the car when practical",
+    "Load bike in or on the car",
     { h: "Final planning" },
     "Check weather one final time",
-    "Check race start / wave time",
+    "Check race start and wave time",
     "Confirm hotel-to-venue journey time",
-    "Work backwards to establish hotel departure time",
-    "Work backwards to establish wake-up time",
+    "Work out what time to leave the hotel",
+    "Work out what time to wake up",
     "Set alarm",
     "Set backup alarm",
     { h: "Evening" },
     "Eat a familiar evening meal",
-    "Hydrate normally",
+    "Drink as normal",
     "Avoid alcohol",
     "Get an early night"
   ]},
   { title: "Race morning: after waking", items: [
     "Wake up at planned time",
     "Eat race-morning breakfast",
-    "Start drinking water / electrolytes",
-    "Take normal vitamins / supplements",
+    "Start drinking water and electrolytes",
+    "Take normal vitamins and supplements",
     "Put trisuit on",
-    "Get dressed in morning-of-race clothes",
-    "Apply sunscreen if required",
+    "Get dressed in race morning clothes",
+    "Put sunscreen on",
     "Put heart-rate monitor on"
   ]},
   { title: "Race morning: final preparation", items: [
     "Fill bike water bottles",
-    "Add electrolytes / hydration mix",
-    "Put bike gels / nutrition on bike",
-    "Take oranges / pre-race food",
-    "Take planned pre-race gel if using one",
+    "Add electrolytes or hydration mix",
+    "Put bike gels and nutrition on bike",
+    "Take oranges and pre-race food",
+    "Take planned pre-race gel, if using one",
     "Check Garmin battery",
     "Check bike computer battery",
     "Check race documents",
-    "Check timing chip if already collected",
+    "Check timing chip, if already collected",
     "Check T1 bag",
     "Check T2 bag",
     "Check race-day kit bag",
-    "Check camera / electronics bag",
+    "Check camera and electronics bag",
     "Check warm post-race clothes",
     "Load remaining overnight items",
     "Check phone",
@@ -238,33 +240,33 @@ const TASKS = [
   { title: "Arrive at venue", items: [
     "Park",
     "Take bike and race equipment to event area",
-    "Register / collect race pack if required",
-    "Collect timing chip if required",
-    "Attach race numbers / stickers",
-    "Attach timing chip when appropriate",
+    "Register or collect race pack, if required",
+    "Collect timing chip, if required",
+    "Attach race numbers and stickers",
+    "Put timing chip on (left ankle) before the swim",
     "Check race number is on race belt",
     "Check helmet stickers",
     "Check bike number",
     "Visit toilets early"
   ]},
-  { title: "Familiarise yourself with transition", items: [
+  { title: "Learn the transition layout", items: [
     "Find transition entrance",
     "Find your rack position",
-    "Identify swim start",
-    "Identify swim exit",
-    "Identify bike out",
-    "Identify bike in",
-    "Identify run out",
+    "Find the swim start",
+    "Find the swim exit",
+    "Find bike out",
+    "Find bike in",
+    "Find run out",
     "Check transition flow",
     "Memorise landmarks near your bike"
   ]},
-  { title: "Set up bike / T1", items: [
+  { title: "Set up bike and T1", items: [
     "Rack bike correctly",
     "Put bike bottles on bike",
     "Check bike nutrition",
     "Check bike computer",
     "Check heart-rate monitor connection",
-    "Set bike into an appropriate starting gear",
+    "Put bike in an easy gear for the start",
     "Position helmet",
     "Position cycling shoes",
     "Position cycling glasses",
@@ -276,24 +278,24 @@ const TASKS = [
     "Position running shoes",
     "Position fresh socks",
     "Position running glasses",
-    "Position running cap / visor",
+    "Position running cap or visor",
     "Position running gels",
     "Position small towel",
     "Walk through T2 mentally"
   ]},
-  { title: "Final preparation before leaving transition", items: [
+  { title: "Before you leave transition", items: [
     "Make sure everything is laid out how you want it",
-    "Check bike computer one final time",
-    "Check bottles are on bike",
-    "Check helmet is ready",
-    "Check cycling shoes are ready",
-    "Check running shoes are ready",
-    "Check race number / race belt",
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
     "Leave transition with enough time before the swim start"
   ]},
   { title: "Before the swim", items: [
     "Visit toilet one final time",
-    "Stop drinking excessively close to the start",
+    "Don't drink too much just before the start",
     "Apply BodyGlide",
     "Put wetsuit on",
     "Put Garmin into triathlon mode",
@@ -303,20 +305,20 @@ const TASKS = [
     "Apply anti-fog to goggles",
     "Put goggles on",
     "Put nose clip on",
-    "Familiarise yourself with swim course and turn buoys",
+    "Look at the swim course and turn buoys",
     "Confirm number of swim laps",
-    "Hand over warm clothes / waterproof coat or place them where instructed",
+    "Hand over warm clothes and waterproof coat, or leave them where instructed",
     "Get to the start with time to spare"
   ]},
   { title: "Immediately after the race", items: [
     { h: "First few minutes" },
-    "Stop / save Garmin activity",
-    "Drink water / electrolytes",
-    "Have meal replacement / recovery shake",
+    "Stop and save Garmin activity",
+    "Drink water or electrolytes",
+    "Have meal replacement or recovery shake",
     "Eat recovery food",
-    "Put waterproof coat on if cold / wet",
-    { h: "Change & recover" },
-    "Change into warm / dry clothes",
+    "Put waterproof coat on if cold or wet",
+    { h: "Change and recover" },
+    "Change into warm, dry clothes",
     "Put wetsuit and wet kit into wet bag",
     { h: "Collect everything" },
     "Collect T1 equipment",
@@ -324,7 +326,7 @@ const TASKS = [
     "Collect race-day kit bag",
     "Collect bike",
     "Check timing chip return requirements",
-    "Check your rack / transition area one final time",
+    "Check your rack and transition area one final time",
     "Make sure nothing has been left behind",
     "Pack bike safely for the journey home"
   ]}
@@ -371,7 +373,8 @@ function buildList(data, storageKey, listEl, overallEl, barEl, doneWord) {
     const body = document.createElement("div"); body.className = "body"; body.id = bodyId;
     let n = 0;
     sec.items.forEach(it => {
-      if (typeof it === "string") body.append(makeItem(`${si}-${n++}`, it));
+      if (it === null) n++; // removed item: keep later items' saved ticks in place
+      else if (typeof it === "string") body.append(makeItem(`${si}-${n++}`, it));
       else if (it.h) { const h = document.createElement("h3"); h.className = "sub"; h.textContent = it.h; body.append(h); }
       else {
         body.append(makeItem(`${si}-${n++}`, it.t));
@@ -426,14 +429,86 @@ function toggleCustomDistance() { customDistance.hidden = distanceSelect.value !
 distanceSelect.addEventListener("change", toggleCustomDistance);
 toggleCustomDistance();
 
+/* Venue search: suggests real places (OpenStreetMap, via Photon) as you type.
+   Free text still works offline or if the service is down. */
+(() => {
+  const input = document.getElementById("raceLocation");
+  const box = document.getElementById("locationSuggest");
+  const list = document.getElementById("locationList");
+  const status = document.getElementById("locationStatus");
+  let timer = 0, controller = null, results = [], active = -1;
+
+  function describe(p) {
+    const parts = [p.name || [p.housenumber, p.street].filter(Boolean).join(" "),
+      p.city || p.town || p.village || p.district || p.county, p.postcode,
+      p.countrycode !== "GB" ? p.country : ""];
+    return parts.filter((x, i) => x && parts.indexOf(x) === i).join(", ");
+  }
+  function setActive(i) {
+    active = i;
+    [...list.children].forEach((li, n) => li.setAttribute("aria-selected", String(n === i)));
+    if (i >= 0) { input.setAttribute("aria-activedescendant", list.children[i].id); list.children[i].scrollIntoView({ block: "nearest" }); }
+    else input.removeAttribute("aria-activedescendant");
+  }
+  function close() {
+    box.hidden = true; input.setAttribute("aria-expanded", "false"); setActive(-1);
+  }
+  function render() {
+    list.textContent = "";
+    results.forEach((label, i) => {
+      const li = document.createElement("li");
+      li.id = "loc-opt-" + i; li.setAttribute("role", "option"); li.setAttribute("aria-selected", "false");
+      li.textContent = label;
+      li.addEventListener("mousedown", e => e.preventDefault()); // keep focus in the input
+      li.addEventListener("click", () => choose(i));
+      list.append(li);
+    });
+    box.hidden = !results.length; input.setAttribute("aria-expanded", String(!!results.length)); setActive(-1);
+    status.textContent = results.length ? `${results.length} places found. Use the up and down arrows to choose.` : "";
+  }
+  function choose(i) {
+    input.value = results[i];
+    input.dispatchEvent(new Event("input")); // saves it, like typing would
+    close();
+  }
+  async function search(q) {
+    if (controller) controller.abort();
+    controller = new AbortController();
+    try {
+      const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&limit=6&lang=en&lat=54.5&lon=-2.5`;
+      const data = await (await fetch(url, { signal: controller.signal })).json();
+      results = [...new Set(data.features.map(f => describe(f.properties)).filter(Boolean))];
+      if (document.activeElement === input) render();
+    } catch (e) { if (e.name !== "AbortError") { results = []; close(); } }
+  }
+
+  input.addEventListener("input", e => {
+    if (!e.isTrusted) return; // our own event from choose()
+    clearTimeout(timer);
+    const q = input.value.trim();
+    if (q.length < 3) { if (controller) controller.abort(); results = []; close(); return; }
+    timer = setTimeout(() => search(q), 300);
+  });
+  input.addEventListener("keydown", e => {
+    if (box.hidden) return;
+    if (e.key === "ArrowDown") { e.preventDefault(); setActive((active + 1) % results.length); }
+    else if (e.key === "ArrowUp") { e.preventDefault(); setActive(active <= 0 ? results.length - 1 : active - 1); }
+    else if (e.key === "Enter" && active >= 0) { e.preventDefault(); choose(active); }
+    else if (e.key === "Escape") { e.preventDefault(); close(); }
+  });
+  input.addEventListener("blur", () => setTimeout(close, 150));
+})();
+
 /* Race summary under the packing title */
 function renderRaceLine() {
   const f = settings.fields;
   document.querySelectorAll(".race-line").forEach(el => {
   const bits = [];
   if (f.raceDate) {
-    const d = new Date(f.raceDate + "T00:00:00");
-    bits.push(d.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", year: "numeric" }));
+    // e.g. "26 Sep 26" (built by hand: some browsers write "Sept")
+    const [y, m, d] = f.raceDate.split("-").map(Number);
+    const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    bits.push(`${d} ${MONTHS[m - 1]} ${String(y).slice(-2)}`);
   }
   el.textContent = "";
   if (f.raceName) { const b = document.createElement("strong"); b.textContent = f.raceName; el.append(b); }
@@ -463,7 +538,7 @@ applyTheme();
 const VIEWS = ["packing", "tasks", "settings"];
 const nav = document.querySelector(".lg-nav");
 const tabs = [...nav.querySelectorAll(".lg-nav__item")];
-const APP_TITLE = "Triathlon Packing List";
+const APP_TITLE = "Triathlon packing list";
 function showView(i) {
   VIEWS.forEach((v, n) => { document.getElementById("view-" + v).hidden = n !== i; });
   const h1 = document.querySelector(`#view-${VIEWS[i]} h1`);
@@ -485,8 +560,11 @@ nav.addEventListener("lg:change", e => {
 });
 
 /* Reset: clear every saved list, setting and tab, then start fresh */
-document.getElementById("resetApp").addEventListener("click", () => {
-  if (!confirm("Reset the app? This unticks every packing item and task and clears all your settings. This can't be undone.")) return;
+const resetDialog = document.getElementById("resetDialog");
+document.getElementById("resetApp").addEventListener("click", () => resetDialog.showModal());
+document.getElementById("resetCancel").addEventListener("click", () => resetDialog.close());
+resetDialog.addEventListener("click", e => { if (e.target === resetDialog) resetDialog.close(); }); // tap outside
+document.getElementById("resetConfirm").addEventListener("click", () => {
   try {
     Object.keys(localStorage).filter(k => k.startsWith("tri-")).forEach(k => localStorage.removeItem(k));
   } catch {}

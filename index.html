@@ -6,7 +6,7 @@
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#ffffff">
 <script src="theme.js"></script>
-<title>Triathlon Packing List</title>
+<title>Triathlon packing list</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
 <link rel="icon" href="icons/icon-192.png" type="image/png" sizes="192x192">
@@ -14,14 +14,14 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Tri Packing">
+<meta name="apple-mobile-web-app-title" content="Tri packing">
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 <div class="page">
 <main class="wrap">
   <section class="view" id="view-packing">
-    <h1 tabindex="-1">Triathlon Packing List</h1>
+    <h1 tabindex="-1">Triathlon packing list</h1>
     <div class="race-line" hidden></div>
     <div class="overall" id="overall"></div>
     <div class="bar" aria-hidden="true"><div id="barFill"></div></div>
@@ -29,7 +29,7 @@
   </section>
 
   <section class="view" id="view-tasks" hidden>
-    <h1 tabindex="-1">Race Prep Tasks</h1>
+    <h1 tabindex="-1">Race prep tasks</h1>
     <div class="race-line" hidden></div>
     <div class="overall" id="tasksOverall"></div>
     <div class="bar" aria-hidden="true"><div id="tasksBarFill"></div></div>
@@ -46,7 +46,13 @@
         <label class="field"><span>Date</span><input data-key="raceDate" type="date"></label>
         <label class="field"><span>Start / wave time</span><input data-key="raceStart" type="time"></label>
       </div>
-      <label class="field"><span>Location / venue</span><input data-key="raceLocation" type="text" autocapitalize="words" placeholder="Venue or postcode" autocomplete="off"></label>
+      <label class="field"><span>Venue</span><input data-key="raceLocation" id="raceLocation" type="text" autocapitalize="words" placeholder="Start typing a place or postcode" autocomplete="off"
+        role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="locationList"></label>
+      <div class="suggest" id="locationSuggest" hidden>
+        <ul role="listbox" id="locationList" aria-label="Suggested places"></ul>
+        <p class="suggest__credit">Places from © OpenStreetMap contributors</p>
+      </div>
+      <p class="sr-only" id="locationStatus" aria-live="polite"></p>
       <label class="field"><span>Distance</span>
         <select data-key="raceDistance">
           <option value="">Choose…</option>
@@ -65,7 +71,7 @@
       </div>
       <div class="row">
         <label class="field"><span>Race number</span><input data-key="raceNumber" type="text" autocapitalize="words" inputmode="numeric" placeholder="Add when known"></label>
-        <label class="field"><span>Booking reference</span><input data-key="raceRef" type="text" autocapitalize="words" placeholder="Optional" autocomplete="off"></label>
+        <label class="field"><span>Booking reference (optional)</span><input data-key="raceRef" type="text" autocapitalize="words" placeholder="From your entry email" autocomplete="off"></label>
       </div>
       <label class="field"><span>Accommodation</span><input data-key="raceStay" type="text" autocapitalize="words" placeholder="Hotel / address for the night before" autocomplete="off"></label>
       <label class="field"><span>Event website</span><input data-key="raceWebsite" type="url" placeholder="https://" autocomplete="off"></label>
@@ -74,14 +80,14 @@
     <h2 class="set-title">My details</h2>
     <div class="group">
       <label class="field"><span>Name</span><input data-key="name" type="text" autocapitalize="words" placeholder="Your name" autocomplete="name"></label>
-      <label class="field"><span>Club</span><input data-key="club" type="text" autocapitalize="words" placeholder="Optional"></label>
+      <label class="field"><span>Club (optional)</span><input data-key="club" type="text" autocapitalize="words" placeholder="Your triathlon club"></label>
       <div class="row">
         <label class="field"><span>British Triathlon no.</span><input data-key="btNumber" type="text" autocapitalize="words" placeholder="Add number" autocomplete="off"></label>
         <label class="field"><span>Membership expiry</span><input data-key="btExpiry" type="date"></label>
       </div>
       <label class="field"><span>Emergency contact</span><input data-key="iceName" type="text" autocapitalize="words" placeholder="Name" autocomplete="off"></label>
       <label class="field"><span>Emergency contact phone</span><input data-key="icePhone" type="tel" placeholder="Phone number" autocomplete="off"></label>
-      <label class="field"><span>Notes</span><textarea data-key="notes" autocapitalize="words" rows="2" placeholder="Anything else for race day"></textarea></label>
+      <label class="field"><span>Notes</span><textarea data-key="notes" autocapitalize="sentences" rows="2" placeholder="Anything else for race day"></textarea></label>
     </div>
 
     <h2 class="set-title">Appearance</h2>
@@ -96,7 +102,16 @@
     <button type="button" class="danger" id="resetApp">Reset app</button>
     <p class="set-note">Unticks every packing item and task, and clears all your settings on this device.</p>
 
-    <p class="saved" id="savedNote">Saved on this device</p>
+    <dialog class="confirm" id="resetDialog" aria-labelledby="resetTitle" aria-describedby="resetDesc">
+      <h2 id="resetTitle">Reset the app?</h2>
+      <p id="resetDesc">This unticks every packing item and task and clears all your settings. You can't undo this.</p>
+      <div class="confirm__actions">
+        <button type="button" class="confirm__cancel" id="resetCancel" autofocus>Keep my data</button>
+        <button type="button" class="confirm__ok" id="resetConfirm">Reset everything</button>
+      </div>
+    </dialog>
+
+    <p class="saved" id="savedNote">Changes save automatically on this device</p>
   </section>
 </main>
 </div>
