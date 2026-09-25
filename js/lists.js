@@ -17,7 +17,7 @@ const PACKING_SECTIONS = [
   { title: "Race-day kit bag", items: [
     "Race documents and registration details", "Race pack, if issued", "Photo ID", "British Triathlon licence or membership", "Phone",
     "Wallet or bank card", "Car keys", "Timing chip", "Timing chip ankle strap", "Race numbers", "Bike number and stickers",
-    "Helmet stickers", "Safety pins", "Permanent marker", "Sunscreen", "Lip balm", "Vaseline", "BodyGlide or anti-chafe balm",
+    "Helmet stickers", "Safety pins", "Permanent marker", "Sunscreen", "Lip balm", null, "BodyGlide or anti-chafe balm",
     "First-aid kit", "Goggles", "Anti-fog solution", "Swim cap", "Nose clip", "Flip-flops or sandals",
     "Warm hoodie or jumper", "Waterproof coat", "Wet bag or dry bag for wetsuit", "Foam roller"
   ]},
