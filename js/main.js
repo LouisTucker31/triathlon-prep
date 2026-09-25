@@ -635,14 +635,78 @@ const summaryFilename = extension => {
   const name = (eventFields().raceName || `${EVENT_TYPES[settings.eventType]} event`).replace(/[^\w\- ]+/g, "").trim();
   return `${name || "Event"} details.${extension}`;
 };
-// The PDF button first asks for actual times (optional), then downloads
+// The social image: fewer details than the PDF, built around the finish time.
+// Uses actual times if any are entered, otherwise the goals (labelled as such).
+function imageSummary() {
+  const type = settings.eventType, f = eventFields(), d = raceDistances();
+  const value = key => String(f[key] ?? "").trim();
+  const LEG_TYPES = { Swim: ["triathlon", "swimming"], T1: ["triathlon"], Bike: ["triathlon", "cycling"], T2: ["triathlon"], Run: ["triathlon", "running"] };
+  const hasActuals = legTotal("actual") > 0, prefix = hasActuals ? "actual" : "goal";
+  const km = n => `${n.toLocaleString("en-GB")} km`;
+  const climb = key => value(key) && value(key) !== "0" ? `↑ ${value(key)} m` : "";
+  const DETAILS = {
+    Swim: [d.swim && `${d.swim.toLocaleString("en-GB")} m`, value("swimType")],
+    Bike: [d.bike && km(d.bike), climb("bikeElevation")],
+    Run: [d.run && km(d.run), climb("runElevation")]
+  };
+  const legs = LEG_NAMES.filter(leg => LEG_TYPES[leg].includes(type)).map(leg => {
+    const seconds = legSeconds(prefix + leg);
+    return {
+      name: leg, seconds,
+      time: seconds ? formatHMS(seconds) : "",
+      pace: legPace(leg, seconds, d),
+      detail: (DETAILS[leg] || []).filter(Boolean).join(" · ")
+    };
+  });
+
+  const kicker = [EVENT_TYPES[type]];
+  if (value("raceDistance") && value("raceDistance") !== "Other") kicker.push(value("raceDistance"));
+  if (value("raceDate")) {
+    const [year, month, day] = f.raceDate.split("-").map(Number);
+    kicker.push(`${pad2(day)} ${MONTHS[month - 1]} ${year}`);
+  }
+  if (value("raceStart")) kicker.push(value("raceStart"));
+  const total = legTotal(prefix);
+  // Single-sport events have one leg, so show it as stat tiles instead
+  const leg = { running: "Run", cycling: "Bike", swimming: "Swim" }[type];
+  const seconds = leg && legSeconds(prefix + leg);
+  const STATS = {
+    running: [["Distance", d.run && km(d.run)], ["Pace", legPace("Run", seconds, d)], ["Elevation", climb("runElevation")], ["5 km split", runSplit(seconds, d)]],
+    cycling: [["Distance", d.bike && km(d.bike)], ["Speed", legPace("Bike", seconds, d)], ["Elevation", climb("bikeElevation")]],
+    swimming: [["Distance", d.swim && `${d.swim.toLocaleString("en-GB")} m`], ["Pace", legPace("Swim", seconds, d)], ["Swim type", value("swimType")]]
+  };
+  return {
+    stats: STATS[type]?.map(([label, stat]) => ({ label, value: stat || "" })),
+    kicker: kicker.join("  ·  "),
+    title: value("raceName") || `${EVENT_TYPES[type]} event`,
+    location: isWebLink(value("raceLocation")) ? "" : value("raceLocation"),   // a maps link isn't readable on a card
+    heroLabel: hasActuals ? "Finish time" : "Goal time",
+    heroTime: total ? formatHMS(total) : "",
+    legs,
+    footer: "Made with Tri packing"
+  };
+}
+
+// Both download buttons first ask for actual times (optional), then download
 const actualsDialog = document.getElementById("actualsDialog");
-document.getElementById("downloadPdf").addEventListener("click", () => actualsDialog.showModal());
+const actualsDownload = document.getElementById("actualsDownload");
+const DOWNLOADS = {
+  pdf: { label: "Download PDF", save: () => saveFile(EventPdf.build(eventSummary()), summaryFilename("pdf")) },
+  image: { label: "Download image", save: () => EventImage.build(imageSummary()).then(blob => saveFile(blob, summaryFilename("png"))) }
+};
+let pendingDownload = "pdf";
+function askForActuals(kind) {
+  pendingDownload = kind;
+  actualsDownload.textContent = DOWNLOADS[kind].label;
+  actualsDialog.showModal();
+}
+document.getElementById("downloadPdf").addEventListener("click", () => askForActuals("pdf"));
+document.getElementById("downloadImage").addEventListener("click", () => askForActuals("image"));
 document.getElementById("actualsCancel").addEventListener("click", () => actualsDialog.close());
 actualsDialog.addEventListener("click", e => { if (e.target === actualsDialog) actualsDialog.close(); }); // tap outside
-document.getElementById("actualsDownload").addEventListener("click", () => {
+actualsDownload.addEventListener("click", () => {
   actualsDialog.close();
-  saveFile(EventPdf.build(eventSummary()), summaryFilename("pdf"));
+  DOWNLOADS[pendingDownload].save();
 });
 
 // Theme: light / dark / system (js/theme.js applies it early to avoid a flash)

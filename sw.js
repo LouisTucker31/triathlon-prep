@@ -4,7 +4,7 @@
 //
 // This file stays in the site root (not js/) because a service worker can only
 // control pages at or below its own folder.
-const VERSION = "v7";
+const VERSION = "v8";
 const CACHE = "tri-packing-" + VERSION;
 const NETWORK_TIMEOUT = 3000;
 const ASSETS = [
@@ -14,6 +14,7 @@ const ASSETS = [
   "js/theme.js",
   "js/lists.js",
   "js/event-pdf.js",
+  "js/event-image.js",
   "js/main.js",
   "js/liquid-glass-nav.js",
   "manifest.webmanifest",
