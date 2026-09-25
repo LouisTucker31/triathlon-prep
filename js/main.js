@@ -178,12 +178,40 @@ document.querySelectorAll("[data-key]").forEach(field => {
   });
 });
 
-// Custom swim / bike / run distances, shown when distance is "Other"
+// Swim / bike / run distances (swim in metres, bike and run in kilometres).
+// Picking a standard distance fills them in; editing any of them afterwards
+// switches the choice to "Other", so a race's real distances can be used.
+const DISTANCE_PRESETS = {
+  "Super sprint": { swim: 400, bike: 10, run: 2.5 },
+  "Sprint": { swim: 750, bike: 20, run: 5 },
+  "Olympic / Standard": { swim: 1500, bike: 40, run: 10 },
+  "Middle (70.3)": { swim: 1900, bike: 90, run: 21.1 },
+  "Full (Ironman)": { swim: 3800, bike: 180, run: 42.2 }
+};
 const distanceSelect = document.querySelector('[data-key="raceDistance"]');
-const customDistance = document.getElementById("customDistance");
-function toggleCustomDistance() { customDistance.hidden = distanceSelect.value !== "Other"; }
-distanceSelect.addEventListener("change", toggleCustomDistance);
-toggleCustomDistance();
+const legDistanceInputs = {
+  swim: document.querySelector('[data-key="swimDistance"]'),
+  bike: document.querySelector('[data-key="bikeDistance"]'),
+  run: document.querySelector('[data-key="runDistance"]')
+};
+function fillPresetDistances() {
+  const preset = DISTANCE_PRESETS[distanceSelect.value];
+  if (!preset) return;
+  Object.entries(legDistanceInputs).forEach(([leg, input]) => {
+    input.value = settings.fields[input.dataset.key] = formatNumber(String(preset[leg]));
+  });
+  saveSettings();
+}
+distanceSelect.addEventListener("change", fillPresetDistances);
+Object.values(legDistanceInputs).forEach(input => input.addEventListener("input", () => {
+  if (!DISTANCE_PRESETS[distanceSelect.value]) return;
+  distanceSelect.value = settings.fields.raceDistance = "Other";
+  saveSettings();
+}));
+// Races saved before the distances were always shown: fill them in once
+if (DISTANCE_PRESETS[distanceSelect.value] && Object.values(legDistanceInputs).every(input => !input.value)) {
+  fillPresetDistances();
+}
 
 // An empty time box opens the picker at the current time of day, which makes no
 // sense for a duration. Filling in 00:00 just before it opens starts the wheel
@@ -204,20 +232,10 @@ document.querySelectorAll("[data-goal-time]").forEach(input => {
   });
 });
 
-// Goal total and paces, worked out from the goal times and the race distance
-// (swim in metres, bike and run in kilometres)
-const DISTANCE_PRESETS = {
-  "Super sprint": { swim: 400, bike: 10, run: 2.5 },
-  "Sprint": { swim: 750, bike: 20, run: 5 },
-  "Olympic / Standard": { swim: 1500, bike: 40, run: 10 },
-  "Middle (70.3)": { swim: 1900, bike: 90, run: 21.1 },
-  "Full (Ironman)": { swim: 3800, bike: 180, run: 42.2 }
-};
+// Goal total and paces, worked out from the goal times and the leg distances
 function raceDistances() {
-  const f = settings.fields;
-  if (f.raceDistance !== "Other") return DISTANCE_PRESETS[f.raceDistance] || {};
-  const read = value => parseFloat(String(value || "").replace(/,/g, "")) || 0;
-  return { swim: read(f.swimDistance), bike: read(f.bikeDistance), run: read(f.runDistance) };
+  const read = input => parseFloat(input.value.replace(/,/g, "")) || 0;
+  return { swim: read(legDistanceInputs.swim), bike: read(legDistanceInputs.bike), run: read(legDistanceInputs.run) };
 }
 const legSeconds = leg => {
   const [hours, minutes] = String(settings.fields[leg + "Time"] || "0:0").split(":").map(Number);
@@ -253,15 +271,20 @@ document.getElementById("view-events").addEventListener("input", updateGoalMaths
 document.getElementById("view-events").addEventListener("change", updateGoalMaths);
 updateGoalMaths();
 
-// Map buttons for the venue and accommodation: shown once there's an address.
-// A pasted maps link opens as it is; plain text opens a choice of maps apps,
-// each searching for that address.
-const mapsDialog = document.getElementById("mapsDialog");
-const MAP_APPS = {
-  mapsApple: q => `https://maps.apple.com/?q=${q}`,
-  mapsGoogle: q => `https://www.google.com/maps/search/?api=1&query=${q}`,
-  mapsWaze: q => `https://waze.com/ul?q=${q}&navigate=yes`
-};
+// Map buttons for the venue and accommodation, shown once there's an address.
+// Websites can't open the phone's own "choose a maps app" menu on iPhone, so
+// the button opens the default maps app for the device instead:
+//   iPhone, iPad, Mac  Apple Maps (maps.apple.com links open the Maps app)
+//   Android            a geo: link, which opens the default maps app
+//   anything else      Google Maps in the browser
+// A pasted maps link (http/https only) is opened as it is.
+function mapsLinkFor(address) {
+  const query = encodeURIComponent(address);
+  const ua = navigator.userAgent;
+  if (/iPhone|iPad|iPod|Macintosh/.test(ua)) return `https://maps.apple.com/?q=${query}`;
+  if (/Android/.test(ua)) return `geo:0,0?q=${query}`;
+  return `https://www.google.com/maps/search/?api=1&query=${query}`;
+}
 document.querySelectorAll("[data-map-for]").forEach(button => {
   const input = document.getElementById(button.dataset.mapFor);
   const showButton = () => { button.hidden = !input.value.trim(); };
@@ -270,19 +293,11 @@ document.querySelectorAll("[data-map-for]").forEach(button => {
 
   button.addEventListener("click", () => {
     const address = input.value.trim();
-    if (/^https?:\/\//i.test(address)) {
-      window.open(address, "_blank", "noopener,noreferrer");
-      return;
-    }
-    const query = encodeURIComponent(address);
-    Object.entries(MAP_APPS).forEach(([id, link]) => { document.getElementById(id).href = link(query); });
-    document.getElementById("mapsAddress").textContent = address;
-    mapsDialog.showModal();
+    const link = /^https?:\/\//i.test(address) ? address : mapsLinkFor(address);
+    if (link.startsWith("geo:")) location.href = link;  // hands over to the maps app
+    else window.open(link, "_blank", "noopener,noreferrer");
   });
 });
-document.querySelectorAll(".map-app").forEach(link => link.addEventListener("click", () => mapsDialog.close()));
-document.getElementById("mapsCancel").addEventListener("click", () => mapsDialog.close());
-mapsDialog.addEventListener("click", e => { if (e.target === mapsDialog) mapsDialog.close(); }); // tap outside
 
 // Race name under the packing and tasks titles
 function renderRaceLine() {

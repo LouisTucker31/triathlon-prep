@@ -111,10 +111,7 @@ input, select, textarea { font-size: max(var(--input-size), 1em) !important; }
 .field-row .field { border-bottom: 0; }
 .field-row--3 { grid-template-columns: 1fr 1fr 1fr; }
 .field-row--3 .field:not(:last-child) { border-right: 1px solid var(--line); }
-.field-row[hidden] { display: none; }
-/* When a group ends with a hidden row (custom distances), drop the last visible divider */
-.field-group > .field-row:last-child,
-.field-group > .field:has(+ .field-row[hidden]:last-child) { border-bottom: 0; }
+.field-group > .field-row:last-child { border-bottom: 0; }
 .segmented { display: flex; gap: 4px; padding: 4px; border-radius: var(--radius); background: var(--seg-bg); border: 1px solid var(--border); }
 .segmented button {
   flex: 1; border: 0; background: none; padding: 8px; border-radius: var(--radius-sm); cursor: pointer;
@@ -148,14 +145,6 @@ input, select, textarea { font-size: max(var(--input-size), 1em) !important; }
 .map-button[hidden] { display: none; }
 .map-button svg { width: 22px; height: 22px; fill: currentColor; }
 
-/* Maps app chooser */
-.map-apps { display: grid; gap: 8px; margin-bottom: 8px; }
-.map-app {
-  display: block; padding: 12px var(--gutter); border: 1px solid var(--border); border-radius: var(--radius);
-  background: var(--field); color: var(--text); font-weight: 600; text-align: center; text-decoration: none;
-}
-.map-apps__cancel { width: 100%; min-height: 44px; padding: 8px 12px; border-radius: var(--radius); font: inherit; font-weight: 600; cursor: pointer; }
-#mapsAddress { overflow-wrap: anywhere; }
 
 /* Settings pop-up: full screen, over the nav, scrolls on its own */
 .settings-sheet {

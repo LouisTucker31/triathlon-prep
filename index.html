@@ -65,10 +65,26 @@
           <option>Other</option>
         </select>
       </label>
-      <div class="field-row field-row--3" id="customDistance" hidden>
+      <div class="field-row field-row--3" id="legDistances">
         <label class="field"><span>Swim<span class="sr-only"> in metres</span></span><span class="unit-field"><input data-key="swimDistance" data-format="number" type="text" inputmode="decimal" placeholder="750" autocomplete="off"><span class="unit-field__unit" aria-hidden="true">m</span></span></label>
         <label class="field"><span>Bike<span class="sr-only"> in kilometres</span></span><span class="unit-field"><input data-key="bikeDistance" data-format="number" type="text" inputmode="decimal" placeholder="20" autocomplete="off"><span class="unit-field__unit" aria-hidden="true">km</span></span></label>
         <label class="field"><span>Run<span class="sr-only"> in kilometres</span></span><span class="unit-field"><input data-key="runDistance" data-format="number" type="text" inputmode="decimal" placeholder="5" autocomplete="off"><span class="unit-field__unit" aria-hidden="true">km</span></span></label>
+      </div>
+      <div class="field-row field-row--3">
+        <label class="field"><span>Swim type</span>
+          <select data-key="swimType">
+            <option value="">Choose…</option>
+            <option>Pool</option>
+            <option>Lido</option>
+            <option>Sea</option>
+            <option>Lake</option>
+            <option>River</option>
+            <option>Reservoir</option>
+            <option>Quarry</option>
+          </select>
+        </label>
+        <label class="field"><span>Bike elevation<span class="sr-only">, total climb in metres</span></span><span class="unit-field"><input data-key="bikeElevation" data-format="number" type="text" inputmode="decimal" placeholder="Optional" autocomplete="off"><span class="unit-field__unit" aria-hidden="true">m</span></span></label>
+        <label class="field"><span>Run elevation<span class="sr-only">, total climb in metres</span></span><span class="unit-field"><input data-key="runElevation" data-format="number" type="text" inputmode="decimal" placeholder="Optional" autocomplete="off"><span class="unit-field__unit" aria-hidden="true">m</span></span></label>
       </div>
     </div>
 
@@ -117,19 +133,6 @@
   </section>
 </main>
 </div>
-
-<!-- Choose a maps app for a venue or accommodation address. iPhone doesn't let
-     websites open the system app chooser, so these links open each app directly. -->
-<dialog class="confirm" id="mapsDialog" aria-labelledby="mapsTitle" aria-describedby="mapsAddress">
-  <h2 id="mapsTitle" tabindex="-1" autofocus>Open in maps</h2>
-  <p id="mapsAddress"></p>
-  <div class="map-apps">
-    <a class="map-app" id="mapsApple" target="_blank" rel="noopener noreferrer">Apple Maps</a>
-    <a class="map-app" id="mapsGoogle" target="_blank" rel="noopener noreferrer">Google Maps</a>
-    <a class="map-app" id="mapsWaze" target="_blank" rel="noopener noreferrer">Waze</a>
-  </div>
-  <button type="button" class="confirm__cancel map-apps__cancel" id="mapsCancel">Cancel</button>
-</dialog>
 
 <!-- Settings: a full-screen pop-up over everything, including the nav. The
      close button sits exactly where the settings button was. -->
