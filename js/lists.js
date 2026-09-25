@@ -143,7 +143,10 @@ const TASK_SECTIONS = [
     "Clean running glasses",
     "Clean goggles",
     "Test anti-fog solution",
-    "Check wetsuit for damage"
+    "Check wetsuit for damage",
+    "Stretch after each session",
+    "Do a mobility session",
+    "Foam roll legs"
   ]},
   { title: "2 days out", items: [
     "Pack overnight bag",
@@ -165,7 +168,9 @@ const TASK_SECTIONS = [
     "Charge DSLR batteries",
     "Charge AirPods",
     "Empty or format camera memory cards, if needed",
-    "Empty or format GoPro memory card, if needed"
+    "Empty or format GoPro memory card, if needed",
+    "Do a light stretching session",
+    "Foam roll legs"
   ]},
   { title: "Day before", items: [
     { h: "Final packing and bike prep" },
@@ -200,6 +205,9 @@ const TASK_SECTIONS = [
     "Eat a familiar evening meal",
     "Drink as normal",
     "Avoid alcohol",
+    null,  // "Get an early night", moved below so it comes last
+    "Do gentle stretching or mobility",
+    "Foam roll lightly",
     "Get an early night"
   ]},
   // Has its own id so it could be added here without moving later sections' ticks.
@@ -223,7 +231,8 @@ const TASK_SECTIONS = [
     "Put trisuit on",
     "Get dressed in race morning clothes",
     "Put sunscreen on",
-    "Put heart-rate monitor on"
+    "Put heart-rate monitor on",
+    "Do 5–10 minutes of gentle mobility before leaving"
   ]},
   { title: "Race morning: final preparation", items: [
     "Fill bike water bottles",
