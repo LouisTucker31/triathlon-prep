@@ -246,16 +246,9 @@ toggleCustomDistance();
   input.addEventListener("blur", () => setTimeout(close, 150));
 })();
 
-// Race name and date under the packing and tasks titles, e.g. "26 Sep 26"
-// (months written by hand because some browsers' en-GB format gives "Sept")
-const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+// Race name under the packing and tasks titles
 function renderRaceLine() {
-  const { raceName, raceDate } = settings.fields;
-  let dateText = "";
-  if (raceDate) {
-    const [year, month, day] = raceDate.split("-").map(Number);
-    dateText = `${day} ${MONTHS[month - 1]} ${String(year).slice(-2)}`;
-  }
+  const { raceName } = settings.fields;
   document.querySelectorAll(".race-line").forEach(line => {
     line.textContent = "";
     if (raceName) {
@@ -263,8 +256,7 @@ function renderRaceLine() {
       name.textContent = raceName;
       line.append(name);
     }
-    if (dateText) line.append((raceName ? " · " : "") + dateText);
-    line.hidden = !raceName && !dateText;
+    line.hidden = !raceName;
   });
 }
 renderRaceLine();
