@@ -185,6 +185,25 @@ function toggleCustomDistance() { customDistance.hidden = distanceSelect.value !
 distanceSelect.addEventListener("change", toggleCustomDistance);
 toggleCustomDistance();
 
+// An empty time box opens the picker at the current time of day, which makes no
+// sense for a duration. Filling in 00:00 just before it opens starts the wheel
+// at zero; if nothing is picked, the box is emptied again on the way out.
+document.querySelectorAll("[data-goal-time]").forEach(input => {
+  let autoFilled = false;
+  const startAtZero = () => {
+    if (input.value) return;
+    input.value = "00:00";
+    autoFilled = true;
+  };
+  input.addEventListener("pointerdown", startAtZero);  // before the wheel opens
+  input.addEventListener("focus", startAtZero);        // keyboard
+  input.addEventListener("input", () => { autoFilled = false; });
+  input.addEventListener("blur", () => {
+    if (autoFilled && input.value === "00:00") input.value = "";
+    autoFilled = false;
+  });
+});
+
 // Goal total and paces, worked out from the goal times and the race distance
 // (swim in metres, bike and run in kilometres)
 const DISTANCE_PRESETS = {
