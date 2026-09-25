@@ -472,7 +472,18 @@ nav.addEventListener("lg:change", e => { showView(e.detail.index); window.scroll
 // PWA: register the service worker (needs http(s) - skipped on file://)
 if ("serviceWorker" in navigator && location.protocol !== "file:") {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("sw.js").catch(err => console.warn("Service worker registration failed:", err));
+    navigator.serviceWorker.register("sw.js", { updateViaCache: "none" }).then(reg => {
+      // Home-screen apps are often resumed rather than reloaded, so check for a new version on resume
+      document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") reg.update().catch(() => {}); });
+    }).catch(err => console.warn("Service worker registration failed:", err));
+
+    // When a new version takes over, reload once so the page runs the new code
+    if (navigator.serviceWorker.controller) {
+      let reloaded = false;
+      navigator.serviceWorker.addEventListener("controllerchange", () => {
+        if (!reloaded) { reloaded = true; location.reload(); }
+      });
+    }
   });
 }
 
