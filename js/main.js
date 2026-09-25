@@ -15,7 +15,9 @@ const storage = {
 
 const STORAGE_KEYS = { packing: "tri-packing-list-v2", tasks: "tri-tasks-v1", settings: "tri-settings-v1", view: "tri-view" };
 
+// Builds (or rebuilds, when the event type changes) one checklist page
 function buildChecklist(sections, storageKey, listEl, progressTextEl, progressFillEl, doneWord) {
+  listEl.textContent = "";
   const state = storage.read(storageKey, {});
   state.checked = state.checked || {};
   state.open = state.open || {};
@@ -94,19 +96,18 @@ function buildChecklist(sections, storageKey, listEl, progressTextEl, progressFi
     });
     progressTextEl.textContent = `${done} of ${total} ${doneWord}`;
     progressFillEl.style.width = (total ? (done / total) * 100 : 0) + "%";
+    // Event types without a list yet show an empty page, with no progress bar
+    progressTextEl.hidden = progressFillEl.parentElement.hidden = !total;
   }
   updateProgress();
 }
 
-buildChecklist(PACKING_SECTIONS, STORAGE_KEYS.packing, document.getElementById("packingList"),
-  document.getElementById("packingProgressText"), document.getElementById("packingProgressFill"), "packed");
-buildChecklist(TASK_SECTIONS, STORAGE_KEYS.tasks, document.getElementById("tasksList"),
-  document.getElementById("tasksProgressText"), document.getElementById("tasksProgressFill"), "done");
-
 // Settings
 const settings = storage.read(STORAGE_KEYS.settings, {});
 settings.theme = settings.theme || "light";
-settings.fields = settings.fields || {};
+settings.fields = settings.fields || {};    // my details (settings page)
+settings.events = settings.events || {};    // race details, one set per event type
+settings.eventType = settings.eventType || "triathlon";
 const saveSettings = () => storage.write(STORAGE_KEYS.settings, settings);
 
 // Goal times are typed like a phone timer and stored as "h:mm:ss"
@@ -136,6 +137,24 @@ GOAL_LEGS.forEach(leg => {
   migratedGoals = true;
 });
 OLD_GOAL_KEYS.forEach(key => { if (key in settings.fields) { delete settings.fields[key]; migratedGoals = true; } });
+
+// Event types. Each keeps its own race details, goals and ticks, so switching
+// type and back loses nothing; only Reset clears them.
+const EVENT_TYPES = { triathlon: "Triathlon", running: "Running", cycling: "Cycling", swimming: "Swimming" };
+const eventFields = () => (settings.events[settings.eventType] ||= {});
+// Race details used to be stored with my details; they belong to triathlon
+const EVENT_FIELD_KEYS = [...document.querySelectorAll("#view-events [data-key]")].map(field => field.dataset.key);
+if (!settings.events.triathlon) {
+  settings.events.triathlon = {};
+  EVENT_FIELD_KEYS.forEach(key => {
+    if (!(key in settings.fields)) return;
+    settings.events.triathlon[key] = settings.fields[key];
+    delete settings.fields[key];
+  });
+  migratedGoals = true;
+}
+// Fields on the events page save to the current event type; the rest are my details
+const storeFor = field => field.closest("#view-events") ? eventFields() : settings.fields;
 if (migratedGoals) saveSettings();
 
 // Formatted-as-you-type boxes (data-format="number"): digits and one decimal
@@ -187,55 +206,95 @@ document.querySelectorAll("[data-format]").forEach(input => {
   });
 });
 
-document.querySelectorAll("[data-key]").forEach(field => {
-  const key = field.dataset.key;
-  if (settings.fields[key] != null) field.value = settings.fields[key];
-  // Tidy older free-text values, e.g. a distance saved as "1.9km" -> "1.9"
-  const format = FORMATTERS[field.dataset.format];
-  if (format && field.value && format(field.value) !== field.value) {
-    field.value = settings.fields[key] = format(field.value);
-    saveSettings();
-  }
-  field.addEventListener("input", () => {
-    settings.fields[key] = field.value.trim() === "" ? "" : field.value;
-    saveSettings();
-    renderRaceLine();
-  });
-});
-
-// Swim / bike / run distances (swim in metres, bike and run in kilometres).
-// Picking a standard distance fills them in; editing any of them afterwards
-// switches the choice to "Other", so a race's real distances can be used.
+// Distances (swim in metres, bike and run in kilometres). Each event type has
+// its own standard distances; picking one fills the boxes in, and editing a box
+// afterwards switches the choice to "Other" so a race's real distances can be used.
 const DISTANCE_PRESETS = {
-  "Super sprint": { swim: 400, bike: 10, run: 2.5 },
-  "Sprint": { swim: 750, bike: 20, run: 5 },
-  "Olympic / Standard": { swim: 1500, bike: 40, run: 10 },
-  "Middle (70.3)": { swim: 1900, bike: 90, run: 21.1 },
-  "Full (Ironman)": { swim: 3800, bike: 180, run: 42.2 }
+  triathlon: {
+    "Super sprint": { swim: 400, bike: 10, run: 2.5 },
+    "Sprint": { swim: 750, bike: 20, run: 5 },
+    "Olympic / Standard": { swim: 1500, bike: 40, run: 10 },
+    "Middle (70.3)": { swim: 1900, bike: 90, run: 21.1 },
+    "Full (Ironman)": { swim: 3800, bike: 180, run: 42.2 }
+  },
+  running: {
+    "5 km": { run: 5 },
+    "10 km": { run: 10 },
+    "Half marathon (21.1 km)": { run: 21.1 },
+    "Marathon (42.2 km)": { run: 42.2 }
+  },
+  cycling: {
+    "20 km": { bike: 20 },
+    "40 km": { bike: 40 },
+    "90 km": { bike: 90 },
+    "180 km": { bike: 180 }
+  },
+  swimming: {
+    "750 m": { swim: 750 },
+    "1,500 m": { swim: 1500 },
+    "1,900 m": { swim: 1900 },
+    "3,800 m": { swim: 3800 }
+  }
 };
+const currentPresets = () => DISTANCE_PRESETS[settings.eventType];
 const distanceSelect = document.querySelector('[data-key="raceDistance"]');
 const legDistanceInputs = {
   swim: document.querySelector('[data-key="swimDistance"]'),
   bike: document.querySelector('[data-key="bikeDistance"]'),
   run: document.querySelector('[data-key="runDistance"]')
 };
+function buildDistanceOptions() {
+  distanceSelect.textContent = "";
+  distanceSelect.add(new Option("Choose…", ""));
+  Object.keys(currentPresets()).forEach(name => distanceSelect.add(new Option(name)));
+  distanceSelect.add(new Option("Other"));
+}
+buildDistanceOptions();
+
+document.querySelectorAll("[data-key]").forEach(field => {
+  const key = field.dataset.key;
+  const store = storeFor(field);
+  if (store[key] != null) field.value = store[key];
+  // Tidy older free-text values, e.g. a distance saved as "1.9km" -> "1.9"
+  const format = FORMATTERS[field.dataset.format];
+  if (format && field.value && format(field.value) !== field.value) {
+    field.value = store[key] = format(field.value);
+    saveSettings();
+  }
+  field.addEventListener("input", () => {
+    storeFor(field)[key] = field.value.trim() === "" ? "" : field.value;
+    saveSettings();
+    renderRaceLine();
+  });
+});
+
 function fillPresetDistances() {
-  const preset = DISTANCE_PRESETS[distanceSelect.value];
+  const preset = currentPresets()[distanceSelect.value];
   if (!preset) return;
-  Object.entries(legDistanceInputs).forEach(([leg, input]) => {
-    input.value = settings.fields[input.dataset.key] = formatNumber(String(preset[leg]));
+  Object.entries(preset).forEach(([leg, distance]) => {
+    const input = legDistanceInputs[leg];
+    input.value = eventFields()[input.dataset.key] = formatNumber(String(distance));
   });
   saveSettings();
 }
 distanceSelect.addEventListener("change", fillPresetDistances);
 Object.values(legDistanceInputs).forEach(input => input.addEventListener("input", () => {
-  if (!DISTANCE_PRESETS[distanceSelect.value]) return;
-  distanceSelect.value = settings.fields.raceDistance = "Other";
+  if (!currentPresets()[distanceSelect.value]) return;
+  distanceSelect.value = eventFields().raceDistance = "Other";
   saveSettings();
 }));
 // Races saved before the distances were always shown: fill them in once
-if (DISTANCE_PRESETS[distanceSelect.value] && Object.values(legDistanceInputs).every(input => !input.value)) {
-  fillPresetDistances();
+const savedPreset = currentPresets()[distanceSelect.value];
+if (savedPreset && Object.keys(savedPreset).every(leg => !legDistanceInputs[leg].value)) fillPresetDistances();
+
+// Switching event type: reload the events page from that type's saved details
+// (hidden fields for other types keep their values in storage untouched)
+function loadEventFields() {
+  buildDistanceOptions();
+  const store = eventFields();
+  document.querySelectorAll("#view-events [data-key]").forEach(field => {
+    field.value = store[field.dataset.key] ?? "";
+  });
 }
 
 // Goal total and paces, worked out from the goal times and the leg distances
@@ -243,7 +302,7 @@ function raceDistances() {
   const read = input => parseFloat(input.value.replace(/,/g, "")) || 0;
   return { swim: read(legDistanceInputs.swim), bike: read(legDistanceInputs.bike), run: read(legDistanceInputs.run) };
 }
-const legSeconds = leg => toSeconds(settings.fields[leg + "Time"] || 0);
+const legSeconds = leg => toSeconds(eventFields()[leg + "Time"] || 0);
 const formatClock = seconds => {
   seconds = Math.round(seconds);
   const h = Math.floor(seconds / 3600), m = Math.floor(seconds / 60) % 60, s = seconds % 60;
@@ -263,6 +322,9 @@ function updateGoalMaths() {
     times.goalBike && d.bike ? `${(d.bike / (times.goalBike / 3600)).toFixed(1)} km/h` : NOT_SET;
   document.getElementById("paceRun").textContent =
     times.goalRun && d.run ? `${formatClock(times.goalRun / d.run)} /km` : NOT_SET;
+  // Running: the time for each 5 km at goal pace
+  document.getElementById("splitRun").textContent =
+    times.goalRun && d.run ? formatClock(times.goalRun / d.run * 5) : NOT_SET;
 
   // Show the distance each pace is based on, e.g. "Swim: 750 m"
   document.getElementById("paceSwimLabel").textContent = d.swim ? `Swim: ${d.swim.toLocaleString("en-GB")} m` : "Swim";
@@ -327,12 +389,16 @@ function openLocation(text) {
   else openInBrowser(web);
 }
 
-// Buttons beside location and website boxes, shown once the box has something in it
+// Buttons beside location and website boxes, shown once the box has something in it.
+// refreshLinkButtons() re-checks them after the event type (and so the values) changes.
+const linkButtonRefreshers = [];
+const refreshLinkButtons = () => linkButtonRefreshers.forEach(refresh => refresh());
 function linkButtons(selector, idAttribute, open) {
   document.querySelectorAll(selector).forEach(button => {
     const input = document.getElementById(button.dataset[idAttribute]);
     const showButton = () => { button.hidden = !input.value.trim(); };
     input.addEventListener("input", showButton);
+    linkButtonRefreshers.push(showButton);
     showButton();
     button.addEventListener("click", () => open(input.value.trim()));
   });
@@ -350,7 +416,7 @@ linkButtons("[data-link-for]", "linkFor", openWebsite);
 
 // Race name under the packing and tasks titles
 function renderRaceLine() {
-  const { raceName } = settings.fields;
+  const { raceName } = eventFields();
   document.querySelectorAll(".race-line").forEach(line => {
     line.textContent = "";
     if (raceName) {
@@ -362,6 +428,49 @@ function renderRaceLine() {
   });
 }
 renderRaceLine();
+
+// Event type: switches the packing and task lists, the events page fields and
+// the packing page title. Only triathlon has lists so far.
+const eventSelect = document.getElementById("eventType");
+const CHECKLISTS = { triathlon: { packing: PACKING_SECTIONS, tasks: TASK_SECTIONS } };
+const checklistKeys = type => type === "triathlon"
+  ? { packing: STORAGE_KEYS.packing, tasks: STORAGE_KEYS.tasks }  // original keys, so existing ticks carry over
+  : { packing: `tri-packing-${type}`, tasks: `tri-tasks-${type}` };
+function renderChecklists() {
+  const type = settings.eventType, lists = CHECKLISTS[type] || {}, keys = checklistKeys(type);
+  buildChecklist(lists.packing || [], keys.packing, document.getElementById("packingList"),
+    document.getElementById("packingProgressText"), document.getElementById("packingProgressFill"), "packed");
+  buildChecklist(lists.tasks || [], keys.tasks, document.getElementById("tasksList"),
+    document.getElementById("tasksProgressText"), document.getElementById("tasksProgressFill"), "done");
+  document.getElementById("packingTitle").textContent = `${EVENT_TYPES[type]} packing list`;
+}
+// Show only the fields for this event type (data-events lists the types each
+// field belongs to); rows with nothing left in them are hidden too
+function applyEventVisibility() {
+  const type = settings.eventType;
+  document.querySelectorAll("[data-events]").forEach(el => { el.hidden = !el.dataset.events.split(" ").includes(type); });
+  document.querySelectorAll("#view-events .field-row").forEach(row => {
+    row.hidden = [...row.children].every(child => child.hidden);
+  });
+  document.querySelectorAll("#view-events .field-group").forEach(group => {
+    const visible = [...group.children].filter(child => !child.hidden);
+    [...group.children].forEach(child => child.classList.toggle("is-last-visible", child === visible[visible.length - 1]));
+  });
+}
+eventSelect.value = settings.eventType;
+eventSelect.addEventListener("change", () => {
+  settings.eventType = eventSelect.value;
+  saveSettings();
+  loadEventFields();
+  applyEventVisibility();
+  renderChecklists();
+  renderRaceLine();
+  updateGoalMaths();
+  refreshLinkButtons();
+  if (!document.getElementById("view-packing").hidden) document.title = pageTitle(document.getElementById("packingTitle").textContent);
+});
+renderChecklists();
+applyEventVisibility();
 
 // Theme: light / dark / system (js/theme.js applies it early to avoid a flash)
 const darkQuery = window.matchMedia("(prefers-color-scheme: dark)");
@@ -388,7 +497,9 @@ const VIEWS = ["packing", "tasks", "events"];
 const APP_TITLE = "Triathlon packing list";
 const nav = document.querySelector(".lg-nav");
 const tabs = [...nav.querySelectorAll(".lg-nav__item")];
-const pageTitle = title => title === APP_TITLE ? APP_TITLE : `${title} – ${APP_TITLE}`;
+// The packing page title is the heading itself ("Running packing list"); others
+// add the app name, e.g. "Race prep tasks – Triathlon packing list"
+const pageTitle = title => title.endsWith("packing list") ? title : `${title} – ${APP_TITLE}`;
 
 function showView(name) {
   VIEWS.forEach(view => { document.getElementById("view-" + view).hidden = view !== name; });
@@ -436,17 +547,20 @@ document.getElementById("closeSettings").addEventListener("click", () => {
 settingsDialog.addEventListener("cancel", restoreTitle);
 settingsDialog.addEventListener("close", restoreTitle);
 
-// Reset for a new race: clears everything outside settings (packing and task
-// ticks, and everything on the events page, goals included). My details,
-// theme and current tab are kept.
+// Reset for a new race: clears everything outside settings, for every event type
+// (packing and task ticks, and everything on the events page). My details, the
+// chosen event type, theme and current tab are kept.
 const resetDialog = document.getElementById("resetDialog");
 document.getElementById("resetApp").addEventListener("click", () => resetDialog.showModal());
 document.getElementById("resetCancel").addEventListener("click", () => resetDialog.close());
 resetDialog.addEventListener("click", e => { if (e.target === resetDialog) resetDialog.close(); }); // tap outside
 document.getElementById("resetConfirm").addEventListener("click", () => {
-  storage.remove(STORAGE_KEYS.packing);
-  storage.remove(STORAGE_KEYS.tasks);
-  document.querySelectorAll("#view-events [data-key]").forEach(field => delete settings.fields[field.dataset.key]);
+  Object.keys(EVENT_TYPES).forEach(type => {
+    const keys = checklistKeys(type);
+    storage.remove(keys.packing);
+    storage.remove(keys.tasks);
+  });
+  settings.events = {};
   saveSettings();
   location.reload();
 });

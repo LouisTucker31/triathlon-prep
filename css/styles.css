@@ -105,13 +105,14 @@ input, select, textarea { font-size: max(var(--input-size), 1em) !important; }
   background-position: calc(100% - 10px) 55%, calc(100% - 5px) 55%; background-size: 5px 5px; background-repeat: no-repeat; padding-right: 20px; }
 .field textarea { resize: vertical; min-height: 60px; }
 .field:focus-within { background: var(--head); outline: 2px solid var(--focus); outline-offset: -2px; }
-.field-row { display: grid; grid-template-columns: 1fr 1fr; }
-.field-row .field:first-child { border-right: 1px solid var(--line); }
-.field-row { border-bottom: 1px solid var(--line); }
-.field-row .field { border-bottom: 0; }
-.field-row--3 { grid-template-columns: 1fr 1fr 1fr; }
-.field-row--3 .field:not(:last-child) { border-right: 1px solid var(--line); }
-.field-group > .field-row:last-child { border-bottom: 0; }
+/* Rows of fields share the width equally; fields hidden for the current event
+   type drop out, and dividers are drawn only between visible fields */
+.field-row { display: flex; border-bottom: 1px solid var(--line); }
+.field-row > .field { flex: 1 1 0; min-width: 0; border-bottom: 0; }
+.field-row > .field:not([hidden]) ~ .field:not([hidden]) { border-left: 1px solid var(--line); }
+.field-row[hidden], .field[hidden] { display: none; }
+.field-group > .field-row:last-child,
+.field-group > .is-last-visible { border-bottom: 0; }  /* set by main.js when later rows are hidden */
 .segmented { display: flex; gap: 4px; padding: 4px; border-radius: var(--radius); background: var(--seg-bg); border: 1px solid var(--border); }
 .segmented button {
   flex: 1; border: 0; background: none; padding: 8px; border-radius: var(--radius-sm); cursor: pointer;

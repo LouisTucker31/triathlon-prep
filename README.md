@@ -13,7 +13,7 @@ manifest.webmanifest    install details (name, icons, colours)
 sw.js                   service worker: offline support and updates (must stay in the root)
 css/styles.css
 js/theme.js             applies the saved theme before first paint
-js/lists.js             packing and task list content
+js/lists.js             packing and task list content (triathlon; other event types have none yet)
 js/main.js              app logic
 js/liquid-glass-nav.js  floating tab bar
 assets/icons/
