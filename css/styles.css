@@ -75,7 +75,6 @@ label.check-item {
   border-bottom: 1px solid var(--line); -webkit-tap-highlight-color: transparent;
 }
 label.check-item:last-child { border-bottom: 0; }
-label.check-item.check-item--child { padding-left: 28px; }
 input[type=checkbox] { width: 18px; height: 18px; margin: 1px 0 0; flex-shrink: 0; accent-color: var(--check); cursor: pointer; }
 input:checked + span { text-decoration: line-through; color: var(--faint); }
 

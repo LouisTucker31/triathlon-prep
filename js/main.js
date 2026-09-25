@@ -21,9 +21,9 @@ function buildChecklist(sections, storageKey, listEl, progressTextEl, progressFi
   state.open = state.open || {};
   const save = () => storage.write(storageKey, state);
 
-  function makeCheckItem(id, text, isChild) {
+  function makeCheckItem(id, text) {
     const label = document.createElement("label");
-    label.className = "check-item" + (isChild ? " check-item--child" : "");
+    label.className = "check-item";
     const checkbox = document.createElement("input");
     checkbox.type = "checkbox";
     checkbox.checked = !!state.checked[id];
@@ -69,14 +69,11 @@ function buildChecklist(sections, storageKey, listEl, progressTextEl, progressFi
     section.items.forEach(entry => {
       if (entry === null) nextId();
       else if (typeof entry === "string") panel.append(makeCheckItem(nextId(), entry));
-      else if (entry.h) {
+      else {
         const subheading = document.createElement("h3");
         subheading.className = "checklist-section__subheading";
         subheading.textContent = entry.h;
         panel.append(subheading);
-      } else {
-        panel.append(makeCheckItem(nextId(), entry.t));
-        entry.sub.forEach(child => panel.append(makeCheckItem(nextId(), child, true)));
       }
     });
 

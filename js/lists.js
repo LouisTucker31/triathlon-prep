@@ -1,9 +1,11 @@
-// Item formats: "text" | {t:"text", sub:["child", ...]} | {h:"Subheading"} | null
+// Item formats: "text" | {h:"Subheading"} | null
 // Ticks are saved by position, so a removed item is left as null to keep the
 // items after it lined up with their saved ticks.
 const PACKING_SECTIONS = [
   { title: "Overnight bag", items: [
-    { t: "Friday evening clothes", sub: ["T-shirt", "Casual trousers or joggers", "Underwear", "Socks", "Comfortable shoes or trainers"] },
+    { h: "Friday evening clothes" }, null,
+    "T-shirt", "Casual trousers or joggers", "Underwear", "Socks", "Comfortable shoes or trainers",
+    { h: "Overnight essentials" },
     "Sleepwear", "Warm hoodie or jumper", "Warm jacket", "Waterproof coat", "Toothbrush", "Toothpaste", "Deodorant", "Shower gel",
     "Lip balm", "Vitamins and supplements you normally take", "Wallet", "British Triathlon licence or membership",
     "Breakfast for race morning", "Evening snacks", "AeroPress and coffee"
@@ -23,10 +25,13 @@ const PACKING_SECTIONS = [
     "Socks", "T-shirt", "Comfortable shorts", "Hoodie or warm jumper", "Waterproof coat", "Comfortable trainers", "Flip-flops or sliders"
   ]},
   { title: "Worn to the swim start", items: [
+    { h: "Kit" },
     "Trisuit", "Wetsuit", "Goggles", "Anti-fog applied to goggles", "Swim cap", "Race-issued swim cap, if required", "Nose clip",
     "Garmin watch", "Heart-rate monitor", "Timing chip",
-    { t: "BodyGlide", sub: ["Neck", "Shoulders", "Wrists", "Ankles"] },
-    "Flip-flops or sliders", "Warm hoodie or jumper for waiting", "Waterproof coat"
+    { h: "Apply BodyGlide to" }, null,
+    "Neck", "Shoulders", "Wrists", "Ankles",
+    { h: "While waiting" },
+    "Flip-flops or sliders", "Warm hoodie or jumper", "Waterproof coat"
   ]},
   { title: "T1 transition bag: swim to bike", items: [
     "Cycling helmet", "Cycling shoes", "Socks", "Cycling glasses", "Cycling gloves", "Race belt", "Race number attached to race belt",
