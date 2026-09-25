@@ -264,10 +264,10 @@ function updateGoalMaths() {
   document.getElementById("paceRun").textContent =
     times.goalRun && d.run ? `${formatClock(times.goalRun / d.run)} /km` : NOT_SET;
 
-  // Show the distance each pace is based on, e.g. "Swim, 750 m"
-  document.getElementById("paceSwimLabel").textContent = d.swim ? `Swim, ${d.swim.toLocaleString("en-GB")} m` : "Swim";
-  document.getElementById("speedBikeLabel").textContent = d.bike ? `Bike, ${d.bike.toLocaleString("en-GB")} km` : "Bike";
-  document.getElementById("paceRunLabel").textContent = d.run ? `Run, ${d.run.toLocaleString("en-GB")} km` : "Run";
+  // Show the distance each pace is based on, e.g. "Swim: 750 m"
+  document.getElementById("paceSwimLabel").textContent = d.swim ? `Swim: ${d.swim.toLocaleString("en-GB")} m` : "Swim";
+  document.getElementById("speedBikeLabel").textContent = d.bike ? `Bike: ${d.bike.toLocaleString("en-GB")} km` : "Bike";
+  document.getElementById("paceRunLabel").textContent = d.run ? `Run: ${d.run.toLocaleString("en-GB")} km` : "Run";
 }
 // Fields save on "input" first (registered above), so settings are current here
 document.getElementById("view-events").addEventListener("input", updateGoalMaths);
