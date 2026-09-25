@@ -42,7 +42,7 @@
     <h1 tabindex="-1">Settings</h1>
 
     <h2 class="settings-heading">Race details</h2>
-    <div class="field-group">
+    <div class="field-group" id="raceDetails">
       <label class="field"><span>Race name</span><input data-key="raceName" type="text" autocapitalize="words" placeholder="e.g. Weymouth Triathlon" autocomplete="off"></label>
       <div class="field-row">
         <label class="field"><span>Date</span><input data-key="raceDate" type="date"></label>
@@ -101,15 +101,15 @@
     <p class="settings-note">System follows your phone's light or dark setting.</p>
 
     <h2 class="settings-heading">Reset</h2>
-    <button type="button" class="button-danger" id="resetApp">Reset app</button>
-    <p class="settings-note">Unticks every packing item and task, and clears all your settings on this device.</p>
+    <button type="button" class="button-danger" id="resetApp">Reset for a new race</button>
+    <p class="settings-note">Unticks every packing item and task, and clears your race details. Your details and appearance are kept.</p>
 
     <dialog class="confirm" id="resetDialog" aria-labelledby="resetTitle" aria-describedby="resetDesc">
-      <h2 id="resetTitle">Reset the app?</h2>
-      <p id="resetDesc">This unticks every packing item and task and clears all your settings. You can't undo this.</p>
+      <h2 id="resetTitle">Reset for a new race?</h2>
+      <p id="resetDesc">This unticks every packing item and task and clears your race details. Your details stay. You can't undo this.</p>
       <div class="confirm__actions">
-        <button type="button" class="confirm__cancel" id="resetCancel" autofocus>Keep my data</button>
-        <button type="button" class="confirm__ok" id="resetConfirm">Reset everything</button>
+        <button type="button" class="confirm__cancel" id="resetCancel" autofocus>Keep everything</button>
+        <button type="button" class="confirm__ok" id="resetConfirm">Reset</button>
       </div>
     </dialog>
 

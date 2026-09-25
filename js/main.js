@@ -8,8 +8,8 @@ const storage = {
   write(key, value) {
     try { localStorage.setItem(key, JSON.stringify(value)); } catch { /* see note above */ }
   },
-  clearApp() {
-    try { Object.keys(localStorage).filter(k => k.startsWith("tri-")).forEach(k => localStorage.removeItem(k)); } catch { /* see note above */ }
+  remove(key) {
+    try { localStorage.removeItem(key); } catch { /* see note above */ }
   }
 };
 
@@ -305,13 +305,17 @@ nav.addEventListener("lg:change", e => {
   title.focus({ preventScroll: true }); // so screen readers announce the new view
 });
 
-// Reset: clear every saved list, setting and tab, then start fresh
+// Reset for a new race: untick both lists and clear race details. My details,
+// theme and current tab are kept.
 const resetDialog = document.getElementById("resetDialog");
 document.getElementById("resetApp").addEventListener("click", () => resetDialog.showModal());
 document.getElementById("resetCancel").addEventListener("click", () => resetDialog.close());
 resetDialog.addEventListener("click", e => { if (e.target === resetDialog) resetDialog.close(); }); // tap outside
 document.getElementById("resetConfirm").addEventListener("click", () => {
-  storage.clearApp();
+  storage.remove(STORAGE_KEYS.packing);
+  storage.remove(STORAGE_KEYS.tasks);
+  document.querySelectorAll("#raceDetails [data-key]").forEach(field => delete settings.fields[field.dataset.key]);
+  saveSettings();
   location.reload();
 });
 
