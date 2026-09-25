@@ -373,8 +373,8 @@ updateGoalMaths();
 // ordinary web links in its own built-in browser, so the maps apps' own link
 // types are used to jump straight into the app:
 //   Apple device  address or Apple Maps link -> maps:// (the Maps app)
-//                 Google Maps link -> the Google Maps app, or the web page if
-//                 the app isn't installed
+//                 Google Maps link -> Safari, which opens the Google Maps
+//                 app at that place (or the web page if it isn't installed)
 //   Android       address -> geo: (the default maps app); links open normally,
 //                 and Android hands maps links to the right app
 //   elsewhere     Google Maps in the browser
@@ -405,7 +405,9 @@ function openAppOrFallback(appUrl, webUrl) {
 function locationTarget(text) {
   const query = encodeURIComponent(text);
   if (IS_APPLE) {
-    if (GOOGLE_MAPS_LINK.test(text)) return { app: "comgooglemapsurl://" + text.replace(/^https?:\/\//i, ""), web: text };
+    // Google Maps links (often short maps.app.goo.gl ones) go to Safari itself,
+    // which follows the link and opens the Google Maps app at that place
+    if (GOOGLE_MAPS_LINK.test(text)) return IS_IOS ? { app: "x-safari-" + text, web: text } : { web: text };
     if (APPLE_MAPS_LINK.test(text)) return { app: text.replace(APPLE_MAPS_LINK, "maps://") };
     if (isWebLink(text)) return { web: text };
     return { app: `maps://?q=${query}` };
@@ -645,7 +647,8 @@ function imageSummary() {
   const LEG_TYPES = { Swim: ["triathlon", "swimming"], T1: ["triathlon"], Bike: ["triathlon", "cycling"], T2: ["triathlon"], Run: ["triathlon", "running"] };
   const hasActuals = legTotal("actual") > 0, prefix = hasActuals ? "actual" : "goal";
   const km = n => `${n.toLocaleString("en-GB")} km`;
-  const climb = key => value(key) && value(key) !== "0" ? `↑ ${value(key)} m` : "";
+  // Elevation always shows: an up arrow for a climb, a flat arrow for none (empty or 0)
+  const climb = key => { const m = value(key).replace(/,/g, ""); return Number(m) > 0 ? `↑ ${value(key)} m` : "→ 0 m"; };
   const DETAILS = {
     Swim: [d.swim && `${d.swim.toLocaleString("en-GB")} m`, value("swimType")],
     Bike: [d.bike && km(d.bike), climb("bikeElevation")],
