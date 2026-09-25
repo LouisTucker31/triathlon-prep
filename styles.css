@@ -89,6 +89,9 @@ input, select, textarea { font-size: max(16px, 1em) !important; }
 .row .field:first-child { border-right: 1px solid var(--line); }
 .row { border-bottom: 1px solid var(--line); }
 .row .field { border-bottom: 0; }
+.row--3 { grid-template-columns: 1fr 1fr 1fr; }
+.row--3 .field:not(:last-child) { border-right: 1px solid var(--line); }
+.row[hidden] { display: none; }
 .seg { display: flex; gap: 2px; padding: 3px; border-radius: 10px; background: var(--seg-bg); border: 1px solid var(--border); }
 .seg button {
   flex: 1; border: 0; background: none; padding: 9px 6px; border-radius: 8px; cursor: pointer;

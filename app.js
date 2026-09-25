@@ -412,6 +412,13 @@ document.querySelectorAll("#view-settings [data-key]").forEach(el => {
   });
 });
 
+/* Custom swim / bike / run distances, shown when distance is "Other" */
+const distanceSelect = document.querySelector('[data-key="raceDistance"]');
+const customDistance = document.getElementById("customDistance");
+function toggleCustomDistance() { customDistance.hidden = distanceSelect.value !== "Other"; }
+distanceSelect.addEventListener("change", toggleCustomDistance);
+toggleCustomDistance();
+
 /* Race summary under the packing title */
 function renderRaceLine() {
   const f = settings.fields;
