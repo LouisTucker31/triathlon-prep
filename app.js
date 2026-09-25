@@ -354,25 +354,31 @@ function buildList(data, storageKey, listEl, overallEl, barEl, doneWord) {
     const wrap = document.createElement("div");
     wrap.className = "section";
     if (state.open[si]) wrap.classList.add("open");
+    const heading = document.createElement("h2");
     const head = document.createElement("button");
     head.className = "head"; head.type = "button";
-    head.innerHTML = `<span class="chev">▶</span><span class="name"></span><span class="count"></span>`;
+    head.innerHTML = `<span class="chev" aria-hidden="true">▶</span><span class="name"></span><span class="count" aria-hidden="true"></span><span class="sr-only count-sr"></span>`;
     head.querySelector(".name").textContent = sec.title;
+    const bodyId = `${storageKey}-body-${si}`;
+    head.setAttribute("aria-controls", bodyId);
+    head.setAttribute("aria-expanded", String(wrap.classList.contains("open")));
     head.addEventListener("click", () => {
       wrap.classList.toggle("open");
       state.open[si] = wrap.classList.contains("open"); save();
+      head.setAttribute("aria-expanded", String(state.open[si]));
     });
-    const body = document.createElement("div"); body.className = "body";
+    heading.append(head);
+    const body = document.createElement("div"); body.className = "body"; body.id = bodyId;
     let n = 0;
     sec.items.forEach(it => {
       if (typeof it === "string") body.append(makeItem(`${si}-${n++}`, it));
-      else if (it.h) { const h = document.createElement("div"); h.className = "sub"; h.textContent = it.h; body.append(h); }
+      else if (it.h) { const h = document.createElement("h3"); h.className = "sub"; h.textContent = it.h; body.append(h); }
       else {
         body.append(makeItem(`${si}-${n++}`, it.t));
         it.sub.forEach(x => body.append(makeItem(`${si}-${n++}`, x, true)));
       }
     });
-    wrap.append(head, body);
+    wrap.append(heading, body);
     listEl.append(wrap);
   });
 
@@ -383,6 +389,7 @@ function buildList(data, storageKey, listEl, overallEl, barEl, doneWord) {
       const c = [...boxes].filter(x => x.checked).length;
       total += boxes.length; done += c;
       sec.querySelector(".count").textContent = `${c}/${boxes.length}`;
+      sec.querySelector(".count-sr").textContent = `, ${c} of ${boxes.length} ${doneWord}`;
       sec.classList.toggle("done", c === boxes.length);
     });
     overallEl.textContent = `${done} of ${total} ${doneWord}`;
@@ -456,9 +463,13 @@ applyTheme();
 const VIEWS = ["packing", "tasks", "settings"];
 const nav = document.querySelector(".lg-nav");
 const tabs = [...nav.querySelectorAll(".lg-nav__item")];
+const APP_TITLE = "Triathlon Packing List";
 function showView(i) {
   VIEWS.forEach((v, n) => { document.getElementById("view-" + v).hidden = n !== i; });
+  const h1 = document.querySelector(`#view-${VIEWS[i]} h1`);
+  document.title = h1.textContent === APP_TITLE ? APP_TITLE : `${h1.textContent} – ${APP_TITLE}`;
   try { localStorage.setItem("tri-tab", String(i)); } catch {}
+  return h1;
 }
 let startTab = 0;
 try { startTab = Math.max(0, Math.min(2, parseInt(localStorage.getItem("tri-tab") || "0", 10) || 0)); } catch {}
@@ -467,7 +478,20 @@ tabs.forEach((t, n) => {
   if (n === startTab) t.setAttribute("aria-current", "page"); else t.removeAttribute("aria-current");
 });
 showView(startTab);
-nav.addEventListener("lg:change", e => { showView(e.detail.index); window.scrollTo(0, 0); });
+nav.addEventListener("lg:change", e => {
+  const h1 = showView(e.detail.index);
+  window.scrollTo(0, 0);
+  h1.focus({ preventScroll: true }); // so screen readers announce the new view
+});
+
+/* Reset: clear every saved list, setting and tab, then start fresh */
+document.getElementById("resetApp").addEventListener("click", () => {
+  if (!confirm("Reset the app? This unticks every packing item and task and clears all your settings. This can't be undone.")) return;
+  try {
+    Object.keys(localStorage).filter(k => k.startsWith("tri-")).forEach(k => localStorage.removeItem(k));
+  } catch {}
+  location.reload();
+});
 
 // PWA: register the service worker (needs http(s) - skipped on file://)
 if ("serviceWorker" in navigator && location.protocol !== "file:") {
@@ -477,11 +501,16 @@ if ("serviceWorker" in navigator && location.protocol !== "file:") {
       document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") reg.update().catch(() => {}); });
     }).catch(err => console.warn("Service worker registration failed:", err));
 
-    // When a new version takes over, reload once so the page runs the new code
+    // When a new version takes over, reload once so the page runs the new code -
+    // straight away if the app hasn't been used yet, otherwise when it's next hidden,
+    // so it never reloads mid-use
     if (navigator.serviceWorker.controller) {
-      let reloaded = false;
+      let used = false, reloaded = false;
+      const reload = () => { if (!reloaded) { reloaded = true; location.reload(); } };
+      ["pointerdown", "keydown"].forEach(t => document.addEventListener(t, () => { used = true; }, { once: true, capture: true }));
       navigator.serviceWorker.addEventListener("controllerchange", () => {
-        if (!reloaded) { reloaded = true; location.reload(); }
+        if (!used || document.visibilityState === "hidden") return reload();
+        document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") reload(); });
       });
     }
   });

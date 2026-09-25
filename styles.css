@@ -1,20 +1,27 @@
 :root {
   color-scheme: light;
-  --bg: #ffffff; --text: #1a1a1a; --muted: #555; --muted-2: #666; --faint: #999;
+  --bg: #ffffff; --text: #1a1a1a; --muted: #555; --muted-2: #666; --faint: #707070;
   --border: #e3e3e3; --line: #f0f0f0; --head: #fafafa;
   --done-border: #bcd9bc; --done-head: #f1f8f1;
   --bar: #eee; --bar-fill: #1a1a1a; --check: #1a1a1a;
   --field: #ffffff; --seg-bg: #efeff0; --seg-on: #ffffff; --link: #2563eb;
+  --focus: #2563eb; --danger: #d70015;
 }
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --bg: #000000; --text: #f2f2f7; --muted: #a1a1a6; --muted-2: #8e8e93; --faint: #636366;
+  --bg: #000000; --text: #f2f2f7; --muted: #a1a1a6; --muted-2: #8e8e93; --faint: #8e8e93;
   --border: #2c2c2e; --line: #242426; --head: #1c1c1e;
   --done-border: #2e5a38; --done-head: #14261a;
   --bar: #2c2c2e; --bar-fill: #f2f2f7; --check: #f2f2f7;
   --field: #1c1c1e; --seg-bg: #1c1c1e; --seg-on: #3a3a3c; --link: #64a0ff;
+  --focus: #64a0ff; --danger: #ff6961;
 }
 html, body { background: var(--bg) !important; min-height: 100%; }
+/* Follow the iPhone's text size setting (Dynamic Type) */
+@supports (font: -apple-system-body) { html { font: -apple-system-body; } }
+/* Keep focused items clear of the floating nav; hide the scrollbar */
+html { scroll-padding-bottom: calc(var(--lg-nav-height) + var(--lg-nav-bottom) + 12px); scrollbar-width: none; }
+html::-webkit-scrollbar { display: none; }
 body::before { content: ""; position: fixed; inset: 0; background: var(--bg); z-index: -1; }
 .page { background: var(--bg); min-height: 100vh; position: relative; }
 * { box-sizing: border-box; }
@@ -26,6 +33,9 @@ body {
 .wrap { max-width: 720px; margin: 0 auto; padding: 24px 16px calc(var(--lg-nav-height) + var(--lg-nav-bottom) + 6px); }
 .view[hidden] { display: none; }
 h1 { font-size: 1.7rem; margin: 0 0 4px; }
+h1:focus { outline: none; } /* focused only to announce the view change */
+.sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 .race-line { color: var(--muted); font-size: 0.95rem; margin-bottom: 2px; }
 .race-line[hidden] { display: none; }
 .race-line strong { color: var(--text); font-weight: 600; }
@@ -40,6 +50,9 @@ h1 { font-size: 1.7rem; margin: 0 0 4px; }
   background: var(--head); border: 0; font: inherit; text-align: left; cursor: pointer; color: var(--text);
 }
 .section.done .head { background: var(--done-head); }
+.section > h2 { margin: 0; font: inherit; }
+.head:focus-visible { outline-offset: -2px; border-radius: 8px; }
+.section.done .count::before { content: "✓ "; font-weight: 700; }
 .chev { transition: transform .15s; font-size: 0.8rem; width: 12px; }
 .section.open .chev { transform: rotate(90deg); }
 .head .name { flex: 1; font-weight: 600; }
@@ -74,7 +87,7 @@ input, select, textarea { font-size: max(16px, 1em) !important; }
 .field > span { display: block; font-size: 0.8rem; color: var(--muted-2); margin-bottom: 3px; }
 .field input, .field select, .field textarea {
   display: block; width: 100%; min-height: 26px; margin: 0; padding: 0; border: 0; outline: 0;
-  background: transparent; color: var(--text); font: inherit; font-size: 16px; /* 16px stops iOS zooming */
+  background: transparent; color: var(--text); font: inherit; font-size: max(16px, 1rem); /* 16px+ stops iOS zooming */
   -webkit-appearance: none; appearance: none; border-radius: 0;
 }
 .field input::placeholder, .field textarea::placeholder { color: var(--faint); }
@@ -84,7 +97,7 @@ input, select, textarea { font-size: max(16px, 1em) !important; }
 .field select { background-image: linear-gradient(45deg, transparent 50%, var(--muted-2) 50%), linear-gradient(135deg, var(--muted-2) 50%, transparent 50%);
   background-position: calc(100% - 10px) 55%, calc(100% - 5px) 55%; background-size: 5px 5px; background-repeat: no-repeat; padding-right: 20px; }
 .field textarea { resize: vertical; min-height: 60px; }
-.field:focus-within { background: var(--head); }
+.field:focus-within { background: var(--head); outline: 2px solid var(--focus); outline-offset: -2px; }
 .row { display: grid; grid-template-columns: 1fr 1fr; }
 .row .field:first-child { border-right: 1px solid var(--line); }
 .row { border-bottom: 1px solid var(--line); }
@@ -100,7 +113,16 @@ input, select, textarea { font-size: max(16px, 1em) !important; }
 .seg button[aria-pressed="true"] { background: var(--seg-on); font-weight: 600; box-shadow: 0 1px 3px rgba(0,0,0,.18); }
 .set-note { font-size: 0.8rem; color: var(--faint); margin: 8px 4px 0; }
 .saved { font-size: 0.8rem; color: var(--muted-2); margin: 18px 4px 0; text-align: center; transition: opacity .3s; }
+.seg button:focus-visible { outline-offset: -2px; }
+.danger {
+  display: block; width: 100%; padding: 12px 14px; border: 1px solid var(--border); border-radius: 10px;
+  background: var(--field); color: var(--danger); font: inherit; font-weight: 600; cursor: pointer;
+}
 .empty { color: var(--muted); margin-top: 8px; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; scroll-behavior: auto !important; }
+}
 
 /* =====================================================================
  Liquid Glass Nav - iOS 26-style floating tab bar (Files app)
@@ -144,7 +166,7 @@ input, select, textarea { font-size: max(16px, 1em) !important; }
 --lg-ink-secondary: rgba(60, 60, 67, 0.6);
 --lg-ink-tertiary: rgba(60, 60, 67, 0.45);
 --lg-icon-secondary: rgba(60, 60, 67, 0.85);
---lg-accent: #3480f0;
+--lg-accent: #1d5fd1;
 --lg-bubble: rgba(0, 0, 0, 0.08);
 --lg-bubble-rim: rgba(255, 255, 255, 0.55);
 --lg-font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro", system-ui, "Helvetica Neue", Arial, sans-serif;
@@ -229,9 +251,11 @@ opacity: 0.9;
 
 @media (prefers-reduced-transparency: reduce) {
 :root { --lg-frost-tint: rgba(246, 246, 248, 0.97); }
+:root[data-theme="dark"] { --lg-frost-tint: rgba(28, 28, 30, 0.97); }
 }
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
 .lg-surface__frost { background: rgba(246, 246, 248, 0.96); -webkit-mask: none; mask: none; }
+:root[data-theme="dark"] .lg-surface__frost { background: rgba(28, 28, 30, 0.96); }
 }
 /* === END LIQUID GLASS CORE === */
 
@@ -296,7 +320,7 @@ justify-content: center;
 gap: 3px;
 padding: 0 0 1px;
 color: var(--lg-ink);
-font: 510 10px/12px var(--lg-font);
+font: 510 clamp(10px, 0.625rem, 15px)/1.2 var(--lg-font);
 letter-spacing: 0.01em;
 text-decoration: none;
 white-space: nowrap;

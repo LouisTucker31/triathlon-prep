@@ -19,25 +19,25 @@
 </head>
 <body>
 <div class="page">
-<div class="wrap">
+<main class="wrap">
   <section class="view" id="view-packing">
-    <h1>Triathlon Packing List</h1>
+    <h1 tabindex="-1">Triathlon Packing List</h1>
     <div class="race-line" hidden></div>
     <div class="overall" id="overall"></div>
-    <div class="bar"><div id="barFill"></div></div>
+    <div class="bar" aria-hidden="true"><div id="barFill"></div></div>
     <div id="list"></div>
   </section>
 
   <section class="view" id="view-tasks" hidden>
-    <h1>Race Prep Tasks</h1>
+    <h1 tabindex="-1">Race Prep Tasks</h1>
     <div class="race-line" hidden></div>
     <div class="overall" id="tasksOverall"></div>
-    <div class="bar"><div id="tasksBarFill"></div></div>
+    <div class="bar" aria-hidden="true"><div id="tasksBarFill"></div></div>
     <div id="tasksList"></div>
   </section>
 
   <section class="view" id="view-settings" hidden>
-    <h1>Settings</h1>
+    <h1 tabindex="-1">Settings</h1>
 
     <h2 class="set-title">Race details</h2>
     <div class="group">
@@ -79,7 +79,7 @@
         <label class="field"><span>British Triathlon no.</span><input data-key="btNumber" type="text" autocapitalize="words" placeholder="Add number" autocomplete="off"></label>
         <label class="field"><span>Membership expiry</span><input data-key="btExpiry" type="date"></label>
       </div>
-      <label class="field"><span>Emergency contact</span><input data-key="iceName" type="text" autocapitalize="words" placeholder="Name"></label>
+      <label class="field"><span>Emergency contact</span><input data-key="iceName" type="text" autocapitalize="words" placeholder="Name" autocomplete="off"></label>
       <label class="field"><span>Emergency contact phone</span><input data-key="icePhone" type="tel" placeholder="Phone number" autocomplete="off"></label>
       <label class="field"><span>Notes</span><textarea data-key="notes" autocapitalize="words" rows="2" placeholder="Anything else for race day"></textarea></label>
     </div>
@@ -92,9 +92,13 @@
     </div>
     <p class="set-note">System follows your phone's light or dark setting.</p>
 
+    <h2 class="set-title">Reset</h2>
+    <button type="button" class="danger" id="resetApp">Reset app</button>
+    <p class="set-note">Unticks every packing item and task, and clears all your settings on this device.</p>
+
     <p class="saved" id="savedNote">Saved on this device</p>
   </section>
-</div>
+</main>
 </div>
 
 <!-- Liquid Glass Nav (icons: Google Material Symbols Rounded, Apache 2.0) -->
