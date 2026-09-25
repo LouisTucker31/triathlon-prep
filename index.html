@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en-GB" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#ffffff">
+<script src="theme.js"></script>
+<title>Triathlon Packing List</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="icon" href="icons/icon-192.png" type="image/png" sizes="192x192">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Tri Packing">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="page">
+<div class="wrap">
+  <section class="view" id="view-packing">
+    <h1>Triathlon Packing List</h1>
+    <div class="race-line" hidden></div>
+    <div class="overall" id="overall"></div>
+    <div class="bar"><div id="barFill"></div></div>
+    <div id="list"></div>
+  </section>
+
+  <section class="view" id="view-tasks" hidden>
+    <h1>Race Prep Tasks</h1>
+    <div class="race-line" hidden></div>
+    <div class="overall" id="tasksOverall"></div>
+    <div class="bar"><div id="tasksBarFill"></div></div>
+    <div id="tasksList"></div>
+  </section>
+
+  <section class="view" id="view-settings" hidden>
+    <h1>Settings</h1>
+
+    <h2 class="set-title">Race details</h2>
+    <div class="group">
+      <label class="field"><span>Race name</span><input data-key="raceName" type="text" placeholder="e.g. Weymouth Triathlon" autocomplete="off"></label>
+      <div class="row">
+        <label class="field"><span>Date</span><input data-key="raceDate" type="date"></label>
+        <label class="field"><span>Start / wave time</span><input data-key="raceStart" type="time"></label>
+      </div>
+      <label class="field"><span>Location / venue</span><input data-key="raceLocation" type="text" placeholder="Venue or postcode" autocomplete="off"></label>
+      <label class="field"><span>Distance</span>
+        <select data-key="raceDistance">
+          <option value="">Choose…</option>
+          <option>Super sprint</option>
+          <option>Sprint</option>
+          <option>Olympic / Standard</option>
+          <option>Middle (70.3)</option>
+          <option>Full (Ironman)</option>
+          <option>Other</option>
+        </select>
+      </label>
+      <div class="row">
+        <label class="field"><span>Race number</span><input data-key="raceNumber" type="text" inputmode="numeric" placeholder="Add when known"></label>
+        <label class="field"><span>Booking reference</span><input data-key="raceRef" type="text" placeholder="Optional" autocomplete="off"></label>
+      </div>
+      <label class="field"><span>Accommodation</span><input data-key="raceStay" type="text" placeholder="Hotel / address for the night before" autocomplete="off"></label>
+      <label class="field"><span>Event website</span><input data-key="raceWebsite" type="url" placeholder="https://" autocomplete="off"></label>
+    </div>
+
+    <h2 class="set-title">My details</h2>
+    <div class="group">
+      <label class="field"><span>Name</span><input data-key="name" type="text" placeholder="Your name" autocomplete="name"></label>
+      <label class="field"><span>Club</span><input data-key="club" type="text" placeholder="Optional"></label>
+      <div class="row">
+        <label class="field"><span>British Triathlon membership no.</span><input data-key="btNumber" type="text" placeholder="Add number" autocomplete="off"></label>
+        <label class="field"><span>Membership expiry</span><input data-key="btExpiry" type="date"></label>
+      </div>
+      <label class="field"><span>Emergency contact</span><input data-key="iceName" type="text" placeholder="Name"></label>
+      <label class="field"><span>Emergency contact phone</span><input data-key="icePhone" type="tel" placeholder="Phone number" autocomplete="off"></label>
+      <label class="field"><span>Notes</span><textarea data-key="notes" rows="2" placeholder="Anything else for race day"></textarea></label>
+    </div>
+
+    <h2 class="set-title">Appearance</h2>
+    <div class="seg" role="group" aria-label="Theme">
+      <button type="button" data-theme-choice="light">Light</button>
+      <button type="button" data-theme-choice="dark">Dark</button>
+      <button type="button" data-theme-choice="system">System</button>
+    </div>
+    <p class="set-note">System follows your phone's light or dark setting.</p>
+
+    <p class="saved" id="savedNote">Saved on this device</p>
+  </section>
+</div>
+</div>
+
+<!-- Liquid Glass Nav (icons: Google Material Symbols Rounded, Apache 2.0) -->
+<nav class="lg-nav lg-surface" aria-label="Main">
+  <span class="lg-surface__lens" aria-hidden="true"></span>
+  <span class="lg-surface__frost" aria-hidden="true"></span>
+  <div class="lg-nav__items">
+    <span class="lg-nav__indicator" aria-hidden="true"></span>
+    <button type="button" class="lg-nav__item is-active" aria-current="page">
+      <span class="lg-nav__icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960"><path d="M319-240v-480h38q0-54 36-87t86-33q50 0 86 33t36 87h38v480H319Zm82-480h156q0-34-23.5-54.5T479-795q-31 0-54.5 20.5T401-720Zm283 480v-480h56q24 0 42 18t18 42v360q0 24-18 42t-42 18h-56Zm-466 0q-24 0-42-18t-18-42v-360q0-24 18-42t42-18h56v480h-56ZM110-120q-13 0-21.5-8.5T80-150q0-13 8.5-21.5T110-180h740q13 0 21.5 8.5T880-150q0 13-8.5 21.5T850-120H110Z"/></svg></span>
+      <span class="lg-nav__label">Packing</span>
+    </button>
+    <button type="button" class="lg-nav__item">
+      <span class="lg-nav__icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960"><path d="m222-299 158-158q9-9 21-8.5t21.39 9.5q8.61 9 8.61 21t-9 21L243-235q-9 9-21 9t-21-9L101-335q-9-9-9-21t9-21q9-9 21-8.5t21 8.5l79 78Zm0-320 158-158q9-9 21-8.5t21.39 9.5q8.61 9 8.61 21t-9 21L243-555q-9 9-21 9t-21-9L101-655q-9-9-9-21t9-21q9-9 21-8.5t21 8.5l79 78Zm328 329q-12.75 0-21.37-8.68-8.63-8.67-8.63-21.5 0-12.82 8.63-21.32 8.62-8.5 21.37-8.5h300q12.75 0 21.38 8.68 8.62 8.67 8.62 21.5 0 12.82-8.62 21.32-8.63 8.5-21.38 8.5H550Zm0-320q-12.75 0-21.37-8.68-8.63-8.67-8.63-21.5 0-12.82 8.63-21.32 8.62-8.5 21.37-8.5h300q12.75 0 21.38 8.68 8.62 8.67 8.62 21.5 0 12.82-8.62 21.32-8.63 8.5-21.38 8.5H550Z"/></svg></span>
+      <span class="lg-nav__label">Tasks</span>
+    </button>
+    <button type="button" class="lg-nav__item">
+      <span class="lg-nav__icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960"><path d="M421-80q-14 0-25-9t-13-23l-15-94q-19-7-40-19t-37-25l-86 40q-14 6-28 1.5T155-226L97-330q-8-13-4.5-27t15.5-23l80-59q-2-9-2.5-20.5T185-480q0-9 .5-20.5T188-521l-80-59q-12-9-15.5-23t4.5-27l58-104q8-13 22-17.5t28 1.5l86 40q16-13 37-25t40-18l15-95q2-14 13-23t25-9h118q14 0 25 9t13 23l15 94q19 7 40.5 18.5T669-710l86-40q14-6 27.5-1.5T804-734l59 104q8 13 4.5 27.5T852-580l-80 57q2 10 2.5 21.5t.5 21.5q0 10-.5 21t-2.5 21l80 58q12 8 15.5 22.5T863-330l-58 104q-8 13-22 17.5t-28-1.5l-86-40q-16 13-36.5 25.5T592-206l-15 94q-2 14-13 23t-25 9H421Zm59-270q54 0 92-38t38-92q0-54-38-92t-92-38q-54 0-92 38t-38 92q0 54 38 92t92 38Z"/></svg></span>
+      <span class="lg-nav__label">Settings</span>
+    </button>
+  </div>
+</nav>
+
+<script src="app.js"></script>
+<script src="liquid-glass-nav.js"></script>
+</body>
+</html>
