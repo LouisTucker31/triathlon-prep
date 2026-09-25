@@ -215,7 +215,7 @@ toggleCustomDistance();
     if (pending) pending.abort();
     pending = new AbortController();
     try {
-      const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=6&lang=en&lat=54.5&lon=-2.5`;
+      const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=10&lang=en&lat=54.5&lon=-2.5`;
       // Only the search text is sent: no referrer, no cookies
       const result = await (await fetch(url, { signal: pending.signal, referrerPolicy: "no-referrer", credentials: "omit" })).json();
       places = [...new Set(result.features.map(f => describePlace(f.properties)).filter(Boolean))];

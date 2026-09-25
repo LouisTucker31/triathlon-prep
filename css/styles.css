@@ -134,7 +134,11 @@ input, select, textarea { font-size: max(var(--input-size), 1em) !important; }
 /* Venue suggestions */
 .place-suggestions[hidden] { display: none; }
 .place-suggestions { border-bottom: 1px solid var(--line); }
-.place-suggestions ul { list-style: none; margin: 0; padding: 0; }
+.place-suggestions ul {
+  list-style: none; margin: 0; padding: 0;
+  /* Scroll inside the list, never the page behind it */
+  max-height: 216px; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
+}
 .place-suggestions li { padding: 12px var(--gutter); min-height: 44px; cursor: pointer; border-top: 1px solid var(--line); }
 .place-suggestions li:hover, .place-suggestions li[aria-selected="true"] { background: var(--head); box-shadow: inset 3px 0 0 var(--focus); }
 .place-suggestions__credit { margin: 0; padding: 8px var(--gutter); font-size: 0.75rem; color: var(--muted-2); border-top: 1px solid var(--line); }
@@ -187,6 +191,8 @@ input, select, textarea { font-size: max(var(--input-size), 1em) !important; }
   --lg-accent: #1d5fd1;
   --lg-bubble: rgba(0, 0, 0, 0.08);
   --lg-bubble-rim: rgba(255, 255, 255, 0.55);
+  --lg-edge-light: rgba(255, 255, 255, 0.75);    /* 1px lit edge, top-left */
+  --lg-distortion: url(#lg-distortion);          /* SVG filter in index.html */
   --lg-font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro", system-ui, "Helvetica Neue", Arial, sans-serif;
 }
 :root[data-theme="dark"] {
@@ -204,6 +210,7 @@ input, select, textarea { font-size: max(var(--input-size), 1em) !important; }
   --lg-accent: #3e91ff;
   --lg-bubble: rgba(255, 255, 255, 0.14);
   --lg-bubble-rim: rgba(255, 255, 255, 0.14);
+  --lg-edge-light: rgba(255, 255, 255, 0.3);
 }
 
 /* :where() keeps this at zero specificity, so .lg-nav's position: fixed always wins */
@@ -241,6 +248,9 @@ input, select, textarea { font-size: max(var(--input-size), 1em) !important; }
     linear-gradient(to bottom, transparent 0, #000 var(--lg-lip), #000 calc(100% - var(--lg-lip)), transparent 100%);
   mask-composite: intersect;
 }
+/* Liquid distortion on both glass layers (off with Reduce Transparency) */
+.lg-surface__lens,
+.lg-surface__frost { filter: var(--lg-distortion); }
 .lg-surface::after {
   content: "";
   position: absolute;
@@ -249,6 +259,7 @@ input, select, textarea { font-size: max(var(--input-size), 1em) !important; }
   border-radius: inherit;
   pointer-events: none;
   box-shadow:
+    inset 1px 1px 0 var(--lg-edge-light),
     inset 0 1px 0.5px var(--lg-rim-top),
     inset 0 -1px 0.5px var(--lg-rim-bottom),
     inset 1px 0 0.5px var(--lg-rim-side),
@@ -264,7 +275,7 @@ input, select, textarea { font-size: max(var(--input-size), 1em) !important; }
 .lg--refract.lg-surface > .lg-surface__lens { background: transparent; }
 
 @media (prefers-reduced-transparency: reduce) {
-  :root { --lg-frost-tint: rgba(246, 246, 248, 0.97); }
+  :root { --lg-frost-tint: rgba(246, 246, 248, 0.97); --lg-distortion: none; }
   :root[data-theme="dark"] { --lg-frost-tint: rgba(28, 28, 30, 0.97); }
 }
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
@@ -357,3 +368,6 @@ input, select, textarea { font-size: max(var(--input-size), 1em) !important; }
 
 /* nav buttons: reset default button styling */
 button.lg-nav__item { border: 0; background: none; margin: 0; -webkit-appearance: none; appearance: none; }
+
+/* Holds the SVG distortion filter; takes no space */
+.lg-filters { position: absolute; width: 0; height: 0; overflow: hidden; }
