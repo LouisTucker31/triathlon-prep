@@ -13,7 +13,8 @@ const EventPdf = (() => {
     muted: [0.4, 0.4, 0.4],
     border: [0.89, 0.89, 0.89],
     divider: [0.94, 0.94, 0.94],
-    link: [0.145, 0.388, 0.922]
+    link: [0.165, 0.451, 0.314],          // the app's green accent (#2a7350)
+    accentSoft: [0.624, 0.831, 0.714]     // its light end (#9fd4b6), for the title rule
   };
 
   // Character widths (1/1000 em) for ASCII 32-126, from the standard Helvetica
@@ -149,7 +150,14 @@ const EventPdf = (() => {
       text(MARGIN, y + 11, fit(model.subtitle, 11, false, contentW), 11, false, COLOURS.muted);
       y += 22;
     }
-    line(MARGIN, y, pageW - MARGIN, y, COLOURS.border);
+    // A thin rule under the title, fading from light to full green. PDF has no
+    // simple gradient stroke, so it is drawn as short blocks of stepped colour.
+    const STEPS = 80, stepW = contentW / STEPS;
+    for (let i = 0; i < STEPS; i++) {
+      const t = i / (STEPS - 1);
+      const rgb = COLOURS.accentSoft.map((from, k) => from + (COLOURS.link[k] - from) * t);
+      ops.push(`${colour(rgb)} ${n(MARGIN + i * stepW)} ${n(pageH - y - 0.75)} ${n(stepW + 0.3)} 1.5 re f`);
+    }
     y += 20;
 
     if (orientation === "landscape") {

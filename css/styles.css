@@ -2,10 +2,15 @@
   color-scheme: light;
   --bg: #ffffff; --text: #1a1a1a; --muted: #555; --muted-2: #666; --faint: #707070;
   --border: #e3e3e3; --line: #f0f0f0; --head: #fafafa;
-  --done-border: #bcd9bc; --done-head: #f1f8f1;
-  --bar: #eee; --bar-fill: #1a1a1a; --check: #1a1a1a;
+  --done-border: #b7dcc6; --done-head: #eef7f1;
+  --bar: #eee; --check: var(--accent);
   --field: #ffffff; --seg-bg: #efeff0; --seg-on: #ffffff;
-  --focus: #2563eb; --danger: #d70015; --on-danger: #fff;
+  --focus: var(--accent); --danger: #d70015; --on-danger: #fff;
+  /* Accent: sage green, used only for progress, completion and selection.
+     --accent is deep enough for text and icons (5.7:1 on white); --accent-soft
+     is for fills; the gradient runs soft to deep, for progress. */
+  --accent: #2a7350; --accent-soft: #e3f2e9;
+  --accent-gradient: linear-gradient(90deg, #9fd4b6, #2a7350);
 
   --radius-sm: 8px;
   --radius: 10px;
@@ -17,10 +22,12 @@
   color-scheme: dark;
   --bg: #0b0b0c; --text: #f2f2f7; --muted: #a1a1a6; --muted-2: #8e8e93; --faint: #8e8e93;
   --border: #2c2c2e; --line: #242426; --head: #1c1c1e;
-  --done-border: #2e5a38; --done-head: #14261a;
-  --bar: #2c2c2e; --bar-fill: #f2f2f7; --check: #f2f2f7;
+  --done-border: #2d5a44; --done-head: #12251b;
+  --bar: #2c2c2e; --check: var(--accent);
   --field: #1c1c1e; --seg-bg: #1c1c1e; --seg-on: #3a3a3c;
-  --focus: #64a0ff; --danger: #ff6961; --on-danger: #000;
+  --focus: var(--accent); --danger: #ff6961; --on-danger: #000;
+  --accent: #8fd1ab; --accent-soft: rgba(143, 209, 171, 0.14);
+  --accent-gradient: linear-gradient(90deg, #3d8a63, #8fd1ab);
 }
 html, body { background: var(--bg) !important; min-height: 100%; }
 /* Follow the iPhone's text size setting (Dynamic Type) */
@@ -49,7 +56,7 @@ h1:focus { outline: none; } /* focused only to announce the view change */
 .race-line strong { color: var(--text); font-weight: 600; }
 .progress-text { color: var(--muted); font-size: 0.95rem; margin-bottom: 12px; }
 .progress { height: 8px; background: var(--bar); border-radius: 3px; overflow: hidden; margin-bottom: 16px; }
-.progress > div { height: 100%; background: var(--bar-fill); width: 0; transition: width .2s; }
+.progress > div { height: 100%; background: var(--accent-gradient); width: 0; transition: width .2s; }
 
 /* Collapsible checklist sections (packing and tasks) */
 .checklist-section { border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 12px; overflow: hidden; }
@@ -62,6 +69,7 @@ h1:focus { outline: none; } /* focused only to announce the view change */
 .checklist-section > h2 { margin: 0; font: inherit; }
 .checklist-section__toggle:focus-visible { outline-offset: -2px; border-radius: var(--radius-sm); }
 .checklist-section.is-done .checklist-section__count::before { content: "✓ "; font-weight: 700; }
+.checklist-section.is-done .checklist-section__count { color: var(--accent); }
 .checklist-section__chevron { transition: transform .15s; font-size: 0.8rem; width: 12px; }
 .checklist-section.is-open .checklist-section__chevron { transform: rotate(90deg); }
 .checklist-section__toggle .checklist-section__title { flex: 1; font-weight: 600; }
@@ -131,7 +139,7 @@ input, select, textarea { font-size: max(var(--input-size), 1em) !important; }
   flex: 1; border: 0; background: none; padding: 8px; border-radius: var(--radius-sm); cursor: pointer;
   font: inherit; font-size: 0.95rem; color: var(--text); -webkit-tap-highlight-color: transparent;
 }
-.segmented button[aria-pressed="true"] { background: var(--seg-on); font-weight: 600; box-shadow: 0 1px 3px rgba(0,0,0,.18); }
+.segmented button[aria-pressed="true"] { background: var(--seg-on); color: var(--accent); font-weight: 600; box-shadow: 0 1px 3px rgba(0,0,0,.18); }
 .settings-note { font-size: 0.8rem; color: var(--faint); margin: 8px 4px 0; }
 .save-note { font-size: 0.8rem; color: var(--muted-2); margin: 16px 4px 0; text-align: center; }
 .segmented button:focus-visible { outline-offset: -2px; }
@@ -204,7 +212,7 @@ html:has(.settings-sheet[open]) { overflow: hidden; }  /* stop the page behind s
   border: 1px solid var(--border); border-radius: var(--radius); background: var(--field);
   color: var(--text); font: inherit; font-weight: 600; cursor: pointer;
 }
-.choice-option[aria-pressed="true"] { border-color: var(--text); box-shadow: inset 0 0 0 1px var(--text); }
+.choice-option[aria-pressed="true"] { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); background: var(--accent-soft); }
 .choice-option__note { font-size: 0.8rem; font-weight: 400; color: var(--muted-2); }
 /* Previews sit in the same 64 x 80 space so the options line up */
 .choice-option__preview { display: grid; place-items: center; width: 64px; height: 80px; }
@@ -256,8 +264,8 @@ html:has(.settings-sheet[open]) { overflow: hidden; }  /* stop the page behind s
   --lg-shadow: 0 6px 24px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.05);
 
   --lg-ink: #000;
-  --lg-accent: #1d5fd1;
-  --lg-bubble: rgba(0, 0, 0, 0.06);
+  --lg-accent: var(--accent);
+  --lg-bubble: rgba(42, 115, 80, 0.1);   /* a hint of the accent */
   --lg-bubble-rim: rgba(255, 255, 255, 0.7);
   --lg-edge-light: rgba(255, 255, 255, 0.95);    /* 1px lit edge, top-left */
   --lg-distortion: url(#lg-distortion);          /* SVG filter in index.html */
@@ -275,8 +283,8 @@ html:has(.settings-sheet[open]) { overflow: hidden; }  /* stop the page behind s
   --lg-outline: rgba(0, 0, 0, 0.5);
   --lg-shadow: 0 6px 24px rgba(0, 0, 0, 0.35), 0 1px 3px rgba(0, 0, 0, 0.25);
   --lg-ink: #fff;
-  --lg-accent: #3e91ff;
-  --lg-bubble: rgba(255, 255, 255, 0.14);
+  --lg-accent: var(--accent);
+  --lg-bubble: rgba(143, 209, 171, 0.16);
   --lg-bubble-rim: rgba(255, 255, 255, 0.18);
   --lg-edge-light: rgba(255, 255, 255, 0.45);
 }

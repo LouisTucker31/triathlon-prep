@@ -26,8 +26,9 @@ const EventImage = (() => {
       rim: "rgba(0, 0, 0, 0.08)",
       shadow: "rgba(0, 0, 0, 0.06)",
       divider: "rgba(0, 0, 0, 0.07)",
-      // Split bar shades per leg, like the app's monochrome greys
-      split: { Swim: "rgba(26,26,26,0.95)", T1: "rgba(26,26,26,0.15)", Bike: "rgba(26,26,26,0.6)", T2: "rgba(26,26,26,0.15)", Run: "rgba(26,26,26,0.35)" }
+      // Sage green accent, as in the app: the split bar runs soft to deep, and a
+      // faint green glow sits in the bottom corner
+      accent: "#2a7350", accentSoft: "#a8d8bc", accentGlow: "rgba(143, 209, 171, 0.22)"
     },
     dark: {
       bg: "#0b0b0c",
@@ -40,7 +41,7 @@ const EventImage = (() => {
       rim: "rgba(255, 255, 255, 0.14)",
       shadow: "rgba(0, 0, 0, 0)",
       divider: "rgba(255, 255, 255, 0.08)",
-      split: { Swim: "rgba(255,255,255,0.95)", T1: "rgba(255,255,255,0.25)", Bike: "rgba(255,255,255,0.65)", T2: "rgba(255,255,255,0.25)", Run: "rgba(255,255,255,0.4)" }
+      accent: "#8fd1ab", accentSoft: "#3d8a63", accentGlow: "rgba(95, 180, 136, 0.14)"
     }
   };
   let C = THEMES.light;   // the palette for the image being drawn
@@ -133,25 +134,32 @@ const EventImage = (() => {
   }
   function heroBlock(ctx, model, x, y, w, paint) {
     if (paint) {
-      text(ctx, model.heroLabel, x, y + 30, 600, 30, C.muted);
+      text(ctx, model.heroLabel, x, y + 30, 600, 30, C.accent);
       text(ctx, model.heroTime || "–", x - 6, y + 180, 800, 160, C.text);
     }
     return 192;
   }
-  // Each leg's share of the race time
+  // Each leg's share of the race time. One accent gradient runs across the
+  // whole bar (soft to deep), so the legs read as a single journey; the short
+  // transitions are fainter so the swim, bike and run stand out.
   function splitBlock(ctx, model, x, y, w, paint) {
     const timed = model.legs.filter(leg => leg.seconds);
     const total = timed.reduce((sum, leg) => sum + leg.seconds, 0), GAP = 6, BAR_H = 16;
     if (paint) {
       const usable = w - GAP * (timed.length - 1);
+      const gradient = ctx.createLinearGradient(x, 0, x + w, 0);
+      gradient.addColorStop(0, C.accentSoft);
+      gradient.addColorStop(1, C.accent);
+      ctx.fillStyle = gradient;
       let barX = x;
       timed.forEach(leg => {
         const legW = Math.max(BAR_H, usable * leg.seconds / total);
-        ctx.fillStyle = C.split[leg.name] || C.muted;
+        ctx.globalAlpha = leg.name === "T1" || leg.name === "T2" ? 0.35 : 1;
         roundedRect(ctx, barX, y, legW, BAR_H, BAR_H / 2);
         ctx.fill();
         barX += legW + GAP;
       });
+      ctx.globalAlpha = 1;
     }
     return BAR_H;
   }
@@ -209,13 +217,19 @@ const EventImage = (() => {
     const ctx = canvas.getContext("2d");
     ctx.textBaseline = "alphabetic";
 
-    // Background with a soft glow in the top corner
+    // Background with a soft light glow in the top corner...
     ctx.fillStyle = C.bg;
     ctx.fillRect(0, 0, W, H);
     const glow = ctx.createRadialGradient(W * 0.85, 0, 0, W * 0.85, 0, Math.max(W, H) * 0.8);
     glow.addColorStop(0, C.glow);
     glow.addColorStop(1, "rgba(255, 255, 255, 0)");
     ctx.fillStyle = glow;
+    ctx.fillRect(0, 0, W, H);
+    // ...and a faint green glow from the opposite corner
+    const greenGlow = ctx.createRadialGradient(0, H, 0, 0, H, Math.max(W, H) * 0.75);
+    greenGlow.addColorStop(0, C.accentGlow);
+    greenGlow.addColorStop(1, "rgba(143, 209, 171, 0)");
+    ctx.fillStyle = greenGlow;
     ctx.fillRect(0, 0, W, H);
 
     const parts = [{ block: headerBlock }, { block: heroBlock, gap: 54 }];
