@@ -112,19 +112,27 @@ const EventPdf = (() => {
       }
 
       if (section.table) {
-        // Leg / goal time / pace, with a header row and a bold total
-        const { columns, rows, total } = section.table;
-        const HEAD_H = 24, ROW_H = 26;
-        const colX = [MARGIN + PAD, MARGIN + CONTENT_W * 0.4, MARGIN + CONTENT_W * 0.7];
+        // A header row, then one row per entry and a bold total. The first column
+        // (the row names) is narrower; the rest share the width equally. An
+        // optional divider separates groups of columns (goal | actual).
+        const { columns, rows, total, dividerBefore } = section.table;
+        const HEAD_H = 24, ROW_H = 26, FIRST_W = CONTENT_W * 0.18;
+        const restW = (CONTENT_W - FIRST_W) / (columns.length - 1);
+        const colLeft = c => MARGIN + (c === 0 ? 0 : FIRST_W + (c - 1) * restW);
+        const colWidth = c => (c === 0 ? FIRST_W : restW) - PAD;
         const allRows = total ? [...rows, total] : rows;
         const h = HEAD_H + allRows.length * ROW_H;
         roundedBox(MARGIN, y, CONTENT_W, h, 8, COLOURS.border);
         line(MARGIN, y + HEAD_H, MARGIN + CONTENT_W, y + HEAD_H, COLOURS.border);
-        columns.forEach((label, c) => text(colX[c], y + 15.5, label, 8, true, COLOURS.muted));
+        if (dividerBefore) line(colLeft(dividerBefore), y, colLeft(dividerBefore), y + h, COLOURS.border);
+        columns.forEach((label, c) => text(colLeft(c) + PAD, y + 15.5, fit(label, 8, true, colWidth(c)), 8, true, COLOURS.muted));
         allRows.forEach((cells, r) => {
           const rowY = y + HEAD_H + r * ROW_H, isTotal = total && r === allRows.length - 1;
           if (r > 0) line(MARGIN, rowY, MARGIN + CONTENT_W, rowY, isTotal ? COLOURS.border : COLOURS.divider);
-          cells.forEach((cell, c) => text(colX[c], rowY + 17, cell, 11, isTotal || c === 0, COLOURS.text));
+          cells.forEach((cell, c) => {
+            const bold = isTotal || c === 0;
+            text(colLeft(c) + PAD, rowY + 17, fit(cell, 11, bold, colWidth(c)), 11, bold, COLOURS.text);
+          });
         });
         y += h + 18;
       }

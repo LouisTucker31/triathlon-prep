@@ -195,6 +195,10 @@ html:has(.settings-sheet[open]) { overflow: hidden; }  /* stop the page behind s
 }
 .confirm__cancel { border: 1px solid var(--border); background: var(--seg-bg); color: var(--text); }
 .confirm__ok { border: 0; background: var(--danger); color: var(--on-danger); }
+.confirm__primary { border: 0; background: var(--text); color: var(--bg); }
+/* Actual times pop-up: wider, to fit two time boxes per row */
+.confirm.actuals { width: min(420px, calc(100% - 32px)); }
+.confirm.actuals .field-group { margin-bottom: 16px; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; scroll-behavior: auto !important; }

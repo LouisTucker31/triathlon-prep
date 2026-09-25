@@ -158,6 +158,31 @@
 </main>
 </div>
 
+<!-- Actual times, asked for when downloading the PDF so it can show goal and
+     actual side by side. Saved with the current event type; Reset clears them. -->
+<dialog class="confirm actuals" id="actualsDialog" aria-labelledby="actualsTitle" aria-describedby="actualsDesc">
+  <h2 id="actualsTitle" tabindex="-1" autofocus>Add your actual times</h2>
+  <p id="actualsDesc">Optional. They go beside your goals in the PDF. Type digits only, like a timer.</p>
+  <div class="field-group">
+    <div class="field-row">
+      <label class="field" data-events="triathlon swimming"><span>Swim</span><input data-key="actualSwimTime" type="text" inputmode="numeric" data-format="duration" placeholder="0:00:00" autocomplete="off"></label>
+      <label class="field" data-events="triathlon"><span>T1</span><input data-key="actualT1Time" type="text" inputmode="numeric" data-format="duration" placeholder="0:00:00" autocomplete="off"></label>
+    </div>
+    <div class="field-row">
+      <label class="field" data-events="triathlon cycling"><span>Bike</span><input data-key="actualBikeTime" type="text" inputmode="numeric" data-format="duration" placeholder="0:00:00" autocomplete="off"></label>
+      <label class="field" data-events="triathlon"><span>T2</span><input data-key="actualT2Time" type="text" inputmode="numeric" data-format="duration" placeholder="0:00:00" autocomplete="off"></label>
+    </div>
+    <div class="field-row">
+      <label class="field" data-events="triathlon running"><span>Run</span><input data-key="actualRunTime" type="text" inputmode="numeric" data-format="duration" placeholder="0:00:00" autocomplete="off"></label>
+      <div class="field computed-field" data-events="triathlon"><span id="actualTotalLabel">Total</span><output id="actualTotal" aria-labelledby="actualTotalLabel">–</output></div>
+    </div>
+  </div>
+  <div class="confirm__actions">
+    <button type="button" class="confirm__cancel" id="actualsCancel">Cancel</button>
+    <button type="button" class="confirm__primary" id="actualsDownload">Download PDF</button>
+  </div>
+</dialog>
+
 <!-- Settings: a full-screen pop-up over everything, including the nav. The
      close button sits exactly where the settings button was. -->
 <dialog class="settings-sheet" id="settingsDialog" aria-labelledby="settingsTitle">

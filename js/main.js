@@ -168,8 +168,10 @@ if (!settings.events.triathlon) {
   });
   migratedGoals = true;
 }
-// Fields on the events page save to the current event type; the rest are my details
-const storeFor = field => field.closest("#view-events") ? eventFields() : settings.fields;
+// Fields on the events page (and the actual-times pop-up) save to the current
+// event type; the rest are my details
+const EVENT_SCOPES = "#view-events, #actualsDialog";
+const storeFor = field => field.closest(EVENT_SCOPES) ? eventFields() : settings.fields;
 // Tyre pressure moved from the events page to settings (one bike, not one per
 // event type): carry over a saved value, triathlon first
 ["tyreFront", "tyreRear"].forEach(key => {
@@ -314,7 +316,7 @@ if (savedPreset && Object.keys(savedPreset).every(leg => !legDistanceInputs[leg]
 function loadEventFields() {
   buildDistanceOptions();
   const store = eventFields();
-  document.querySelectorAll("#view-events [data-key]").forEach(field => {
+  document.querySelectorAll(`#view-events [data-key], #actualsDialog [data-key]`).forEach(field => {
     field.value = store[field.dataset.key] ?? "";
   });
 }
@@ -332,21 +334,28 @@ const formatClock = seconds => {
 };
 const NOT_SET = "–";
 
+// Pace for a leg at a given time: swim per 100 m, bike speed, run per km.
+// Used for goals (on the events page) and actual times (in the PDF).
+function legPace(leg, seconds, d) {
+  if (!seconds) return "";
+  if (leg === "Swim" && d.swim) return `${formatClock(seconds / (d.swim / 100))} /100m`;
+  if (leg === "Bike" && d.bike) return `${(d.bike / (seconds / 3600)).toFixed(1)} km/h`;
+  if (leg === "Run" && d.run) return `${formatClock(seconds / d.run)} /km`;
+  return "";
+}
+const runSplit = (seconds, d) => seconds && d.run ? formatClock(seconds / d.run * 5) : "";   // each 5 km
+const LEG_NAMES = ["Swim", "T1", "Bike", "T2", "Run"];
+const legTotal = prefix => LEG_NAMES.reduce((sum, leg) => sum + legSeconds(prefix + leg), 0);   // "goal" or "actual"
+
 function updateGoalMaths() {
   const d = raceDistances();
-  const times = Object.fromEntries(GOAL_LEGS.map(leg => [leg, legSeconds(leg)]));
-  const total = Object.values(times).reduce((sum, t) => sum + t, 0);
-  document.getElementById("goalTotal").textContent = total ? formatHMS(total) : NOT_SET;
-
-  document.getElementById("paceSwim").textContent =
-    times.goalSwim && d.swim ? `${formatClock(times.goalSwim / (d.swim / 100))} /100m` : NOT_SET;
-  document.getElementById("speedBike").textContent =
-    times.goalBike && d.bike ? `${(d.bike / (times.goalBike / 3600)).toFixed(1)} km/h` : NOT_SET;
-  document.getElementById("paceRun").textContent =
-    times.goalRun && d.run ? `${formatClock(times.goalRun / d.run)} /km` : NOT_SET;
-  // Running: the time for each 5 km at goal pace
-  document.getElementById("splitRun").textContent =
-    times.goalRun && d.run ? formatClock(times.goalRun / d.run * 5) : NOT_SET;
+  const goalTotal = legTotal("goal"), actualTotal = legTotal("actual");
+  document.getElementById("goalTotal").textContent = goalTotal ? formatHMS(goalTotal) : NOT_SET;
+  document.getElementById("actualTotal").textContent = actualTotal ? formatHMS(actualTotal) : NOT_SET;
+  document.getElementById("paceSwim").textContent = legPace("Swim", legSeconds("goalSwim"), d) || NOT_SET;
+  document.getElementById("speedBike").textContent = legPace("Bike", legSeconds("goalBike"), d) || NOT_SET;
+  document.getElementById("paceRun").textContent = legPace("Run", legSeconds("goalRun"), d) || NOT_SET;
+  document.getElementById("splitRun").textContent = runSplit(legSeconds("goalRun"), d) || NOT_SET;
 
   // Show the distance each pace is based on, e.g. "Swim: 750 m"
   document.getElementById("paceSwimLabel").textContent = d.swim ? `Swim: ${d.swim.toLocaleString("en-GB")} m` : "Swim";
@@ -356,6 +365,7 @@ function updateGoalMaths() {
 // Fields save on "input" first (registered above), so settings are current here
 document.getElementById("view-events").addEventListener("input", updateGoalMaths);
 document.getElementById("view-events").addEventListener("change", updateGoalMaths);
+document.getElementById("actualsDialog").addEventListener("input", updateGoalMaths);
 updateGoalMaths();
 
 // Location boxes (venue, accommodation) take a pasted maps link or an address.
@@ -490,10 +500,10 @@ function renderChecklists() {
 function applyEventVisibility() {
   const type = settings.eventType;
   document.querySelectorAll("[data-events]").forEach(el => { el.hidden = !el.dataset.events.split(" ").includes(type); });
-  document.querySelectorAll("#view-events .field-row").forEach(row => {
+  document.querySelectorAll("#view-events .field-row, #actualsDialog .field-row").forEach(row => {
     row.hidden = [...row.children].every(child => child.hidden);
   });
-  document.querySelectorAll("#view-events .field-group").forEach(group => {
+  document.querySelectorAll("#view-events .field-group, #actualsDialog .field-group").forEach(group => {
     const visible = [...group.children].filter(child => !child.hidden);
     [...group.children].forEach(child => child.classList.toggle("is-last-visible", child === visible[visible.length - 1]));
   });
@@ -522,7 +532,6 @@ function eventSummary() {
   const value = key => String(f[key] ?? "").trim();
   const forType = types => types.includes(type);
   const withUnit = (text, unit) => text ? `${text} ${unit}` : "";
-  const outputText = id => { const text = document.getElementById(id).textContent; return text === NOT_SET ? "" : text; };
   // Links show as short, readable text but open the full address
   const linkField = (label, text, linkText) => {
     const url = isWebLink(text) ? text : null;
@@ -574,28 +583,29 @@ function eventSummary() {
     ] }
   ].filter(Boolean);
 
-  // Goals table: every leg for this type, with the goal time and pace if set
-  const GOAL_ROWS = [
-    { leg: "Swim", key: "goalSwim", pace: "paceSwim", types: ["triathlon", "swimming"] },
-    { leg: "T1", key: "goalT1", types: ["triathlon"] },
-    { leg: "Bike", key: "goalBike", pace: "speedBike", types: ["triathlon", "cycling"] },
-    { leg: "T2", key: "goalT2", types: ["triathlon"] },
-    { leg: "Run", key: "goalRun", pace: "paceRun", types: ["triathlon", "running"] }
-  ];
-  const rows = GOAL_ROWS.filter(row => forType(row.types)).map(row => {
-    const seconds = legSeconds(row.key);
-    return [row.leg, seconds ? formatHMS(seconds) : "", row.pace ? outputText(row.pace) : ""];
+  // Goals and results: every leg for this type, with goal and actual time and pace
+  const LEG_TYPES = { Swim: ["triathlon", "swimming"], T1: ["triathlon"], Bike: ["triathlon", "cycling"], T2: ["triathlon"], Run: ["triathlon", "running"] };
+  const clock = seconds => seconds ? formatHMS(seconds) : "";
+  const rows = LEG_NAMES.filter(leg => forType(LEG_TYPES[leg])).map(leg => {
+    const goal = legSeconds("goal" + leg), actual = legSeconds("actual" + leg);
+    return [leg, clock(goal), legPace(leg, goal, d), clock(actual), legPace(leg, actual, d)];
   });
-  if (type === "running") rows.push(["5 km split", outputText("splitRun"), ""]);
-  sections.push({ heading: "Goals", table: {
-    columns: ["Leg", "Goal time", "Pace"], rows,
-    total: type === "triathlon" ? ["Total", outputText("goalTotal"), ""] : null
+  if (type === "running") {
+    rows.push(["5 km split", runSplit(legSeconds("goalRun"), d), "", runSplit(legSeconds("actualRun"), d), ""]);
+  }
+  const goalTotal = legTotal("goal"), actualTotal = legTotal("actual");
+  sections.push({ heading: "Goals and results", table: {
+    columns: ["Leg", "Goal time", "Goal pace", "Actual time", "Actual pace"], rows, dividerBefore: 3,
+    total: type === "triathlon" ? ["Total", clock(goalTotal), "", clock(actualTotal), ""] : null
   } });
+
+  // With a finish time it reads as a record of the race: who, what and how long
+  const subtitle = [String(settings.fields.name ?? "").trim(), EVENT_TYPES[type], actualTotal && `Finished in ${formatHMS(actualTotal)}`];
 
   const today = new Date();
   return {
     title: value("raceName") || `${EVENT_TYPES[type]} event`,
-    subtitle: EVENT_TYPES[type],
+    subtitle: subtitle.filter(Boolean).join("  ·  "),
     sections,
     footer: `Made with the Tri packing app on ${pad2(today.getDate())} ${MONTHS[today.getMonth()]} ${today.getFullYear()}`
   };
@@ -625,7 +635,13 @@ const summaryFilename = extension => {
   const name = (eventFields().raceName || `${EVENT_TYPES[settings.eventType]} event`).replace(/[^\w\- ]+/g, "").trim();
   return `${name || "Event"} details.${extension}`;
 };
-document.getElementById("downloadPdf").addEventListener("click", () => {
+// The PDF button first asks for actual times (optional), then downloads
+const actualsDialog = document.getElementById("actualsDialog");
+document.getElementById("downloadPdf").addEventListener("click", () => actualsDialog.showModal());
+document.getElementById("actualsCancel").addEventListener("click", () => actualsDialog.close());
+actualsDialog.addEventListener("click", e => { if (e.target === actualsDialog) actualsDialog.close(); }); // tap outside
+document.getElementById("actualsDownload").addEventListener("click", () => {
+  actualsDialog.close();
   saveFile(EventPdf.build(eventSummary()), summaryFilename("pdf"));
 });
 
