@@ -21,6 +21,9 @@ function buildChecklist(sections, storageKey, listEl, progressTextEl, progressFi
   const state = storage.read(storageKey, {});
   state.checked = state.checked || {};
   state.open = state.open || {};
+  // Only one section open at a time; older saves may have several, so keep the first
+  const firstOpen = Object.keys(state.open).find(index => state.open[index]);
+  state.open = firstOpen === undefined ? {} : { [firstOpen]: true };
   const save = () => storage.write(storageKey, state);
 
   function makeCheckItem(id, text) {
@@ -55,9 +58,16 @@ function buildChecklist(sections, storageKey, listEl, progressTextEl, progressFi
     toggle.setAttribute("aria-controls", panelId);
     toggle.setAttribute("aria-expanded", String(sectionEl.classList.contains("is-open")));
     toggle.addEventListener("click", () => {
-      state.open[sectionIndex] = sectionEl.classList.toggle("is-open");
+      const opening = !sectionEl.classList.contains("is-open");
+      // Opening a section closes whichever one was open before
+      listEl.querySelectorAll(".checklist-section.is-open").forEach(other => {
+        other.classList.remove("is-open");
+        other.querySelector(".checklist-section__toggle").setAttribute("aria-expanded", "false");
+      });
+      sectionEl.classList.toggle("is-open", opening);
+      toggle.setAttribute("aria-expanded", String(opening));
+      state.open = opening ? { [sectionIndex]: true } : {};
       save();
-      toggle.setAttribute("aria-expanded", String(state.open[sectionIndex]));
     });
     heading.append(toggle);
 
