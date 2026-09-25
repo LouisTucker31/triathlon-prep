@@ -6,7 +6,7 @@ const PACKING_SECTIONS = [
     { h: "Friday evening clothes" }, null,
     "T-shirt", "Casual trousers or joggers", "Underwear", "Socks", "Comfortable shoes or trainers",
     { h: "Overnight essentials" },
-    "Sleepwear", "Warm hoodie or jumper", null, "Waterproof coat", "Toothbrush", "Toothpaste", "Deodorant", "Shower gel",
+    "Sleepwear", "Warm hoodie or jumper", null, null, "Toothbrush", "Toothpaste", "Deodorant", "Shower gel",
     null, "Vitamins and supplements", "Wallet", "British Triathlon licence or membership",
     "Breakfast for race morning", "Evening snacks", "AeroPress and coffee"
   ]},
