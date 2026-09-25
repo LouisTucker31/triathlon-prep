@@ -47,7 +47,7 @@
     <h1 tabindex="-1">Events</h1>
 
     <h2 class="settings-heading">Race details</h2>
-    <div class="field-group" id="raceDetails">
+    <div class="field-group">
       <label class="field"><span>Race name</span><input data-key="raceName" type="text" autocapitalize="words" placeholder="e.g. Weymouth Triathlon" autocomplete="off"></label>
       <div class="field-row">
         <label class="field"><span>Date</span><input data-key="raceDate" type="date"></label>
@@ -72,16 +72,48 @@
         </select>
       </label>
       <div class="field-row field-row--3" id="customDistance" hidden>
-        <label class="field"><span>Swim<span class="sr-only"> in metres</span></span><span class="unit-field"><input data-key="swimDistance" data-number type="text" inputmode="decimal" placeholder="750" autocomplete="off"><span class="unit-field__unit" aria-hidden="true">m</span></span></label>
-        <label class="field"><span>Bike<span class="sr-only"> in kilometres</span></span><span class="unit-field"><input data-key="bikeDistance" data-number type="text" inputmode="decimal" placeholder="20" autocomplete="off"><span class="unit-field__unit" aria-hidden="true">km</span></span></label>
-        <label class="field"><span>Run<span class="sr-only"> in kilometres</span></span><span class="unit-field"><input data-key="runDistance" data-number type="text" inputmode="decimal" placeholder="5" autocomplete="off"><span class="unit-field__unit" aria-hidden="true">km</span></span></label>
+        <label class="field"><span>Swim<span class="sr-only"> in metres</span></span><span class="unit-field"><input data-key="swimDistance" data-format="number" type="text" inputmode="decimal" placeholder="750" autocomplete="off"><span class="unit-field__unit" aria-hidden="true">m</span></span></label>
+        <label class="field"><span>Bike<span class="sr-only"> in kilometres</span></span><span class="unit-field"><input data-key="bikeDistance" data-format="number" type="text" inputmode="decimal" placeholder="20" autocomplete="off"><span class="unit-field__unit" aria-hidden="true">km</span></span></label>
+        <label class="field"><span>Run<span class="sr-only"> in kilometres</span></span><span class="unit-field"><input data-key="runDistance" data-format="number" type="text" inputmode="decimal" placeholder="5" autocomplete="off"><span class="unit-field__unit" aria-hidden="true">km</span></span></label>
       </div>
+    </div>
+
+    <h2 class="settings-heading">Entry</h2>
+    <div class="field-group">
       <div class="field-row">
         <label class="field"><span>Race number</span><input data-key="raceNumber" type="text" autocapitalize="words" inputmode="numeric" placeholder="Add when known"></label>
         <label class="field"><span>Booking ref (optional)</span><input data-key="raceRef" type="text" autocapitalize="words" placeholder="From your entry email" autocomplete="off"></label>
       </div>
+    </div>
+
+    <h2 class="settings-heading">Accommodation and website</h2>
+    <div class="field-group">
       <label class="field"><span>Accommodation</span><input data-key="raceStay" type="text" autocapitalize="words" placeholder="Hotel or address for the night before" autocomplete="off"></label>
       <label class="field"><span>Event website</span><input data-key="raceWebsite" type="url" placeholder="https://" autocomplete="off"></label>
+    </div>
+
+    <h2 class="settings-heading">Goal times</h2>
+    <div class="field-group">
+      <div class="field-row field-row--3">
+        <label class="field"><span>Swim<span class="sr-only"> goal time</span></span><input data-key="goalSwim" data-format="hms" data-goal-leg type="text" inputmode="numeric" placeholder="0:15:00" autocomplete="off"></label>
+        <label class="field"><span>Bike<span class="sr-only"> goal time</span></span><input data-key="goalBike" data-format="hms" data-goal-leg type="text" inputmode="numeric" placeholder="0:40:00" autocomplete="off"></label>
+        <label class="field"><span>Run<span class="sr-only"> goal time</span></span><input data-key="goalRun" data-format="hms" data-goal-leg type="text" inputmode="numeric" placeholder="0:25:00" autocomplete="off"></label>
+      </div>
+      <div class="field-row field-row--3">
+        <label class="field"><span>T1<span class="sr-only"> goal time</span></span><input data-key="goalT1" data-format="hms" data-goal-leg type="text" inputmode="numeric" placeholder="0:02:00" autocomplete="off"></label>
+        <label class="field"><span>T2<span class="sr-only"> goal time</span></span><input data-key="goalT2" data-format="hms" data-goal-leg type="text" inputmode="numeric" placeholder="0:01:30" autocomplete="off"></label>
+        <label class="field"><span>Total<span class="sr-only"> goal time</span></span><input data-key="goalTotal" id="goalTotal" data-format="hms" type="text" inputmode="numeric" placeholder="h:mm:ss" autocomplete="off"></label>
+      </div>
+    </div>
+    <p class="settings-note">Type the numbers only: 12345 becomes 1:23:45. Total adds up the others until you enter your own.</p>
+
+    <h2 class="settings-heading">Goal paces</h2>
+    <div class="field-group">
+      <div class="field-row field-row--3">
+        <label class="field"><span>Swim<span class="sr-only"> pace, minutes per 100 metres</span></span><span class="unit-field"><input data-key="paceSwim" data-format="ms" type="text" inputmode="numeric" placeholder="2:00" autocomplete="off"><span class="unit-field__unit" aria-hidden="true">/100m</span></span></label>
+        <label class="field"><span>Bike<span class="sr-only"> speed, kilometres per hour</span></span><span class="unit-field"><input data-key="speedBike" data-format="number" type="text" inputmode="decimal" placeholder="30" autocomplete="off"><span class="unit-field__unit" aria-hidden="true">km/h</span></span></label>
+        <label class="field"><span>Run<span class="sr-only"> pace, minutes per kilometre</span></span><span class="unit-field"><input data-key="paceRun" data-format="ms" type="text" inputmode="numeric" placeholder="5:00" autocomplete="off"><span class="unit-field__unit" aria-hidden="true">/km</span></span></label>
+      </div>
     </div>
 
     <p class="save-note">Changes save automatically on this device</p>

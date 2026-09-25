@@ -112,6 +112,9 @@ input, select, textarea { font-size: max(var(--input-size), 1em) !important; }
 .field-row--3 { grid-template-columns: 1fr 1fr 1fr; }
 .field-row--3 .field:not(:last-child) { border-right: 1px solid var(--line); }
 .field-row[hidden] { display: none; }
+/* When a group ends with a hidden row (custom distances), drop the last visible divider */
+.field-group > .field-row:last-child,
+.field-group > .field:has(+ .field-row[hidden]:last-child) { border-bottom: 0; }
 .segmented { display: flex; gap: 4px; padding: 4px; border-radius: var(--radius); background: var(--seg-bg); border: 1px solid var(--border); }
 .segmented button {
   flex: 1; border: 0; background: none; padding: 8px; border-radius: var(--radius-sm); cursor: pointer;

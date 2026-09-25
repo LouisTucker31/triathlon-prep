@@ -109,7 +109,10 @@ settings.theme = settings.theme || "light";
 settings.fields = settings.fields || {};
 const saveSettings = () => storage.write(STORAGE_KEYS.settings, settings);
 
-// Number-only boxes: digits and one decimal point, with commas for thousands (1,500)
+// Formatted-as-you-type boxes (data-format):
+//   number  digits and one decimal point, commas for thousands (1,500)
+//   hms     a duration typed as digits, filled in from the right (45 -> 0:45, 12345 -> 1:23:45)
+//   ms      the same, minutes and seconds only (430 -> 4:30)
 function formatNumber(raw) {
   let digits = raw.replace(/[^\d.]/g, "");
   const dot = digits.indexOf(".");
@@ -118,13 +121,26 @@ function formatNumber(raw) {
   whole = whole.replace(/^0+(?=\d)/, "").slice(0, 7).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   return fraction === undefined ? whole : `${whole || "0"}.${fraction.slice(0, 2)}`;
 }
-document.querySelectorAll("[data-number]").forEach(input => {
+function formatDuration(raw, maxDigits) {
+  const digits = raw.replace(/\D/g, "").replace(/^0+(?=\d)/, "").slice(0, maxDigits);
+  if (!digits) return "";
+  if (digits.length <= 2) return `0:${digits.padStart(2, "0")}`;  // 45 -> 0:45, so seconds are never mistaken for minutes
+  const seconds = digits.slice(-2), minutes = digits.slice(-4, -2), hours = digits.slice(0, -4);
+  return hours ? `${hours}:${minutes}:${seconds}` : `${minutes}:${seconds}`;
+}
+const FORMATTERS = {
+  number: formatNumber,
+  hms: raw => formatDuration(raw, 6),
+  ms: raw => formatDuration(raw, 4)
+};
+document.querySelectorAll("[data-format]").forEach(input => {
+  const format = FORMATTERS[input.dataset.format];
   // Registered before the save handler below, so the formatted value is what's saved
   input.addEventListener("input", () => {
     const before = input.value;
     const caret = input.selectionStart ?? before.length;
     const keptLeftOfCaret = before.slice(0, caret).replace(/[^\d.]/g, "").length;
-    const after = formatNumber(before);
+    const after = format(before);
     if (after === before) return;
     input.value = after;
     let pos = 0, seen = 0;
@@ -136,9 +152,10 @@ document.querySelectorAll("[data-number]").forEach(input => {
 document.querySelectorAll("[data-key]").forEach(field => {
   const key = field.dataset.key;
   if (settings.fields[key] != null) field.value = settings.fields[key];
-  // Tidy older free-text distances, e.g. "1.9km" -> "1.9"
-  if ("number" in field.dataset && field.value && formatNumber(field.value) !== field.value) {
-    field.value = settings.fields[key] = formatNumber(field.value);
+  // Tidy older free-text values, e.g. a distance saved as "1.9km" -> "1.9"
+  const format = FORMATTERS[field.dataset.format];
+  if (format && field.value && format(field.value) !== field.value) {
+    field.value = settings.fields[key] = format(field.value);
     saveSettings();
   }
   field.addEventListener("input", () => {
@@ -147,6 +164,20 @@ document.querySelectorAll("[data-key]").forEach(field => {
     renderRaceLine();
   });
 });
+
+// Goal total: until you type your own, it suggests the sum of the legs
+const goalLegs = [...document.querySelectorAll("[data-goal-leg]")];
+const goalTotal = document.getElementById("goalTotal");
+const toSeconds = text => text.split(":").reduce((total, part) => total * 60 + Number(part), 0);
+function suggestGoalTotal() {
+  const seconds = goalLegs.reduce((sum, leg) => sum + (leg.value ? toSeconds(leg.value) : 0), 0);
+  const hms = [Math.floor(seconds / 3600), Math.floor(seconds / 60) % 60, seconds % 60];
+  goalTotal.placeholder = seconds
+    ? `${hms[0]}:${String(hms[1]).padStart(2, "0")}:${String(hms[2]).padStart(2, "0")}`
+    : "h:mm:ss";
+}
+goalLegs.forEach(leg => leg.addEventListener("input", suggestGoalTotal));
+suggestGoalTotal();
 
 // Custom swim / bike / run distances, shown when distance is "Other"
 const distanceSelect = document.querySelector('[data-key="raceDistance"]');
@@ -334,7 +365,7 @@ settingsDialog.addEventListener("cancel", restoreTitle);
 settingsDialog.addEventListener("close", restoreTitle);
 
 // Reset for a new race: clears everything outside settings (packing and task
-// ticks, and the race details on the events page). My details,
+// ticks, and everything on the events page, goals included). My details,
 // theme and current tab are kept.
 const resetDialog = document.getElementById("resetDialog");
 document.getElementById("resetApp").addEventListener("click", () => resetDialog.showModal());
@@ -343,7 +374,7 @@ resetDialog.addEventListener("click", e => { if (e.target === resetDialog) reset
 document.getElementById("resetConfirm").addEventListener("click", () => {
   storage.remove(STORAGE_KEYS.packing);
   storage.remove(STORAGE_KEYS.tasks);
-  document.querySelectorAll("#raceDetails [data-key]").forEach(field => delete settings.fields[field.dataset.key]);
+  document.querySelectorAll("#view-events [data-key]").forEach(field => delete settings.fields[field.dataset.key]);
   saveSettings();
   location.reload();
 });
