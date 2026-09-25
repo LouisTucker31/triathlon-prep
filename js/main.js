@@ -42,7 +42,12 @@ function buildChecklist(sections, storageKey, listEl, progressTextEl, progressFi
     return label;
   }
 
-  sections.forEach((section, sectionIndex) => {
+  // Ticks and the open section are saved under a section id: its position among
+  // the sections without their own "id", or its "id" if it has one. So a section
+  // with an id can be added anywhere without moving other sections' ticks.
+  let positionalIndex = 0;
+  sections.forEach(section => {
+    const sectionIndex = section.id ?? positionalIndex++;
     const sectionEl = document.createElement("div");
     sectionEl.className = "checklist-section";
     if (state.open[sectionIndex]) sectionEl.classList.add("is-open");

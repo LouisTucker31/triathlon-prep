@@ -1,6 +1,7 @@
 // Item formats: "text" | {h:"Subheading"} | null
 // Ticks are saved by position, so a removed item is left as null to keep the
-// items after it lined up with their saved ticks.
+// items after it lined up with their saved ticks. Sections are saved by position
+// too, so a new section added anywhere but the end needs its own "id".
 const PACKING_SECTIONS = [
   { title: "Overnight bag", items: [
     { h: "Friday evening clothes" }, null,
@@ -59,13 +60,6 @@ const PACKING_SECTIONS = [
     "Dry underwear", "Dry socks", "Dry T-shirt", "Warm hoodie or jumper", "Warm trousers or joggers", "Waterproof coat",
     "Dry comfortable trainers", "Beanie or warm hat, if cold", "Large towel", "Wet bag for wetsuit",
     "Plastic bag for wet trisuit and other kit", "Dry robe"
-  ]},
-  { title: "Bike checks before leaving", items: [
-    "Bike mechanically sound", "Tyres checked", "Tyres inflated to chosen pressure", "No obvious tyre cuts or damage", "Wheels secure",
-    "Thru-axles or quick releases secure", "Brakes working", "Gears working", "Chain clean and lubricated", "Pedals secure",
-    "Bottle cages secure", "Bike computer secure", "Bike computer fully charged", "Bike computer working", "Sensors connected",
-    "Heart-rate monitor connected", "Spare tube on bike", "Mini pump on bike", "Multi-tool on bike", "Tyre levers on bike",
-    "Gels and nutrition attached or stored", "Both water bottles filled"
   ]}
 ];
 
@@ -207,6 +201,19 @@ const TASK_SECTIONS = [
     "Drink as normal",
     "Avoid alcohol",
     "Get an early night"
+  ]},
+  // Has its own id so it could be added here without moving later sections' ticks.
+  // Pumping tyres, spares on the bike, nutrition and bottles are covered in
+  // "Day before" and "Race morning: final preparation".
+  { id: "bike-checks", title: "Bike checks before leaving", items: [
+    "Check tyres for cuts or damage",
+    "Check wheels and thru-axles or quick releases are secure",
+    "Check brakes work",
+    "Check gears shift cleanly",
+    "Check chain is clean and lubricated",
+    "Check pedals and bottle cages are secure",
+    "Check bike computer is secure, charged and working",
+    "Check sensors and heart-rate monitor connect"
   ]},
   { title: "Race morning: after waking", items: [
     "Wake up at planned time",
