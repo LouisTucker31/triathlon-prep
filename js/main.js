@@ -46,6 +46,7 @@ function buildChecklist(sections, storageKey, listEl, progressTextEl, progressFi
     const toggle = document.createElement("button");
     toggle.className = "checklist-section__toggle";
     toggle.type = "button";
+    // Fixed markup only; the section title goes in via textContent below
     toggle.innerHTML = `<span class="checklist-section__chevron" aria-hidden="true">▶</span><span class="checklist-section__title"></span><span class="checklist-section__count" aria-hidden="true"></span><span class="sr-only checklist-section__count-sr"></span>`;
     toggle.querySelector(".checklist-section__title").textContent = section.title;
     const panelId = `${storageKey}-body-${sectionIndex}`;
@@ -215,7 +216,8 @@ toggleCustomDistance();
     pending = new AbortController();
     try {
       const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=6&lang=en&lat=54.5&lon=-2.5`;
-      const result = await (await fetch(url, { signal: pending.signal })).json();
+      // Only the search text is sent: no referrer, no cookies
+      const result = await (await fetch(url, { signal: pending.signal, referrerPolicy: "no-referrer", credentials: "omit" })).json();
       places = [...new Set(result.features.map(f => describePlace(f.properties)).filter(Boolean))];
       if (document.activeElement === input) render();
     } catch (err) {
