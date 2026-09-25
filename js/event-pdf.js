@@ -91,17 +91,18 @@ const EventPdf = (() => {
       y += 16;
 
       if (section.fields) {
-        // Two columns of label / value pairs, like the app's field groups
-        const ROW_H = 36, colW = CONTENT_W / 2;
-        const rows = Math.ceil(section.fields.length / 2);
+        // Label / value pairs in columns (two unless the section asks for more),
+        // like the app's field groups. Empty values stay blank to write in by hand.
+        const ROW_H = 36, cols = section.columns || 2, colW = CONTENT_W / cols;
+        const count = section.fields.length, rows = Math.ceil(count / cols);
         roundedBox(MARGIN, y, CONTENT_W, rows * ROW_H, 8, COLOURS.border);
         section.fields.forEach((field, i) => {
-          const row = Math.floor(i / 2), col = i % 2;
+          const row = Math.floor(i / cols), col = i % cols;
           const cellX = MARGIN + col * colW, cellY = y + row * ROW_H;
-          const alone = col === 0 && i === section.fields.length - 1;   // last field on its own takes the full width
-          const width = (alone ? CONTENT_W : colW) - PAD * 2;
+          const last = i === count - 1;   // the last field stretches to fill a short final row
+          const width = (last ? MARGIN + CONTENT_W - cellX : colW) - PAD * 2;
           if (row > 0 && col === 0) line(MARGIN, cellY, MARGIN + CONTENT_W, cellY, COLOURS.divider);
-          if (col === 1) line(cellX, cellY, cellX, cellY + ROW_H, COLOURS.divider);
+          if (col > 0) line(cellX, cellY, cellX, cellY + ROW_H, COLOURS.divider);
           text(cellX + PAD, cellY + 13, fit(field.label, 8, false, width), 8, false, COLOURS.muted);
           const value = fit(field.value, 11, false, width);
           text(cellX + PAD, cellY + 28, value, 11, false, field.link ? COLOURS.link : COLOURS.text);

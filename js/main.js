@@ -515,26 +515,25 @@ renderChecklists();
 applyEventVisibility();
 
 // "Download this event": a summary of the current event type's details, for the
-// PDF (and later the image). Only filled-in fields that apply to this type are included.
+// PDF (and later the image): every field for this event type, blank if not filled in.
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 function eventSummary() {
   const type = settings.eventType, f = eventFields();
-  const has = key => String(f[key] ?? "").trim() !== "";
+  const value = key => String(f[key] ?? "").trim();
   const forType = types => types.includes(type);
+  const withUnit = (text, unit) => text ? `${text} ${unit}` : "";
   const outputText = id => { const text = document.getElementById(id).textContent; return text === NOT_SET ? "" : text; };
   // Links show as short, readable text but open the full address
-  const linkField = (label, key, linkText) => {
-    const value = f[key].trim(), url = isWebLink(value) ? value : null;
-    return { label, value: url ? linkText || value.replace(/^https?:\/\/(www\.)?/i, "").replace(/\/$/, "") : value, link: url };
+  const linkField = (label, text, linkText) => {
+    const url = isWebLink(text) ? text : null;
+    return { label, value: url ? linkText || text.replace(/^https?:\/\/(www\.)?/i, "").replace(/\/$/, "") : text, link: url };
   };
-  const clean = fields => fields.filter(Boolean);
 
-  const subtitle = [EVENT_TYPES[type]];
-  if (has("raceDate")) {
+  let date = "";
+  if (value("raceDate")) {
     const [year, month, day] = f.raceDate.split("-").map(Number);
-    subtitle.push(`${WEEKDAYS[new Date(year, month - 1, day).getDay()]} ${pad2(day)} ${MONTHS[month - 1]} ${year}`);
+    date = `${WEEKDAYS[new Date(year, month - 1, day).getDay()]} ${pad2(day)} ${MONTHS[month - 1]} ${year}`;
   }
-  if (has("raceStart")) subtitle.push(`Start ${f.raceStart}`);
 
   const d = raceDistances();
   const legs = [
@@ -542,38 +541,45 @@ function eventSummary() {
     forType(["triathlon", "cycling"]) && d.bike && `${d.bike.toLocaleString("en-GB")} km bike`,
     forType(["triathlon", "running"]) && d.run && `${d.run.toLocaleString("en-GB")} km run`
   ].filter(Boolean).join(" · ");
+  // Single-sport presets already say the distance ("Half marathon (21.1 km)");
+  // triathlon presets and "Other" get the leg distances spelled out
+  const distance = [
+    value("raceDistance") !== "Other" && value("raceDistance"),
+    (type === "triathlon" || !currentPresets()[f.raceDistance]) && legs
+  ].filter(Boolean).join(": ");
 
+  // Every field that applies to this event type is always included, so the PDF
+  // is the same template each time; empty ones are left blank
   const sections = [
-    { heading: "Race", fields: clean([
-      has("raceLocation") && linkField("Venue", "raceLocation", "Open in maps"),
-      // Single-sport presets already say the distance ("Half marathon (21.1 km)");
-      // triathlon presets and "Other" get the leg distances spelled out
-      (has("raceDistance") || legs) && { label: "Distance", value: [
-        f.raceDistance !== "Other" && f.raceDistance,
-        (type === "triathlon" || !currentPresets()[f.raceDistance]) && legs
-      ].filter(Boolean).join(": ") },
-      forType(["triathlon", "swimming"]) && has("swimType") && { label: "Swim type", value: f.swimType },
-      forType(["triathlon", "swimming"]) && has("wetsuitRule") && { label: "Wetsuit", value: f.wetsuitRule },
-      forType(["triathlon", "cycling"]) && has("bikeElevation") && { label: "Bike elevation", value: `${f.bikeElevation} m` },
-      forType(["triathlon", "running"]) && has("runElevation") && { label: "Run elevation", value: `${f.runElevation} m` },
-      has("raceWebsite") && linkField("Event website", "raceWebsite")
-    ]) },
+    { heading: "Race", fields: [
+      { label: "Date", value: date },
+      { label: "Start / wave time", value: value("raceStart") },
+      linkField("Venue", value("raceLocation"), "Open in maps"),
+      { label: "Distance", value: distance },
+      forType(["triathlon", "swimming"]) && { label: "Swim type", value: value("swimType") },
+      forType(["triathlon", "swimming"]) && { label: "Wetsuit", value: value("wetsuitRule") },
+      forType(["triathlon", "cycling"]) && { label: "Bike elevation", value: withUnit(value("bikeElevation"), "m") },
+      forType(["triathlon", "running"]) && { label: "Run elevation", value: withUnit(value("runElevation"), "m") },
+      linkField("Event website", value("raceWebsite"))
+    ].filter(Boolean) },
     // Tyre pressure lives in settings (one bike), shown for events with a bike
-    forType(["triathlon", "cycling"]) && { heading: "Tyre pressure", fields: clean([
-      settings.fields.tyreFront && { label: "Front", value: `${settings.fields.tyreFront} psi` },
-      settings.fields.tyreRear && { label: "Rear", value: `${settings.fields.tyreRear} psi` }
-    ]) },
-    { heading: "Entry", fields: clean([
-      has("raceNumber") && { label: "Race number", value: f.raceNumber },
-      has("raceRef") && { label: "Booking ref", value: f.raceRef }
-    ]) },
-    { heading: "Accommodation", fields: clean([
-      has("raceStay") && linkField("Location", "raceStay", "Open in maps"),
-      has("raceStayLink") && linkField("Booking link", "raceStayLink")
-    ]) }
-  ].filter(section => section && section.fields.length);
+    forType(["triathlon", "cycling"]) && { heading: "Tyre pressure", fields: [
+      { label: "Front", value: withUnit(settings.fields.tyreFront || "", "psi") },
+      { label: "Rear", value: withUnit(settings.fields.tyreRear || "", "psi") }
+    ] },
+    // British Triathlon membership (from settings) sits beside the booking ref
+    { heading: "Entry", columns: type === "triathlon" ? 3 : 2, fields: [
+      { label: "Race number", value: value("raceNumber") },
+      { label: "Booking ref", value: value("raceRef") },
+      type === "triathlon" && { label: "British Triathlon no.", value: String(settings.fields.btNumber ?? "").trim() }
+    ].filter(Boolean) },
+    { heading: "Accommodation", fields: [
+      linkField("Location", value("raceStay"), "Open in maps"),
+      linkField("Booking link", value("raceStayLink"))
+    ] }
+  ].filter(Boolean);
 
-  // Goals table: each leg for this type that has a goal time, with its pace
+  // Goals table: every leg for this type, with the goal time and pace if set
   const GOAL_ROWS = [
     { leg: "Swim", key: "goalSwim", pace: "paceSwim", types: ["triathlon", "swimming"] },
     { leg: "T1", key: "goalT1", types: ["triathlon"] },
@@ -581,18 +587,20 @@ function eventSummary() {
     { leg: "T2", key: "goalT2", types: ["triathlon"] },
     { leg: "Run", key: "goalRun", pace: "paceRun", types: ["triathlon", "running"] }
   ];
-  const rows = GOAL_ROWS.filter(row => forType(row.types) && legSeconds(row.key))
-    .map(row => [row.leg, formatHMS(legSeconds(row.key)), row.pace ? outputText(row.pace) : ""]);
-  if (type === "running" && outputText("splitRun")) rows.push(["5 km split", outputText("splitRun"), ""]);
-  if (rows.length) {
-    const total = type === "triathlon" && outputText("goalTotal");
-    sections.push({ heading: "Goals", table: { columns: ["Leg", "Goal time", "Pace"], rows, total: total ? ["Total", total, ""] : null } });
-  }
+  const rows = GOAL_ROWS.filter(row => forType(row.types)).map(row => {
+    const seconds = legSeconds(row.key);
+    return [row.leg, seconds ? formatHMS(seconds) : "", row.pace ? outputText(row.pace) : ""];
+  });
+  if (type === "running") rows.push(["5 km split", outputText("splitRun"), ""]);
+  sections.push({ heading: "Goals", table: {
+    columns: ["Leg", "Goal time", "Pace"], rows,
+    total: type === "triathlon" ? ["Total", outputText("goalTotal"), ""] : null
+  } });
 
   const today = new Date();
   return {
-    title: f.raceName?.trim() || `${EVENT_TYPES[type]} event`,
-    subtitle: subtitle.join("  ·  "),
+    title: value("raceName") || `${EVENT_TYPES[type]} event`,
+    subtitle: EVENT_TYPES[type],
     sections,
     footer: `Made with the Tri packing app on ${pad2(today.getDate())} ${MONTHS[today.getMonth()]} ${today.getFullYear()}`
   };
