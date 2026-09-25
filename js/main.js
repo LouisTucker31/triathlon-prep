@@ -562,11 +562,6 @@ function eventSummary() {
       forType(["triathlon", "running"]) && { label: "Run elevation", value: withUnit(value("runElevation"), "m") },
       linkField("Event website", value("raceWebsite"))
     ].filter(Boolean) },
-    // Tyre pressure lives in settings (one bike), shown for events with a bike
-    forType(["triathlon", "cycling"]) && { heading: "Tyre pressure", fields: [
-      { label: "Front", value: withUnit(settings.fields.tyreFront || "", "psi") },
-      { label: "Rear", value: withUnit(settings.fields.tyreRear || "", "psi") }
-    ] },
     // British Triathlon membership (from settings) sits beside the booking ref
     { heading: "Entry", columns: type === "triathlon" ? 3 : 2, fields: [
       { label: "Race number", value: value("raceNumber") },
