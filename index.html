@@ -49,11 +49,12 @@
     <h2 class="settings-heading">Race details</h2>
     <div class="field-group">
       <label class="field"><span>Race name</span><input data-key="raceName" type="text" autocapitalize="words" placeholder="e.g. Weymouth Triathlon" autocomplete="off"></label>
+      <div class="field"><label for="raceWebsite">Event website</label><span class="map-field"><input data-key="raceWebsite" id="raceWebsite" type="url" placeholder="https://" autocomplete="off"><button type="button" class="map-button" data-link-for="raceWebsite" aria-label="Open event website" hidden><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960"><path d="M180-120q-24 0-42-18t-18-42v-600q0-24 18-42t42-18h249q12.75 0 21.38 8.68 8.62 8.67 8.62 21.5 0 12.82-8.62 21.32-8.63 8.5-21.38 8.5H180v600h600v-249q0-12.75 8.68-21.38 8.67-8.62 21.5-8.62 12.82 0 21.32 8.62 8.5 8.63 8.5 21.38v249q0 24-18 42t-42 18H180Zm600-617L403-360q-9 9-21 8.5t-21-9.5q-9-9-9-21t9-21l377-377H549q-12.75 0-21.37-8.68-8.63-8.67-8.63-21.5 0-12.82 8.63-21.32 8.62-8.5 21.37-8.5h261q12.75 0 21.38 8.62Q840-822.75 840-810v261q0 12.75-8.68 21.37-8.67 8.63-21.5 8.63-12.82 0-21.32-8.63-8.5-8.62-8.5-21.37v-188Z"/></svg></button></span></div>
       <div class="field-row">
         <label class="field"><span>Date</span><input data-key="raceDate" type="date"></label>
         <label class="field"><span>Start / wave time</span><input data-key="raceStart" type="time"></label>
       </div>
-      <div class="field"><label for="raceLocation">Venue</label><span class="map-field"><input data-key="raceLocation" id="raceLocation" type="text" autocapitalize="words" placeholder="Address, postcode or maps link" autocomplete="off"><button type="button" class="map-button" data-map-for="raceLocation" aria-label="Open venue in maps" hidden><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960"><path d="m592-127-243-86-188 75q-8 3-15 1.5t-13-5.5q-6-4-9.5-10t-3.5-14v-565q0-13 7.5-23t19.5-15l182-64q5-2 10-2.5t10-.5q5 0 10 .5t10 2.5l243 85 187-75q8-3 15-2t13 5q6 4 9.5 10.5T840-795v572q0 11-7.5 19T814-192l-182 65q-5 2-10 2.5t-10 .5q-5 0-10-.5t-10-2.5Zm-14-68v-505l-196-66v505l196 66Z"/></svg></button></span></div>
+      <div class="field"><label for="raceLocation">Venue location</label><span class="map-field"><input data-key="raceLocation" id="raceLocation" type="text" placeholder="Paste a Google Maps link or address" autocomplete="off"><button type="button" class="map-button" data-map-for="raceLocation" aria-label="Open venue location in maps" hidden><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960"><path d="M479.75-100q-10.75 0-21.25-3.5T440-115q-42-38-91-87.5T258-309q-42-57-70-119t-28-124q0-150 96.5-239T480-880q127 0 223.5 89T800-552q0 62-28 124t-70 119q-42 57-91 106.5T520-115q-8 8-18.75 11.5t-21.5 3.5Zm.34-390q28.91 0 49.41-20.59 20.5-20.59 20.5-49.5t-20.59-49.41q-20.59-20.5-49.5-20.5t-49.41 20.59q-20.5 20.59-20.5 49.5t20.59 49.41q20.59 20.5 49.5 20.5Z"/></svg></button></span></div>
       <label class="field"><span>Distance</span>
         <select data-key="raceDistance">
           <option value="">Choose…</option>
@@ -73,7 +74,7 @@
       <div class="field-row field-row--3">
         <label class="field"><span>Swim type</span>
           <select data-key="swimType">
-            <option value="">Choose…</option>
+            <option value="">Select</option>
             <option>Pool</option>
             <option>Lido</option>
             <option>Sea</option>
@@ -83,8 +84,8 @@
             <option>Quarry</option>
           </select>
         </label>
-        <label class="field"><span>Bike elevation<span class="sr-only">, total climb in metres</span></span><span class="unit-field"><input data-key="bikeElevation" data-format="number" type="text" inputmode="decimal" placeholder="Optional" autocomplete="off"><span class="unit-field__unit" aria-hidden="true">m</span></span></label>
-        <label class="field"><span>Run elevation<span class="sr-only">, total climb in metres</span></span><span class="unit-field"><input data-key="runElevation" data-format="number" type="text" inputmode="decimal" placeholder="Optional" autocomplete="off"><span class="unit-field__unit" aria-hidden="true">m</span></span></label>
+        <label class="field"><span>Bike elevation<span class="sr-only">, total climb in metres</span></span><span class="unit-field"><input data-key="bikeElevation" data-format="number" type="text" inputmode="decimal" placeholder="0" autocomplete="off"><span class="unit-field__unit" aria-hidden="true">m</span></span></label>
+        <label class="field"><span>Run elevation<span class="sr-only">, total climb in metres</span></span><span class="unit-field"><input data-key="runElevation" data-format="number" type="text" inputmode="decimal" placeholder="0" autocomplete="off"><span class="unit-field__unit" aria-hidden="true">m</span></span></label>
       </div>
     </div>
 
@@ -96,28 +97,28 @@
       </div>
     </div>
 
-    <h2 class="settings-heading">Accommodation and website</h2>
+    <h2 class="settings-heading">Accommodation</h2>
     <div class="field-group">
-      <div class="field"><label for="raceStay">Accommodation</label><span class="map-field"><input data-key="raceStay" id="raceStay" type="text" autocapitalize="words" placeholder="Address, postcode or maps link" autocomplete="off"><button type="button" class="map-button" data-map-for="raceStay" aria-label="Open accommodation in maps" hidden><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960"><path d="m592-127-243-86-188 75q-8 3-15 1.5t-13-5.5q-6-4-9.5-10t-3.5-14v-565q0-13 7.5-23t19.5-15l182-64q5-2 10-2.5t10-.5q5 0 10 .5t10 2.5l243 85 187-75q8-3 15-2t13 5q6 4 9.5 10.5T840-795v572q0 11-7.5 19T814-192l-182 65q-5 2-10 2.5t-10 .5q-5 0-10-.5t-10-2.5Zm-14-68v-505l-196-66v505l196 66Z"/></svg></button></span></div>
-      <label class="field"><span>Event website</span><input data-key="raceWebsite" type="url" placeholder="https://" autocomplete="off"></label>
+      <div class="field"><label for="raceStay">Location</label><span class="map-field"><input data-key="raceStay" id="raceStay" type="text" placeholder="Paste a Google Maps link or address" autocomplete="off"><button type="button" class="map-button" data-map-for="raceStay" aria-label="Open accommodation location in maps" hidden><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960"><path d="M479.75-100q-10.75 0-21.25-3.5T440-115q-42-38-91-87.5T258-309q-42-57-70-119t-28-124q0-150 96.5-239T480-880q127 0 223.5 89T800-552q0 62-28 124t-70 119q-42 57-91 106.5T520-115q-8 8-18.75 11.5t-21.5 3.5Zm.34-390q28.91 0 49.41-20.59 20.5-20.59 20.5-49.5t-20.59-49.41q-20.59-20.5-49.5-20.5t-49.41 20.59q-20.5 20.59-20.5 49.5t20.59 49.41q20.59 20.5 49.5 20.5Z"/></svg></button></span></div>
+      <div class="field"><label for="raceStayLink">Booking link</label><span class="map-field"><input data-key="raceStayLink" id="raceStayLink" type="url" placeholder="https://" autocomplete="off"><button type="button" class="map-button" data-link-for="raceStayLink" aria-label="Open accommodation booking link" hidden><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960"><path d="M180-120q-24 0-42-18t-18-42v-600q0-24 18-42t42-18h249q12.75 0 21.38 8.68 8.62 8.67 8.62 21.5 0 12.82-8.62 21.32-8.63 8.5-21.38 8.5H180v600h600v-249q0-12.75 8.68-21.38 8.67-8.62 21.5-8.62 12.82 0 21.32 8.62 8.5 8.63 8.5 21.38v249q0 24-18 42t-42 18H180Zm600-617L403-360q-9 9-21 8.5t-21-9.5q-9-9-9-21t9-21l377-377H549q-12.75 0-21.37-8.68-8.63-8.67-8.63-21.5 0-12.82 8.63-21.32 8.62-8.5 21.37-8.5h261q12.75 0 21.38 8.62Q840-822.75 840-810v261q0 12.75-8.68 21.37-8.67 8.63-21.5 8.63-12.82 0-21.32-8.63-8.5-8.62-8.5-21.37v-188Z"/></svg></button></span></div>
     </div>
 
     <h2 class="settings-heading">Goal times</h2>
     <div class="field-group">
       <div class="field-row">
-        <label class="field"><span>Swim</span><input data-key="goalSwimTime" type="time" data-goal-time aria-describedby="goalTimesHint"></label>
-        <label class="field"><span>T1</span><input data-key="goalT1Time" type="time" data-goal-time aria-describedby="goalTimesHint"></label>
+        <label class="field"><span>Swim</span><input data-key="goalSwimTime" type="text" inputmode="numeric" data-format="duration" placeholder="0:00:00" autocomplete="off" aria-describedby="goalTimesHint"></label>
+        <label class="field"><span>T1</span><input data-key="goalT1Time" type="text" inputmode="numeric" data-format="duration" placeholder="0:00:00" autocomplete="off" aria-describedby="goalTimesHint"></label>
       </div>
       <div class="field-row">
-        <label class="field"><span>Bike</span><input data-key="goalBikeTime" type="time" data-goal-time aria-describedby="goalTimesHint"></label>
-        <label class="field"><span>T2</span><input data-key="goalT2Time" type="time" data-goal-time aria-describedby="goalTimesHint"></label>
+        <label class="field"><span>Bike</span><input data-key="goalBikeTime" type="text" inputmode="numeric" data-format="duration" placeholder="0:00:00" autocomplete="off" aria-describedby="goalTimesHint"></label>
+        <label class="field"><span>T2</span><input data-key="goalT2Time" type="text" inputmode="numeric" data-format="duration" placeholder="0:00:00" autocomplete="off" aria-describedby="goalTimesHint"></label>
       </div>
       <div class="field-row">
-        <label class="field"><span>Run</span><input data-key="goalRunTime" type="time" data-goal-time aria-describedby="goalTimesHint"></label>
+        <label class="field"><span>Run</span><input data-key="goalRunTime" type="text" inputmode="numeric" data-format="duration" placeholder="0:00:00" autocomplete="off" aria-describedby="goalTimesHint"></label>
         <div class="field computed-field"><span id="goalTotalLabel">Total</span><output id="goalTotal" aria-labelledby="goalTotalLabel">–</output></div>
       </div>
     </div>
-    <p class="settings-note" id="goalTimesHint">Hours and minutes: 00:45 is 45 minutes, 01:15 is an hour and a quarter.</p>
+    <p class="settings-note" id="goalTimesHint">Type digits only, like a timer: 1500 becomes 0:15:00.</p>
 
     <h2 class="settings-heading">Goal paces</h2>
     <div class="field-group">

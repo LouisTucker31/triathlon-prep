@@ -109,27 +109,30 @@ settings.theme = settings.theme || "light";
 settings.fields = settings.fields || {};
 const saveSettings = () => storage.write(STORAGE_KEYS.settings, settings);
 
-// Goal times use the same time picker as the start time (one scroll wheel on
-// iPhone), read as a duration: "01:15" is an hour and a quarter. Hours and
-// minutes only, as that picker has no seconds.
+// Goal times are typed like a phone timer and stored as "h:mm:ss"
 const GOAL_LEGS = ["goalSwim", "goalT1", "goalBike", "goalT2", "goalRun"];
 const pad2 = n => String(n).padStart(2, "0");
-
-// Convert goals saved by earlier versions, once, to the nearest minute:
-// typed text ("15:00" was 15 minutes) or separate h/m/s dropdowns. The new
-// keys end in "Time" so the old text can never be misread as hours.
 const toSeconds = text => String(text).split(":").reduce((total, part) => total * 60 + (Number(part) || 0), 0);
+const formatHMS = seconds => {
+  seconds = Math.round(seconds);
+  return `${Math.floor(seconds / 3600)}:${pad2(Math.floor(seconds / 60) % 60)}:${pad2(seconds % 60)}`;
+};
+
+// Convert goals saved by earlier versions, once:
+//   goalSwim "15:00"            typed text (minutes:seconds, or h:mm:ss)
+//   goalSwimH / M / S           separate hour, minute and second dropdowns
+//   goalSwimTime "00:15"        the time picker's hours:minutes (one colon)
 const OLD_GOAL_KEYS = ["goalTotal", "paceSwim", "speedBike", "paceRun"];
 let migratedGoals = false;
 GOAL_LEGS.forEach(leg => {
-  const f = settings.fields;
+  const f = settings.fields, key = leg + "Time";
   let seconds = null;
   if (leg in f) seconds = toSeconds(f[leg]);
   else if (leg + "H" in f) seconds = (Number(f[leg + "H"]) || 0) * 3600 + (Number(f[leg + "M"]) || 0) * 60 + (Number(f[leg + "S"]) || 0);
+  else if (/^\d+:\d+$/.test(f[key] || "")) seconds = toSeconds(f[key]) * 60;
   if (seconds === null) return;
-  const minutes = Math.round(seconds / 60);
-  if (minutes && !f[leg + "Time"]) f[leg + "Time"] = `${pad2(Math.min(23, Math.floor(minutes / 60)))}:${pad2(minutes % 60)}`;
-  [leg, leg + "H", leg + "M", leg + "S"].forEach(key => delete f[key]);
+  if (seconds) f[key] = formatHMS(seconds); else delete f[key];
+  [leg, leg + "H", leg + "M", leg + "S"].forEach(old => delete f[old]);
   migratedGoals = true;
 });
 OLD_GOAL_KEYS.forEach(key => { if (key in settings.fields) { delete settings.fields[key]; migratedGoals = true; } });
@@ -145,21 +148,43 @@ function formatNumber(raw) {
   whole = whole.replace(/^0+(?=\d)/, "").slice(0, 7).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   return fraction === undefined ? whole : `${whole || "0"}.${fraction.slice(0, 2)}`;
 }
-const FORMATTERS = { number: formatNumber };
+// Durations (data-format="duration") work like a phone timer: digits fill in
+// from the right and it always reads h:mm:ss (1 -> 0:00:01, 1500 -> 0:15:00).
+// Backspace removes the last digit; extra digits beyond 99:59:59 are ignored.
+function formatDuration(raw) {
+  const digits = raw.replace(/\D/g, "").replace(/^0+/, "").slice(0, 6);
+  if (!digits) return "";
+  const padded = digits.padStart(5, "0");
+  return `${Number(padded.slice(0, -4))}:${padded.slice(-4, -2)}:${padded.slice(-2)}`;
+}
+const FORMATTERS = { number: formatNumber, duration: formatDuration };
 document.querySelectorAll("[data-format]").forEach(input => {
-  const format = FORMATTERS[input.dataset.format];
+  const type = input.dataset.format;
+  const format = FORMATTERS[type];
   // Registered before the save handler below, so the formatted value is what's saved
   input.addEventListener("input", () => {
     const before = input.value;
     const caret = input.selectionStart ?? before.length;
     const keptLeftOfCaret = before.slice(0, caret).replace(/[^\d.]/g, "").length;
     const after = format(before);
+    if (after !== before) input.value = after;
+    if (type === "duration") {
+      input.setSelectionRange(after.length, after.length); // always type at the end, like a timer
+      return;
+    }
     if (after === before) return;
-    input.value = after;
     let pos = 0, seen = 0;
     while (pos < after.length && seen < keptLeftOfCaret) { if (/[\d.]/.test(after[pos])) seen++; pos++; }
     input.setSelectionRange(pos, pos);
   }, { capture: true });
+  // Tidy overflow when leaving the box: 0:00:75 -> 0:01:15
+  if (type === "duration") input.addEventListener("blur", () => {
+    if (!input.value) return;
+    const tidy = formatHMS(toSeconds(input.value));
+    if (tidy === input.value) return;
+    input.value = tidy;
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+  });
 });
 
 document.querySelectorAll("[data-key]").forEach(field => {
@@ -213,34 +238,12 @@ if (DISTANCE_PRESETS[distanceSelect.value] && Object.values(legDistanceInputs).e
   fillPresetDistances();
 }
 
-// An empty time box opens the picker at the current time of day, which makes no
-// sense for a duration. Filling in 00:00 just before it opens starts the wheel
-// at zero; if nothing is picked, the box is emptied again on the way out.
-document.querySelectorAll("[data-goal-time]").forEach(input => {
-  let autoFilled = false;
-  const startAtZero = () => {
-    if (input.value) return;
-    input.value = "00:00";
-    autoFilled = true;
-  };
-  input.addEventListener("pointerdown", startAtZero);  // before the wheel opens
-  input.addEventListener("focus", startAtZero);        // keyboard
-  input.addEventListener("input", () => { autoFilled = false; });
-  input.addEventListener("blur", () => {
-    if (autoFilled && input.value === "00:00") input.value = "";
-    autoFilled = false;
-  });
-});
-
 // Goal total and paces, worked out from the goal times and the leg distances
 function raceDistances() {
   const read = input => parseFloat(input.value.replace(/,/g, "")) || 0;
   return { swim: read(legDistanceInputs.swim), bike: read(legDistanceInputs.bike), run: read(legDistanceInputs.run) };
 }
-const legSeconds = leg => {
-  const [hours, minutes] = String(settings.fields[leg + "Time"] || "0:0").split(":").map(Number);
-  return (hours || 0) * 3600 + (minutes || 0) * 60;
-};
+const legSeconds = leg => toSeconds(settings.fields[leg + "Time"] || 0);
 const formatClock = seconds => {
   seconds = Math.round(seconds);
   const h = Math.floor(seconds / 3600), m = Math.floor(seconds / 60) % 60, s = seconds % 60;
@@ -252,7 +255,7 @@ function updateGoalMaths() {
   const d = raceDistances();
   const times = Object.fromEntries(GOAL_LEGS.map(leg => [leg, legSeconds(leg)]));
   const total = Object.values(times).reduce((sum, t) => sum + t, 0);
-  document.getElementById("goalTotal").textContent = total ? formatClock(total) : NOT_SET;
+  document.getElementById("goalTotal").textContent = total ? formatHMS(total) : NOT_SET;
 
   document.getElementById("paceSwim").textContent =
     times.goalSwim && d.swim ? `${formatClock(times.goalSwim / (d.swim / 100))} /100m` : NOT_SET;
@@ -271,33 +274,70 @@ document.getElementById("view-events").addEventListener("input", updateGoalMaths
 document.getElementById("view-events").addEventListener("change", updateGoalMaths);
 updateGoalMaths();
 
-// Map buttons for the venue and accommodation, shown once there's an address.
-// Websites can't open the phone's own "choose a maps app" menu on iPhone, so
-// the button opens the default maps app for the device instead:
-//   iPhone, iPad, Mac  Apple Maps (maps.apple.com links open the Maps app)
-//   Android            a geo: link, which opens the default maps app
-//   anything else      Google Maps in the browser
-// A pasted maps link (http/https only) is opened as it is.
-function mapsLinkFor(address) {
-  const query = encodeURIComponent(address);
-  const ua = navigator.userAgent;
-  if (/iPhone|iPad|iPod|Macintosh/.test(ua)) return `https://maps.apple.com/?q=${query}`;
-  if (/Android/.test(ua)) return `geo:0,0?q=${query}`;
-  return `https://www.google.com/maps/search/?api=1&query=${query}`;
-}
-document.querySelectorAll("[data-map-for]").forEach(button => {
-  const input = document.getElementById(button.dataset.mapFor);
-  const showButton = () => { button.hidden = !input.value.trim(); };
-  input.addEventListener("input", showButton);
-  showButton();
+// Location boxes (venue, accommodation) take a pasted maps link or an address.
+// The pin button opens it in a maps app. On iPhone, a home-screen app opens
+// ordinary web links in its own built-in browser, so the maps apps' own link
+// types are used to jump straight into the app:
+//   Apple device  address or Apple Maps link -> maps:// (the Maps app)
+//                 Google Maps link -> the Google Maps app, or the web page if
+//                 the app isn't installed
+//   Android       address -> geo: (the default maps app); links open normally,
+//                 and Android hands maps links to the right app
+//   elsewhere     Google Maps in the browser
+const IS_APPLE = /iPhone|iPad|iPod|Macintosh/.test(navigator.userAgent);
+const IS_ANDROID = /Android/.test(navigator.userAgent);
+const GOOGLE_MAPS_LINK = /^https?:\/\/(maps\.app\.goo\.gl|goo\.gl\/maps|maps\.google\.[a-z.]+|(www\.)?google\.[a-z.]+\/maps)/i;
+const APPLE_MAPS_LINK = /^https?:\/\/maps\.apple\.com\/?/i;
+const isWebLink = text => /^https?:\/\//i.test(text);
+const openInBrowser = url => window.open(url, "_blank", "noopener,noreferrer");
 
-  button.addEventListener("click", () => {
-    const address = input.value.trim();
-    const link = /^https?:\/\//i.test(address) ? address : mapsLinkFor(address);
-    if (link.startsWith("geo:")) location.href = link;  // hands over to the maps app
-    else window.open(link, "_blank", "noopener,noreferrer");
+// Try an app's own link; if the page is still showing shortly after (the app
+// isn't installed), fall back to the web version
+function openAppOrFallback(appUrl, webUrl) {
+  let leftPage = false;
+  const onHide = () => { if (document.visibilityState === "hidden") leftPage = true; };
+  document.addEventListener("visibilitychange", onHide);
+  location.href = appUrl;
+  setTimeout(() => {
+    document.removeEventListener("visibilitychange", onHide);
+    if (!leftPage) openInBrowser(webUrl);
+  }, 1500);
+}
+
+// Where a location should open: { app } (switch to an app), { web } (browser),
+// or { app, web } (try the app, fall back to the web page)
+function locationTarget(text) {
+  const query = encodeURIComponent(text);
+  if (IS_APPLE) {
+    if (GOOGLE_MAPS_LINK.test(text)) return { app: "comgooglemapsurl://" + text.replace(/^https?:\/\//i, ""), web: text };
+    if (APPLE_MAPS_LINK.test(text)) return { app: text.replace(APPLE_MAPS_LINK, "maps://") };
+    if (isWebLink(text)) return { web: text };
+    return { app: `maps://?q=${query}` };
+  }
+  if (isWebLink(text)) return { web: text };
+  if (IS_ANDROID) return { app: `geo:0,0?q=${query}` };
+  return { web: `https://www.google.com/maps/search/?api=1&query=${query}` };
+}
+function openLocation(text) {
+  const { app, web } = locationTarget(text);
+  if (app && web) openAppOrFallback(app, web);
+  else if (app) location.href = app;
+  else openInBrowser(web);
+}
+
+// Buttons beside location and website boxes, shown once the box has something in it
+function linkButtons(selector, idAttribute, open) {
+  document.querySelectorAll(selector).forEach(button => {
+    const input = document.getElementById(button.dataset[idAttribute]);
+    const showButton = () => { button.hidden = !input.value.trim(); };
+    input.addEventListener("input", showButton);
+    showButton();
+    button.addEventListener("click", () => open(input.value.trim()));
   });
-});
+}
+linkButtons("[data-map-for]", "mapFor", openLocation);
+// Website boxes: add https:// if it was left off; only web links are ever opened
+linkButtons("[data-link-for]", "linkFor", text => openInBrowser(isWebLink(text) ? text : "https://" + text));
 
 // Race name under the packing and tasks titles
 function renderRaceLine() {

@@ -32,7 +32,7 @@ to drop their old cache straight away (they update on next launch either way).
   in your browser's localStorage on this device. Nothing is sent to a server.
   "Reset for a new race" in settings clears the race-specific parts.
 - Nothing is sent anywhere unless you tap a map button, which opens the address
-  in the device's maps app (Apple Maps on iPhone, the default app on Android).
+  in a maps app (Apple Maps or Google Maps on iPhone, the default app on Android).
 - No analytics, tracking, cookies or third-party scripts.
 
 ## Security
