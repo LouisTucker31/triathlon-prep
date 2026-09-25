@@ -285,6 +285,8 @@ updateGoalMaths();
 //                 and Android hands maps links to the right app
 //   elsewhere     Google Maps in the browser
 const IS_APPLE = /iPhone|iPad|iPod|Macintosh/.test(navigator.userAgent);
+// iPadOS reports itself as a Mac, so a touch screen marks it as iOS
+const IS_IOS = /iPhone|iPad|iPod/.test(navigator.userAgent) || (/Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
 const IS_ANDROID = /Android/.test(navigator.userAgent);
 const GOOGLE_MAPS_LINK = /^https?:\/\/(maps\.app\.goo\.gl|goo\.gl\/maps|maps\.google\.[a-z.]+|(www\.)?google\.[a-z.]+\/maps)/i;
 const APPLE_MAPS_LINK = /^https?:\/\/maps\.apple\.com\/?/i;
@@ -336,8 +338,15 @@ function linkButtons(selector, idAttribute, open) {
   });
 }
 linkButtons("[data-map-for]", "mapFor", openLocation);
-// Website boxes: add https:// if it was left off; only web links are ever opened
-linkButtons("[data-link-for]", "linkFor", text => openInBrowser(isWebLink(text) ? text : "https://" + text));
+// Website boxes: add https:// if it was left off; only web links are ever opened.
+// On iPhone, x-safari-https:// (iOS 17+) opens the page in Safari itself rather
+// than the home-screen app's built-in browser; older iOS falls back to that.
+function openWebsite(text) {
+  const url = isWebLink(text) ? text : "https://" + text;
+  if (IS_IOS) openAppOrFallback("x-safari-" + url, url);
+  else openInBrowser(url);
+}
+linkButtons("[data-link-for]", "linkFor", openWebsite);
 
 // Race name under the packing and tasks titles
 function renderRaceLine() {

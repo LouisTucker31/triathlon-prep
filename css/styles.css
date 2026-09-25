@@ -140,7 +140,7 @@ input, select, textarea { font-size: max(var(--input-size), 1em) !important; }
 .map-field input { flex: 1; min-width: 0; }
 .map-button {
   flex: none; display: grid; place-items: center; width: 40px; height: 32px; margin: -4px 0;
-  padding: 0; border: 0; border-radius: var(--radius-sm); background: var(--head); color: var(--focus); cursor: pointer;
+  padding: 0; border: 0; border-radius: var(--radius-sm); background: none; color: var(--text); cursor: pointer;
 }
 .map-button[hidden] { display: none; }
 .map-button svg { width: 22px; height: 22px; fill: currentColor; }
