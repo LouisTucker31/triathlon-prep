@@ -114,8 +114,8 @@ const EventPdf = (() => {
       if (section.table) {
         // A header row, then one row per entry and a bold total. The first column
         // (the row names) is narrower; the rest share the width equally. An
-        // optional divider separates groups of columns (goal | actual).
-        const { columns, rows, total, dividerBefore } = section.table;
+        // optional list of dividers separates groups of columns (leg | goal | actual).
+        const { columns, rows, total, dividersBefore = [] } = section.table;
         const HEAD_H = 24, ROW_H = 26, FIRST_W = CONTENT_W * 0.18;
         const restW = (CONTENT_W - FIRST_W) / (columns.length - 1);
         const colLeft = c => MARGIN + (c === 0 ? 0 : FIRST_W + (c - 1) * restW);
@@ -124,7 +124,7 @@ const EventPdf = (() => {
         const h = HEAD_H + allRows.length * ROW_H;
         roundedBox(MARGIN, y, CONTENT_W, h, 8, COLOURS.border);
         line(MARGIN, y + HEAD_H, MARGIN + CONTENT_W, y + HEAD_H, COLOURS.border);
-        if (dividerBefore) line(colLeft(dividerBefore), y, colLeft(dividerBefore), y + h, COLOURS.border);
+        dividersBefore.forEach(c => line(colLeft(c), y, colLeft(c), y + h, COLOURS.border));
         columns.forEach((label, c) => text(colLeft(c) + PAD, y + 15.5, fit(label, 8, true, colWidth(c)), 8, true, COLOURS.muted));
         allRows.forEach((cells, r) => {
           const rowY = y + HEAD_H + r * ROW_H, isTotal = total && r === allRows.length - 1;

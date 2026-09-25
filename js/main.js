@@ -595,7 +595,7 @@ function eventSummary() {
   }
   const goalTotal = legTotal("goal"), actualTotal = legTotal("actual");
   sections.push({ heading: "Goals and results", table: {
-    columns: ["Leg", "Goal time", "Goal pace", "Actual time", "Actual pace"], rows, dividerBefore: 3,
+    columns: ["Leg", "Goal time", "Goal pace", "Actual time", "Actual pace"], rows, dividersBefore: [1, 3],
     total: type === "triathlon" ? ["Total", clock(goalTotal), "", clock(actualTotal), ""] : null
   } });
 
