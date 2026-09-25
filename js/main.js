@@ -429,6 +429,25 @@ function renderRaceLine() {
 }
 renderRaceLine();
 
+// Dates read "03 Apr 27": the text is laid over the phone's date box, which
+// can't be reformatted itself (written by hand as some browsers use "Sept")
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+function updateDateDisplays() {
+  document.querySelectorAll(".date-field").forEach(wrapper => {
+    const [year, month, day] = wrapper.querySelector("input").value.split("-");
+    const text = year ? `${day} ${MONTHS[Number(month) - 1]} ${year.slice(-2)}` : "";
+    wrapper.querySelector(".date-field__text").textContent = text;
+    wrapper.classList.toggle("has-value", !!text);
+  });
+}
+document.querySelectorAll(".date-field input").forEach(input => input.addEventListener("input", updateDateDisplays));
+updateDateDisplays();
+
+// Focus outlines on boxes are for keyboard users only: Tab turns them on,
+// touching or clicking turns them off again
+document.addEventListener("keydown", e => { if (e.key === "Tab") document.documentElement.classList.add("using-keyboard"); });
+document.addEventListener("pointerdown", () => document.documentElement.classList.remove("using-keyboard"));
+
 // Event type: switches the packing and task lists, the events page fields and
 // the packing page title. Only triathlon has lists so far.
 const eventSelect = document.getElementById("eventType");
@@ -462,6 +481,7 @@ eventSelect.addEventListener("change", () => {
   settings.eventType = eventSelect.value;
   saveSettings();
   loadEventFields();
+  updateDateDisplays();
   applyEventVisibility();
   renderChecklists();
   renderRaceLine();

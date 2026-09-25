@@ -104,7 +104,20 @@ input, select, textarea { font-size: max(var(--input-size), 1em) !important; }
 .field select { background-image: linear-gradient(45deg, transparent 50%, var(--muted-2) 50%), linear-gradient(135deg, var(--muted-2) 50%, transparent 50%);
   background-position: calc(100% - 10px) 55%, calc(100% - 5px) 55%; background-size: 5px 5px; background-repeat: no-repeat; padding-right: 20px; }
 .field textarea { resize: vertical; min-height: 60px; }
-.field:focus-within { background: var(--head); outline: 2px solid var(--focus); outline-offset: -2px; }
+/* The box you're typing in gets a faint background; the blue outline shows only
+   for keyboard users (main.js sets .using-keyboard after Tab is pressed) */
+.field:focus-within { background: var(--head); }
+.using-keyboard .field:focus-within { outline: 2px solid var(--focus); outline-offset: -2px; }
+
+/* Dates show as "03 Apr 27": the formatted text sits over the native date box,
+   which stays underneath so tapping still opens the phone's date picker */
+.field > .date-field { display: block; position: relative; margin: 0; font-size: inherit; color: inherit; }
+.date-field.has-value input,
+.date-field.has-value input::-webkit-datetime-edit { color: transparent; }
+.date-field__text {
+  position: absolute; left: 0; top: 50%; transform: translateY(-50%); pointer-events: none;
+  color: var(--text); font-size: max(var(--input-size), 1rem);
+}
 /* Rows of fields share the width equally; fields hidden for the current event
    type drop out, and dividers are drawn only between visible fields */
 .field-row { display: flex; border-bottom: 1px solid var(--line); }
