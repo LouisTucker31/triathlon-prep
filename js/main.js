@@ -13,7 +13,7 @@ const storage = {
   }
 };
 
-const STORAGE_KEYS = { packing: "tri-packing-list-v2", tasks: "tri-tasks-v1", settings: "tri-settings-v1", tab: "tri-tab" };
+const STORAGE_KEYS = { packing: "tri-packing-list-v2", tasks: "tri-tasks-v1", settings: "tri-settings-v1", view: "tri-view" };
 
 function buildChecklist(sections, storageKey, listEl, progressTextEl, progressFillEl, doneWord) {
   const state = storage.read(storageKey, {});
@@ -118,7 +118,7 @@ function formatNumber(raw) {
   whole = whole.replace(/^0+(?=\d)/, "").slice(0, 7).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   return fraction === undefined ? whole : `${whole || "0"}.${fraction.slice(0, 2)}`;
 }
-document.querySelectorAll("#view-settings [data-number]").forEach(input => {
+document.querySelectorAll(".views [data-number]").forEach(input => {
   // Registered before the save handler below, so the formatted value is what's saved
   input.addEventListener("input", () => {
     const before = input.value;
@@ -133,7 +133,7 @@ document.querySelectorAll("#view-settings [data-number]").forEach(input => {
   }, { capture: true });
 });
 
-document.querySelectorAll("#view-settings [data-key]").forEach(field => {
+document.querySelectorAll(".views [data-key]").forEach(field => {
   const key = field.dataset.key;
   if (settings.fields[key] != null) field.value = settings.fields[key];
   // Tidy older free-text distances, e.g. "1.9km" -> "1.9"
@@ -280,29 +280,45 @@ document.querySelectorAll("[data-theme-choice]").forEach(button => button.addEve
 darkQuery.addEventListener("change", applyTheme);
 applyTheme();
 
-// Tabs
-const VIEWS = ["packing", "tasks", "settings"];
+// Views: the nav tabs are packing, tasks and events (in that order); settings
+// is opened from the round button on the packing and tasks pages
+const TAB_VIEWS = ["packing", "tasks", "events"];
+const VIEWS = [...TAB_VIEWS, "settings"];
+const VIEWS_WITH_SETTINGS_BUTTON = ["packing", "tasks"];
 const APP_TITLE = "Triathlon packing list";
 const nav = document.querySelector(".lg-nav");
 const tabs = [...nav.querySelectorAll(".lg-nav__item")];
-function showView(index) {
-  VIEWS.forEach((view, i) => { document.getElementById("view-" + view).hidden = i !== index; });
-  const title = document.querySelector(`#view-${VIEWS[index]} h1`);
+const settingsButton = document.getElementById("openSettings");
+
+function showView(name) {
+  VIEWS.forEach(view => { document.getElementById("view-" + view).hidden = view !== name; });
+  settingsButton.hidden = !VIEWS_WITH_SETTINGS_BUTTON.includes(name);
+  const title = document.querySelector(`#view-${name} h1`);
   document.title = title.textContent === APP_TITLE ? APP_TITLE : `${title.textContent} – ${APP_TITLE}`;
-  storage.write(STORAGE_KEYS.tab, index);
+  storage.write(STORAGE_KEYS.view, name);
   return title;
 }
-const savedTab = Number(storage.read(STORAGE_KEYS.tab, 0));
-const startTab = Number.isInteger(savedTab) ? Math.max(0, Math.min(VIEWS.length - 1, savedTab)) : 0;
-tabs.forEach((tab, i) => {
-  tab.classList.toggle("is-active", i === startTab);
-  if (i === startTab) tab.setAttribute("aria-current", "page"); else tab.removeAttribute("aria-current");
-});
-showView(startTab);
-nav.addEventListener("lg:change", e => {
-  const title = showView(e.detail.index);
+function goToView(name) {
+  const title = showView(name);
   window.scrollTo(0, 0);
   title.focus({ preventScroll: true }); // so screen readers announce the new view
+}
+
+storage.remove("tri-tab"); // replaced by tri-view when settings left the nav
+const savedView = storage.read(STORAGE_KEYS.view, "packing");
+const startView = VIEWS.includes(savedView) ? savedView : "packing";
+// Set the highlighted tab before the nav script reads it (none for settings)
+tabs.forEach((tab, i) => {
+  const active = TAB_VIEWS[i] === startView;
+  tab.classList.toggle("is-active", active);
+  if (active) tab.setAttribute("aria-current", "page"); else tab.removeAttribute("aria-current");
+});
+showView(startView);
+
+nav.addEventListener("lg:change", e => goToView(TAB_VIEWS[e.detail.index]));
+settingsButton.addEventListener("click", () => {
+  nav.dispatchEvent(new CustomEvent("lg:set", { detail: { index: -1 } }));
+  goToView("settings");
 });
 
 // Reset for a new race: untick both lists and clear race details. My details,

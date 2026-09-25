@@ -8,7 +8,7 @@ Live: https://louistucker31.github.io/triathlon-prep/
 ## Structure
 
 ```
-index.html              the whole app (three views: packing, tasks, settings)
+index.html              the whole app (views: packing, tasks, events, settings)
 manifest.webmanifest    install details (name, icons, colours)
 sw.js                   service worker: offline support and updates (must stay in the root)
 css/styles.css

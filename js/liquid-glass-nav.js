@@ -1,5 +1,5 @@
 // Floating tab bar with a "liquid glass" refraction effect. Sets up the
-// <nav class="lg-nav"> on the page and fires an "lg:change" event with
+// <nav class="lg-nav"> (and any .lg-button) on the page. The nav fires "lg:change" with
 // { index, item } when a tab is chosen (main.js listens for it).
 //
 // createLiquidGlass and its helpers below are the core of
@@ -206,18 +206,28 @@
     fallbackFilter: "blur(var(--lg-lens-blur)) saturate(var(--lg-saturate))"
   };
 
+  // Glass lens plus the little iOS-style "squish" on press, for any glass control
+  function initSurface(surface) {
+    const lens = surface.querySelector(".lg-surface__lens");
+    const glass = lens ? createLiquidGlass(lens, { ...GLASS_OPTIONS, borderRadius: surface.offsetHeight / 2 }) : null;
+    if (glass && glass.isActive) surface.classList.add("lg--refract");
+    surface.addEventListener("pointerdown", () => surface.classList.add("is-pressed"));
+    ["pointerup", "pointercancel", "pointerleave"].forEach(type =>
+      surface.addEventListener(type, () => surface.classList.remove("is-pressed")));
+  }
+
   function initNav(nav) {
-    const lens = nav.querySelector(".lg-surface__lens");
     const tabs = [...nav.querySelectorAll(".lg-nav__item")];
     const indicator = nav.querySelector(".lg-nav__indicator");
+    initSurface(nav);
 
-    const glass = lens ? createLiquidGlass(lens, { ...GLASS_OPTIONS, borderRadius: nav.offsetHeight / 2 }) : null;
-    if (glass && glass.isActive) nav.classList.add("lg--refract");
-
-    const activeTab = () => tabs.find(tab => tab.classList.contains("is-active")) || tabs[0];
+    // null when the current page isn't one of the tabs (e.g. settings)
+    const activeTab = () => tabs.find(tab => tab.classList.contains("is-active")) || null;
 
     function moveIndicator(tab, animate) {
-      if (!indicator || !tab) return;
+      if (!indicator) return;
+      indicator.classList.toggle("is-hidden", !tab);
+      if (!tab) return;
       if (!animate) indicator.classList.add("no-anim");
       const overhang = parseFloat(getComputedStyle(nav).getPropertyValue("--lg-nav-bubble-overhang")) || 0;
       indicator.style.width = (tab.offsetWidth + overhang * 2) + "px";
@@ -228,27 +238,27 @@
       }
     }
 
-    function select(tab) {
+    function select(tab, announce) {
       tabs.forEach(t => {
         t.classList.toggle("is-active", t === tab);
         if (t === tab) t.setAttribute("aria-current", "page"); else t.removeAttribute("aria-current");
       });
       moveIndicator(tab, true);
-      nav.dispatchEvent(new CustomEvent("lg:change", { detail: { index: tabs.indexOf(tab), item: tab } }));
+      if (announce) nav.dispatchEvent(new CustomEvent("lg:change", { detail: { index: tabs.indexOf(tab), item: tab } }));
     }
 
-    tabs.forEach(tab => tab.addEventListener("click", () => select(tab)));
-
-    // Little "squish" when pressed, like iOS
-    nav.addEventListener("pointerdown", () => nav.classList.add("is-pressed"));
-    ["pointerup", "pointercancel", "pointerleave"].forEach(type =>
-      nav.addEventListener(type, () => nav.classList.remove("is-pressed")));
+    tabs.forEach(tab => tab.addEventListener("click", () => select(tab, true)));
+    // Lets the page change the highlighted tab without a click; index -1 clears it
+    nav.addEventListener("lg:set", e => select(tabs[e.detail.index] || null, false));
 
     moveIndicator(activeTab(), false);
     new ResizeObserver(() => moveIndicator(activeTab(), false)).observe(nav);
   }
 
-  const initAll = () => document.querySelectorAll(".lg-nav").forEach(initNav);
+  const initAll = () => {
+    document.querySelectorAll(".lg-nav").forEach(initNav);
+    document.querySelectorAll(".lg-button").forEach(initSurface);
+  };
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", initAll);
   else initAll();
 })();
