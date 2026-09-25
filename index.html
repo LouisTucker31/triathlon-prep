@@ -43,7 +43,7 @@
     <div id="tasksList"></div>
   </section>
 
-  <section class="view" id="view-events" hidden>
+  <section class="view view--has-button" id="view-events" hidden>
     <h1 tabindex="-1">Events</h1>
 
     <h2 class="settings-heading">Race details</h2>
@@ -113,11 +113,11 @@
 
     <h2 class="settings-heading">Reset</h2>
     <button type="button" class="button-danger" id="resetApp">Reset for a new race</button>
-    <p class="settings-note">Unticks every packing item and task, and clears your race details. Your details and appearance are kept.</p>
+    <p class="settings-note">Clears Packing, Tasks and Events. Everything on this Settings page is kept.</p>
 
     <dialog class="confirm" id="resetDialog" aria-labelledby="resetTitle" aria-describedby="resetDesc">
       <h2 id="resetTitle">Reset for a new race?</h2>
-      <p id="resetDesc">This unticks every packing item and task and clears your race details. Your details stay. You can't undo this.</p>
+      <p id="resetDesc">This unticks everything on Packing and Tasks and clears Events. Your settings stay. You can't undo this.</p>
       <div class="confirm__actions">
         <button type="button" class="confirm__cancel" id="resetCancel" autofocus>Keep everything</button>
         <button type="button" class="confirm__ok" id="resetConfirm">Reset</button>
@@ -146,7 +146,7 @@
   <div class="lg-nav__items">
     <span class="lg-nav__indicator" aria-hidden="true"></span>
     <button type="button" class="lg-nav__item is-active" aria-current="page">
-      <span class="lg-nav__icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960"><path d="M319-240v-480h38q0-54 36-87t86-33q50 0 86 33t36 87h38v480H319Zm82-480h156q0-34-23.5-54.5T479-795q-31 0-54.5 20.5T401-720Zm283 480v-480h56q24 0 42 18t18 42v360q0 24-18 42t-42 18h-56Zm-466 0q-24 0-42-18t-18-42v-360q0-24 18-42t42-18h56v480h-56ZM110-120q-13 0-21.5-8.5T80-150q0-13 8.5-21.5T110-180h740q13 0 21.5 8.5T880-150q0 13-8.5 21.5T850-120H110Z"/></svg></span>
+      <span class="lg-nav__icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960"><path d="M260-120q-24.75 0-42.37-17.63Q200-155.25 200-180v-480q0-24.75 17.63-42.38Q235.25-720 260-720h105v-100q0-24.75 17.63-42.38Q400.25-880 425-880h110q24.75 0 42.38 17.62Q595-844.75 595-820v100h105q24.75 0 42.38 17.62Q760-684.75 760-660v480q0 24.75-17.62 42.37Q724.75-120 700-120q0 17-11.5 28.5T660-80q-17 0-28.5-11.5T620-120H340q0 17-11.5 28.5T300-80q-17 0-28.5-11.5T260-120Zm134.82-480q-12.82 0-21.32 8.62-8.5 8.63-8.5 21.38v300q0 12.75 8.68 21.37 8.67 8.63 21.5 8.63 12.82 0 21.32-8.63 8.5-8.62 8.5-21.37v-300q0-12.75-8.68-21.38-8.67-8.62-21.5-8.62Zm170 0q-12.82 0-21.32 8.62-8.5 8.63-8.5 21.38v300q0 12.75 8.68 21.37 8.67 8.63 21.5 8.63 12.82 0 21.32-8.63 8.5-8.62 8.5-21.37v-300q0-12.75-8.68-21.38-8.67-8.62-21.5-8.62ZM425-720h110v-100H425v100Z"/></svg></span>
       <span class="lg-nav__label">Packing</span>
     </button>
     <button type="button" class="lg-nav__item">
@@ -154,7 +154,7 @@
       <span class="lg-nav__label">Tasks</span>
     </button>
     <button type="button" class="lg-nav__item">
-      <span class="lg-nav__icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M8 2.5a1 1 0 0 1 1 1V4h6v-.5a1 1 0 1 1 2 0V4h1.5A2.5 2.5 0 0 1 21 6.5v12a2.5 2.5 0 0 1-2.5 2.5h-13A2.5 2.5 0 0 1 3 18.5v-12A2.5 2.5 0 0 1 5.5 4H7v-.5a1 1 0 0 1 1-1ZM19 10H5v8.5c0 .28.22.5.5.5h13a.5.5 0 0 0 .5-.5V10Zm-11 2.5h3v3H8v-3Z"/></svg></span>
+      <span class="lg-nav__icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960"><path d="M596.82-220Q556-220 528-248.18q-28-28.19-28-69Q500-358 528.18-386q28.19-28 69-28Q638-414 666-385.82q28 28.19 28 69Q694-276 665.82-248q-28.19 28-69 28ZM180-80q-24 0-42-18t-18-42v-620q0-24 18-42t42-18h65v-28q0-13.6 9.2-22.8 9.2-9.2 22.8-9.2 14.02 0 23.51 9.2Q310-861.6 310-848v28h340v-28q0-13.6 9.2-22.8 9.2-9.2 22.8-9.2 14.03 0 23.51 9.2Q715-861.6 715-848v28h65q24 0 42 18t18 42v620q0 24-18 42t-42 18H180Zm0-60h600v-430H180v430Z"/></svg></span>
       <span class="lg-nav__label">Events</span>
     </button>
   </div>

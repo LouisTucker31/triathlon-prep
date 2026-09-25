@@ -374,7 +374,7 @@ button.lg-nav__item { border: 0; background: none; margin: 0; -webkit-appearance
 /* Holds the SVG distortion filter; takes no space */
 .lg-filters { position: absolute; width: 0; height: 0; overflow: hidden; }
 
-/* Round glass button (settings), top right of the packing and tasks pages.
+/* Round glass button (settings), top right of the tab pages.
    Same glass layers, distortion and lit edge as the tab bar. */
 .lg-button {
   position: fixed;

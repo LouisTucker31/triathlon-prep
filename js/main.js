@@ -281,10 +281,10 @@ darkQuery.addEventListener("change", applyTheme);
 applyTheme();
 
 // Views: the nav tabs are packing, tasks and events (in that order); settings
-// is opened from the round button on the packing and tasks pages
+// is opened from the round button shown on every tab page
 const TAB_VIEWS = ["packing", "tasks", "events"];
 const VIEWS = [...TAB_VIEWS, "settings"];
-const VIEWS_WITH_SETTINGS_BUTTON = ["packing", "tasks"];
+const VIEWS_WITH_SETTINGS_BUTTON = TAB_VIEWS;
 const APP_TITLE = "Triathlon packing list";
 const nav = document.querySelector(".lg-nav");
 const tabs = [...nav.querySelectorAll(".lg-nav__item")];
@@ -321,7 +321,8 @@ settingsButton.addEventListener("click", () => {
   goToView("settings");
 });
 
-// Reset for a new race: untick both lists and clear race details. My details,
+// Reset for a new race: clears everything outside settings (packing and task
+// ticks, and the race details on the events page). My details,
 // theme and current tab are kept.
 const resetDialog = document.getElementById("resetDialog");
 document.getElementById("resetApp").addEventListener("click", () => resetDialog.showModal());
