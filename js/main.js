@@ -273,7 +273,7 @@ renderRaceLine();
 const darkQuery = window.matchMedia("(prefers-color-scheme: dark)");
 const themeColorMeta = document.querySelector('meta[name="theme-color"]');
 // Browser bar colour for each theme; keep in step with --bg in css/styles.css
-const THEME_COLORS = { light: "#ffffff", dark: "#000000" };
+const THEME_COLORS = { light: "#ffffff", dark: "#0b0b0c" };
 function applyTheme() {
   const dark = settings.theme === "dark" || (settings.theme === "system" && darkQuery.matches);
   document.documentElement.dataset.theme = dark ? "dark" : "light";
