@@ -179,19 +179,17 @@
   </div>
   <div class="confirm__actions">
     <button type="button" class="confirm__cancel" id="actualsCancel">Cancel</button>
-    <button type="button" class="confirm__primary" id="actualsDownload">Download PDF</button>
+    <button type="button" class="confirm__primary" id="actualsDownload">Next</button>
   </div>
 </dialog>
 
-<!-- Light or dark card for the social image, asked after the actual times -->
-<dialog class="confirm" id="styleDialog" aria-labelledby="styleTitle" aria-describedby="styleDesc">
-  <h2 id="styleTitle" tabindex="-1" autofocus>Choose a style</h2>
-  <p id="styleDesc">Pick how your race card looks, then download it.</p>
-  <div class="style-options">
-    <button type="button" class="style-option" data-image-theme="light" aria-pressed="false"><span class="style-option__swatch style-option__swatch--light" aria-hidden="true"><span></span></span>Light</button>
-    <button type="button" class="style-option" data-image-theme="dark" aria-pressed="false"><span class="style-option__swatch style-option__swatch--dark" aria-hidden="true"><span></span></span>Dark</button>
-  </div>
-  <button type="button" class="confirm__cancel style-action" id="styleAction">Cancel</button>
+<!-- Download options, one step at a time (image: size then style; PDF: layout).
+     main.js fills in the title and options for each step. -->
+<dialog class="confirm choice" id="choiceDialog" aria-labelledby="choiceTitle" aria-describedby="choiceDesc">
+  <h2 id="choiceTitle" tabindex="-1" autofocus></h2>
+  <p id="choiceDesc"></p>
+  <div class="choice-options" id="choiceOptions"></div>
+  <button type="button" class="confirm__cancel choice-action" id="choiceAction">Cancel</button>
 </dialog>
 
 <!-- Settings: a full-screen pop-up over everything, including the nav. The

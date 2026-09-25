@@ -1,10 +1,11 @@
-// Writes the one-page A4 "Download this event" PDF. Hand-written rather than a
-// library so it works offline and needs no third-party script: text in PDF's
-// built-in Helvetica fonts, lines, rounded boxes and clickable links.
+// Writes the one-page A4 "Download this event" PDF, portrait or landscape.
+// Hand-written rather than a library, so it works offline and needs no
+// third-party script: text in PDF's built-in Helvetica fonts, lines, rounded
+// boxes and clickable links.
 // Takes a summary model from main.js ({ title, subtitle, sections, footer }).
 const EventPdf = (() => {
-  const PAGE_W = 595.28, PAGE_H = 841.89, MARGIN = 40;
-  const CONTENT_W = PAGE_W - MARGIN * 2;
+  // A4 in points, either way up
+  const PAGES = { portrait: [595.28, 841.89], landscape: [841.89, 595.28] }, MARGIN = 40;
   // Match the app: near-black text, grey labels, light borders and dividers
   const COLOURS = {
     text: [0.102, 0.102, 0.102],
@@ -51,16 +52,18 @@ const EventPdf = (() => {
   }).join("") + ")";
   const n = value => Number(value.toFixed(2));
 
-  function render(model) {
+  function render(model, orientation) {
+    const [pageW, pageH] = PAGES[orientation] || PAGES.portrait;
+    const contentW = pageW - MARGIN * 2;
     const ops = [], links = [];
     const colour = (rgb, stroke) => `${rgb.map(n).join(" ")} ${stroke ? "RG" : "rg"}`;
     // y is measured from the top of the page; PDF measures from the bottom
     const text = (x, baseline, value, size, bold, rgb) =>
-      ops.push(`BT /${bold ? "F2" : "F1"} ${size} Tf ${colour(rgb)} ${n(x)} ${n(PAGE_H - baseline)} Td ${pdfString(value)} Tj ET`);
+      ops.push(`BT /${bold ? "F2" : "F1"} ${size} Tf ${colour(rgb)} ${n(x)} ${n(pageH - baseline)} Td ${pdfString(value)} Tj ET`);
     const line = (x1, y1, x2, y2, rgb, width = 0.75) =>
-      ops.push(`${width} w ${colour(rgb, true)} ${n(x1)} ${n(PAGE_H - y1)} m ${n(x2)} ${n(PAGE_H - y2)} l S`);
+      ops.push(`${width} w ${colour(rgb, true)} ${n(x1)} ${n(pageH - y1)} m ${n(x2)} ${n(pageH - y2)} l S`);
     function roundedBox(x, y, w, h, r, stroke) {
-      const k = r * 0.5523, top = PAGE_H - y, bottom = PAGE_H - y - h;   // 0.5523: circle from Béziers
+      const k = r * 0.5523, top = pageH - y, bottom = pageH - y - h;   // 0.5523: circle from Béziers
       const path = [
         `${n(x + r)} ${n(top)} m`, `${n(x + w - r)} ${n(top)} l`,
         `${n(x + w - r + k)} ${n(top)} ${n(x + w)} ${n(top - r + k)} ${n(x + w)} ${n(top - r)} c`,
@@ -74,89 +77,111 @@ const EventPdf = (() => {
       ops.push(`0.75 w ${colour(stroke, true)} ${path} S`);
     }
     const link = (x, y, w, h, url) => links.push({ x, y, w, h, url });
-
-    let y = MARGIN;
-    text(MARGIN, y + 24, fit(model.title, 26, true, CONTENT_W), 26, true, COLOURS.text);
-    y += 36;
-    if (model.subtitle) {
-      text(MARGIN, y + 11, fit(model.subtitle, 11, false, CONTENT_W), 11, false, COLOURS.muted);
-      y += 22;
-    }
-    line(MARGIN, y, PAGE_W - MARGIN, y, COLOURS.border);
-    y += 20;
-
     const PAD = 12;
-    model.sections.forEach(section => {
-      text(MARGIN + 2, y + 9, section.heading, 10, true, COLOURS.muted);
+
+    // Draws one section at (x, y) with width w; returns the y below it
+    function drawSection(section, x, w, y) {
+      text(x + 2, y + 9, section.heading, 10, true, COLOURS.muted);
       y += 16;
 
       if (section.fields) {
         // Label / value pairs in columns (two unless the section asks for more),
         // like the app's field groups. Empty values stay blank to write in by hand.
-        const ROW_H = 36, cols = section.columns || 2, colW = CONTENT_W / cols;
-        const count = section.fields.length, rows = Math.ceil(count / cols);
-        roundedBox(MARGIN, y, CONTENT_W, rows * ROW_H, 8, COLOURS.border);
-        section.fields.forEach((field, i) => {
-          const row = Math.floor(i / cols), col = i % cols;
-          const cellX = MARGIN + col * colW, cellY = y + row * ROW_H;
-          const last = i === count - 1;   // the last field stretches to fill a short final row
-          const width = (last ? MARGIN + CONTENT_W - cellX : colW) - PAD * 2;
-          if (row > 0 && col === 0) line(MARGIN, cellY, MARGIN + CONTENT_W, cellY, COLOURS.divider);
-          if (col > 0) line(cellX, cellY, cellX, cellY + ROW_H, COLOURS.divider);
-          text(cellX + PAD, cellY + 13, fit(field.label, 8, false, width), 8, false, COLOURS.muted);
-          const value = fit(field.value, 11, false, width);
-          text(cellX + PAD, cellY + 28, value, 11, false, field.link ? COLOURS.link : COLOURS.text);
-          if (field.link) link(cellX + PAD, cellY + 17, widthOf(value, 11, false), 14, field.link);
+        // Fields marked "long" (addresses, distances) get a row to themselves when
+        // the columns are narrow, as in the landscape layout.
+        const ROW_H = 36, cols = section.columns || 2, colW = w / cols;
+        const rows = [];
+        section.fields.forEach(field => {
+          const alone = field.long && colW < 220;
+          if (alone || !rows.length || rows[rows.length - 1].alone || rows[rows.length - 1].cells.length === cols) {
+            rows.push({ alone, cells: [] });
+          }
+          rows[rows.length - 1].cells.push(field);
         });
-        y += rows * ROW_H + 18;
-      }
-
-      if (section.table) {
-        // A header row, then one row per entry and a bold total. The first column
-        // (the row names) is narrower; the rest share the width equally. An
-        // optional list of dividers separates groups of columns (leg | goal | actual).
-        const { columns, rows, total, dividersBefore = [] } = section.table;
-        const HEAD_H = 24, ROW_H = 26, FIRST_W = CONTENT_W * 0.18;
-        const restW = (CONTENT_W - FIRST_W) / (columns.length - 1);
-        const colLeft = c => MARGIN + (c === 0 ? 0 : FIRST_W + (c - 1) * restW);
-        const colWidth = c => (c === 0 ? FIRST_W : restW) - PAD;
-        const allRows = total ? [...rows, total] : rows;
-        const h = HEAD_H + allRows.length * ROW_H;
-        roundedBox(MARGIN, y, CONTENT_W, h, 8, COLOURS.border);
-        line(MARGIN, y + HEAD_H, MARGIN + CONTENT_W, y + HEAD_H, COLOURS.border);
-        dividersBefore.forEach(c => line(colLeft(c), y, colLeft(c), y + h, COLOURS.border));
-        columns.forEach((label, c) => text(colLeft(c) + PAD, y + 15.5, fit(label, 8, true, colWidth(c)), 8, true, COLOURS.muted));
-        allRows.forEach((cells, r) => {
-          const rowY = y + HEAD_H + r * ROW_H, isTotal = total && r === allRows.length - 1;
-          if (r > 0) line(MARGIN, rowY, MARGIN + CONTENT_W, rowY, isTotal ? COLOURS.border : COLOURS.divider);
-          cells.forEach((cell, c) => {
-            const bold = isTotal || c === 0;
-            text(colLeft(c) + PAD, rowY + 17, fit(cell, 11, bold, colWidth(c)), 11, bold, COLOURS.text);
+        roundedBox(x, y, w, rows.length * ROW_H, 8, COLOURS.border);
+        rows.forEach((row, r) => {
+          const cellY = y + r * ROW_H;
+          if (r > 0) line(x, cellY, x + w, cellY, COLOURS.divider);
+          row.cells.forEach((field, col) => {
+            const cellX = x + col * colW;
+            const lastInRow = col === row.cells.length - 1;   // the last field stretches to fill its row
+            const width = (lastInRow ? x + w - cellX : colW) - PAD * 2;
+            if (col > 0) line(cellX, cellY, cellX, cellY + ROW_H, COLOURS.divider);
+            text(cellX + PAD, cellY + 13, fit(field.label, 8, false, width), 8, false, COLOURS.muted);
+            const value = fit(field.value, 11, false, width);
+            text(cellX + PAD, cellY + 28, value, 11, false, field.link ? COLOURS.link : COLOURS.text);
+            if (field.link) link(cellX + PAD, cellY + 17, widthOf(value, 11, false), 14, field.link);
           });
         });
-        y += h + 18;
+        return y + rows.length * ROW_H + 18;
       }
-    });
 
-    if (model.footer) text(MARGIN, PAGE_H - 28, model.footer, 8, false, COLOURS.muted);
-    return { content: ops.join("\n"), links };
+      // A header row, then one row per entry and a bold total. The first column
+      // (the row names) is narrower; the rest share the width equally. An
+      // optional list of dividers separates groups of columns (leg | goal | actual).
+      const { columns, rows, total, dividersBefore = [] } = section.table;
+      const HEAD_H = 24, ROW_H = 26, FIRST_W = w * 0.18;
+      const restW = (w - FIRST_W) / (columns.length - 1);
+      const colLeft = c => x + (c === 0 ? 0 : FIRST_W + (c - 1) * restW);
+      const colWidth = c => (c === 0 ? FIRST_W : restW) - PAD;
+      const allRows = total ? [...rows, total] : rows;
+      const h = HEAD_H + allRows.length * ROW_H;
+      roundedBox(x, y, w, h, 8, COLOURS.border);
+      line(x, y + HEAD_H, x + w, y + HEAD_H, COLOURS.border);
+      dividersBefore.forEach(c => line(colLeft(c), y, colLeft(c), y + h, COLOURS.border));
+      columns.forEach((label, c) => text(colLeft(c) + PAD, y + 15.5, fit(label, 8, true, colWidth(c)), 8, true, COLOURS.muted));
+      allRows.forEach((cells, r) => {
+        const rowY = y + HEAD_H + r * ROW_H, isTotal = total && r === allRows.length - 1;
+        if (r > 0) line(x, rowY, x + w, rowY, isTotal ? COLOURS.border : COLOURS.divider);
+        cells.forEach((cell, c) => {
+          const bold = isTotal || c === 0;
+          text(colLeft(c) + PAD, rowY + 17, fit(cell, 11, bold, colWidth(c)), 11, bold, COLOURS.text);
+        });
+      });
+      return y + h + 18;
+    }
+
+    let y = MARGIN;
+    text(MARGIN, y + 24, fit(model.title, 26, true, contentW), 26, true, COLOURS.text);
+    y += 36;
+    if (model.subtitle) {
+      text(MARGIN, y + 11, fit(model.subtitle, 11, false, contentW), 11, false, COLOURS.muted);
+      y += 22;
+    }
+    line(MARGIN, y, pageW - MARGIN, y, COLOURS.border);
+    y += 20;
+
+    if (orientation === "landscape") {
+      // Details on the left, the goals and results table on the right
+      const GAP = 24, leftW = contentW * 0.46, rightW = contentW - leftW - GAP;
+      let leftY = y, rightY = y;
+      model.sections.forEach(section => {
+        if (section.table) rightY = drawSection(section, MARGIN + leftW + GAP, rightW, rightY);
+        else leftY = drawSection(section, MARGIN, leftW, leftY);
+      });
+    } else {
+      model.sections.forEach(section => { y = drawSection(section, MARGIN, contentW, y); });
+    }
+
+    if (model.footer) text(MARGIN, pageH - 28, model.footer, 8, false, COLOURS.muted);
+    return { content: ops.join("\n"), links, pageW, pageH };
   }
 
-  function build(model) {
-    const { content, links } = render(model);
+  function build(model, orientation) {
+    const { content, links, pageW, pageH } = render(model, orientation);
     const objects = [];
     const add = body => objects.push(body);   // object number = index + 1
     add("<< /Type /Catalog /Pages 2 0 R >>");
     add("<< /Type /Pages /Kids [3 0 R] /Count 1 >>");
     const annotRefs = links.map((_, i) => `${7 + i} 0 R`).join(" ");
-    add(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${PAGE_W} ${PAGE_H}] ` +
+    add(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${pageW} ${pageH}] ` +
       `/Resources << /Font << /F1 5 0 R /F2 6 0 R >> >> /Contents 4 0 R` +
       (links.length ? ` /Annots [${annotRefs}]` : "") + " >>");
     add(`<< /Length ${content.length} >>\nstream\n${content}\nendstream`);
     add("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>");
     add("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>");
     links.forEach(l => add(`<< /Type /Annot /Subtype /Link /Border [0 0 0] ` +
-      `/Rect [${n(l.x)} ${n(PAGE_H - l.y - l.h)} ${n(l.x + l.w)} ${n(PAGE_H - l.y)}] ` +
+      `/Rect [${n(l.x)} ${n(pageH - l.y - l.h)} ${n(l.x + l.w)} ${n(pageH - l.y)}] ` +
       `/A << /S /URI /URI ${pdfString(l.url)} >> >>`));
     add(`<< /Title ${pdfString(model.title)} /Producer (Tri packing) >>`);
 

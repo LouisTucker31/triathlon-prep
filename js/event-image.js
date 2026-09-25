@@ -1,10 +1,18 @@
-// Draws the "Download this event" social image: a 1080 x 1350 (4:5) PNG race
-// card on a canvas, in the app's light or dark style with glass panels like the nav.
+// Draws the "Download this event" social image as a PNG race card on a canvas,
+// in the app's light or dark style with glass panels like the nav. Sizes suit
+// the main social formats; the layout is one column (scaled to fit, centred
+// vertically) or, for landscape, two columns side by side.
 // Takes a model from main.js ({ kicker, title, location, heroLabel, heroTime,
-// legs for triathlon or stats for single-sport events, footer }) and a theme,
-// and returns a PNG blob. No library, so it works offline.
+// legs for triathlon or stats for single-sport events, footer }), a theme and a
+// size, and returns a PNG blob. No library, so it works offline.
 const EventImage = (() => {
-  const W = 1080, H = 1350, PAD = 80;
+  const SIZES = {
+    square: [1080, 1080],      // 1:1 posts
+    portrait: [1080, 1350],    // 4:5 feed posts
+    story: [1080, 1920],       // 9:16 stories and reels
+    landscape: [1920, 1080]    // 16:9 X, Facebook, Strava
+  };
+  const PAD = 80, FOOTER_H = 60, COLUMN_GAP = 96;
   const FONT = '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
   const THEMES = {
     light: {
@@ -67,6 +75,13 @@ const EventImage = (() => {
     if (lines.length > maxLines) lines.splice(maxLines - 1, lines.length, lines.slice(maxLines - 1).join(" "));
     return lines.map(l => fit(ctx, l, maxWidth));
   }
+  function text(ctx, value, x, y, weight, size, colour, align = "left") {
+    setFont(ctx, weight, size);
+    ctx.fillStyle = colour;
+    ctx.textAlign = align;
+    ctx.fillText(value, x, y);
+    ctx.textAlign = "left";
+  }
 
   // Rounded glass panel: soft fill (lifted by a shadow in light mode), with a rim
   // that's brightest at the top like light on glass
@@ -86,140 +101,156 @@ const EventImage = (() => {
     ctx.lineWidth = 2;
     ctx.stroke();
   }
-  function drawFooter(ctx, text) {
-    setFont(ctx, 600, 26);
-    ctx.fillStyle = C.faint;
-    ctx.textAlign = "left";
-    ctx.fillText(text, PAD, H - PAD + 20);
+
+  // Blocks: each takes a top-left corner and a width, draws itself only when
+  // paint is true (so it can be measured first), and returns its height
+  function headerBlock(ctx, model, x, y, w, paint) {
+    // Kicker (event, distance, date, start) wraps onto a second line if it's
+    // long, breaking between items rather than mid-item
+    let h = 0;
+    setFont(ctx, 600, 30);
+    const SEPARATOR = "  ·  ", kickerLines = [];
+    model.kicker.split(SEPARATOR).forEach(part => {
+      const last = kickerLines.length - 1;
+      if (last >= 0 && ctx.measureText(kickerLines[last] + SEPARATOR + part).width <= w) kickerLines[last] += SEPARATOR + part;
+      else kickerLines.push(part);
+    });
+    kickerLines.slice(0, 2).map(line => fit(ctx, line, w)).forEach((line, i) => {
+      h += i ? 40 : 30;
+      if (paint) text(ctx, line, x, y + h, 600, 30, C.muted);
+    });
+    setFont(ctx, 800, 76);
+    wrap(ctx, model.title, w, 2).forEach(line => {
+      h += 84;
+      if (paint) text(ctx, line, x, y + h, 800, 76, C.text);
+    });
+    if (model.location) {
+      h += 60;
+      setFont(ctx, 500, 32);
+      if (paint) text(ctx, fit(ctx, model.location, w), x, y + h, 500, 32, C.muted);
+    }
+    return h + 12;
+  }
+  function heroBlock(ctx, model, x, y, w, paint) {
+    if (paint) {
+      text(ctx, model.heroLabel, x, y + 30, 600, 30, C.muted);
+      text(ctx, model.heroTime || "–", x - 6, y + 180, 800, 160, C.text);
+    }
+    return 192;
+  }
+  // Each leg's share of the race time
+  function splitBlock(ctx, model, x, y, w, paint) {
+    const timed = model.legs.filter(leg => leg.seconds);
+    const total = timed.reduce((sum, leg) => sum + leg.seconds, 0), GAP = 6, BAR_H = 16;
+    if (paint) {
+      const usable = w - GAP * (timed.length - 1);
+      let barX = x;
+      timed.forEach(leg => {
+        const legW = Math.max(BAR_H, usable * leg.seconds / total);
+        ctx.fillStyle = C.split[leg.name] || C.muted;
+        roundedRect(ctx, barX, y, legW, BAR_H, BAR_H / 2);
+        ctx.fill();
+        barX += legW + GAP;
+      });
+    }
+    return BAR_H;
+  }
+  // Single-sport events: a grid of glass stat tiles
+  function statsBlock(ctx, model, x, y, w, paint) {
+    const GAP = 24, TILE_H = 200, tileW = (w - GAP) / 2;
+    const rows = Math.ceil(model.stats.length / 2);
+    if (paint) model.stats.forEach((stat, i) => {
+      const tileX = x + (i % 2) * (tileW + GAP), tileY = y + Math.floor(i / 2) * (TILE_H + GAP);
+      glassPanel(ctx, tileX, tileY, tileW, TILE_H, 36);
+      text(ctx, stat.label, tileX + 36, tileY + 62, 600, 28, C.muted);
+      setFont(ctx, 800, 64);
+      text(ctx, fit(ctx, stat.value || "–", tileW - 72), tileX + 36, tileY + 146, 800, 64, C.text);
+    });
+    return rows * TILE_H + (rows - 1) * GAP;
+  }
+  // Triathlon: a glass panel with one row per leg
+  function legsBlock(ctx, model, x, y, w, paint) {
+    const ROW_BIG = 124, ROW_SMALL = 84, INSET = 40;
+    const isBig = leg => !!(leg.detail || leg.pace);
+    const h = model.legs.reduce((sum, leg) => sum + (isBig(leg) ? ROW_BIG : ROW_SMALL), 0);
+    if (!paint) return h;
+    glassPanel(ctx, x, y, w, h, 40);
+    let rowY = y;
+    model.legs.forEach((leg, i) => {
+      const big = isBig(leg), left = x + INSET, right = x + w - INSET;
+      if (i > 0) {
+        ctx.fillStyle = C.divider;
+        ctx.fillRect(left, rowY, w - INSET * 2, 2);
+      }
+      const nameY = rowY + (big ? 58 : 54), subY = rowY + 98, colour = big ? C.text : C.muted;
+      text(ctx, leg.name, left, nameY, 700, big ? 42 : 34, colour);
+      text(ctx, leg.time || "–", right, nameY, 700, big ? 44 : 34, colour, "right");
+      if (big) {
+        setFont(ctx, 500, 28);
+        if (leg.detail) text(ctx, fit(ctx, leg.detail, w / 2 - INSET), left, subY, 500, 28, C.muted);
+        if (leg.pace) text(ctx, leg.pace, right, subY, 500, 28, C.muted, "right");
+      }
+      rowY += big ? ROW_BIG : ROW_SMALL;
+    });
+    return h;
   }
 
-  function draw(model, theme) {
+  // A column of blocks with gaps between them; returns a function with the same
+  // shape as a block, so columns can be measured and painted like one
+  const column = parts => (ctx, model, x, y, w, paint) => parts.reduce((h, part, i) =>
+    h + (i ? part.gap : 0) + part.block(ctx, model, x, y + h + (i ? part.gap : 0), w, paint), 0);
+
+  function draw(model, theme, size) {
     C = THEMES[theme] || THEMES.light;
+    const [W, H] = SIZES[size] || SIZES.portrait;
     const canvas = document.createElement("canvas");
     canvas.width = W;
     canvas.height = H;
     const ctx = canvas.getContext("2d");
-    const contentW = W - PAD * 2;
+    ctx.textBaseline = "alphabetic";
 
     // Background with a soft glow in the top corner
     ctx.fillStyle = C.bg;
     ctx.fillRect(0, 0, W, H);
-    const glow = ctx.createRadialGradient(W * 0.85, 0, 0, W * 0.85, 0, W * 0.9);
+    const glow = ctx.createRadialGradient(W * 0.85, 0, 0, W * 0.85, 0, Math.max(W, H) * 0.8);
     glow.addColorStop(0, C.glow);
     glow.addColorStop(1, "rgba(255, 255, 255, 0)");
     ctx.fillStyle = glow;
     ctx.fillRect(0, 0, W, H);
 
-    ctx.textBaseline = "alphabetic";
-    let y = PAD + 30;
+    const body = { block: model.stats ? statsBlock : legsBlock, gap: 56 };
+    const intro = [{ block: headerBlock }, { block: heroBlock, gap: 54 }];
+    if (!model.stats && model.legs.filter(leg => leg.seconds).length > 1) intro.push({ block: splitBlock, gap: 38 });
+    const availW = W - PAD * 2, availH = H - PAD * 2 - FOOTER_H;
 
-    // Kicker: event type, distance and date
-    setFont(ctx, 600, 30);
-    ctx.fillStyle = C.muted;
-    ctx.fillText(fit(ctx, model.kicker, contentW), PAD, y);
-    y += 30;
+    // Columns side by side for landscape, otherwise one column; each is scaled
+    // down if needed to fit the height, then centred vertically
+    const columns = size === "landscape"
+      ? [{ draw: column(intro), share: 0.44 }, { draw: column([{ block: body.block }]), share: 0.56 }]
+      : [{ draw: column([...intro, body]), share: 1 }];
+    const gapTotal = COLUMN_GAP * (columns.length - 1);
+    const widthOf = col => (availW - gapTotal) * col.share;
+    const heightAt = scale => Math.max(...columns.map(col => col.draw(ctx, model, 0, 0, widthOf(col) / scale, false)));
+    let scale = Math.min(1, availH / heightAt(1));
+    scale = Math.min(scale, availH / heightAt(scale));   // re-check once: a wider column can wrap differently
 
-    // Race name, up to two lines
-    setFont(ctx, 800, 76);
-    ctx.fillStyle = C.text;
-    wrap(ctx, model.title, contentW, 2).forEach(line => { y += 84; ctx.fillText(line, PAD, y); });
-
-    if (model.location) {
-      y += 60;
-      setFont(ctx, 500, 32);
-      ctx.fillStyle = C.muted;
-      ctx.fillText(fit(ctx, model.location, contentW), PAD, y);
-    }
-
-    // Hero: the finish (or goal) time
-    y += 96;
-    setFont(ctx, 600, 30);
-    ctx.fillStyle = C.muted;
-    ctx.fillText(model.heroLabel, PAD, y);
-    y += 150;
-    setFont(ctx, 800, 160);
-    ctx.fillStyle = C.text;
-    ctx.fillText(model.heroTime || "–", PAD - 6, y);
-
-    // Split bar: each leg's share of the race time
-    const timed = model.legs.filter(leg => leg.seconds);
-    if (timed.length > 1) {
-      y += 48;
-      const total = timed.reduce((sum, leg) => sum + leg.seconds, 0), GAP = 6, BAR_H = 16;
-      const usable = contentW - GAP * (timed.length - 1);
-      let x = PAD;
-      timed.forEach(leg => {
-        const w = Math.max(BAR_H, usable * leg.seconds / total);
-        ctx.fillStyle = C.split[leg.name] || C.muted;
-        roundedRect(ctx, x, y, w, BAR_H, BAR_H / 2);
-        ctx.fill();
-        x += w + GAP;
-      });
-      y += BAR_H;
-    }
-
-    // Single-sport events: a grid of glass stat tiles instead of the leg rows
-    if (model.stats) {
-      y += 64;
-      const GAP = 24, TILE_H = 200, tileW = (contentW - GAP) / 2;
-      model.stats.forEach((stat, i) => {
-        const x = PAD + (i % 2) * (tileW + GAP), tileY = y + Math.floor(i / 2) * (TILE_H + GAP);
-        glassPanel(ctx, x, tileY, tileW, TILE_H, 36);
-        setFont(ctx, 600, 28);
-        ctx.fillStyle = C.muted;
-        ctx.fillText(stat.label, x + 36, tileY + 62);
-        setFont(ctx, 800, 64);
-        ctx.fillStyle = C.text;
-        ctx.fillText(fit(ctx, stat.value || "–", tileW - 72), x + 36, tileY + 146);
-      });
-      drawFooter(ctx, model.footer);
-      return canvas;
-    }
-
-    // Triathlon: glass panel with one row per leg
-    y += 56;
-    const ROW_BIG = 124, ROW_SMALL = 84, INSET = 40;
-    const panelH = model.legs.reduce((sum, leg) => sum + (leg.detail || leg.pace ? ROW_BIG : ROW_SMALL), 0);
-    glassPanel(ctx, PAD, y, contentW, panelH, 40);
-
-    let rowY = y;
-    model.legs.forEach((leg, i) => {
-      const big = !!(leg.detail || leg.pace), rowH = big ? ROW_BIG : ROW_SMALL;
-      if (i > 0) {
-        ctx.fillStyle = C.divider;
-        ctx.fillRect(PAD + INSET, rowY, contentW - INSET * 2, 2);
-      }
-      const left = PAD + INSET, right = W - PAD - INSET;
-      const nameY = rowY + (big ? 58 : 54), subY = rowY + 98;
-      setFont(ctx, 700, big ? 42 : 34);
-      ctx.fillStyle = big ? C.text : C.muted;
-      ctx.textAlign = "left";
-      ctx.fillText(leg.name, left, nameY);
-      setFont(ctx, 700, big ? 44 : 34);
-      ctx.textAlign = "right";
-      ctx.fillStyle = big ? C.text : C.muted;
-      ctx.fillText(leg.time || "–", right, nameY);
-      if (big) {
-        setFont(ctx, 500, 28);
-        ctx.fillStyle = C.muted;
-        ctx.textAlign = "left";
-        if (leg.detail) ctx.fillText(fit(ctx, leg.detail, contentW / 2 - INSET), left, subY);
-        ctx.textAlign = "right";
-        if (leg.pace) ctx.fillText(leg.pace, right, subY);
-      }
-      ctx.textAlign = "left";
-      rowY += rowH;
+    let colX = PAD;
+    columns.forEach(col => {
+      const w = widthOf(col), h = col.draw(ctx, model, 0, 0, w / scale, false) * scale;
+      ctx.setTransform(scale, 0, 0, scale, colX, PAD + (availH - h) / 2);
+      col.draw(ctx, model, 0, 0, w / scale, true);
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      colX += w + COLUMN_GAP;
     });
 
-    drawFooter(ctx, model.footer);
-
+    text(ctx, model.footer, PAD, H - PAD + 20, 600, 26, C.faint);
     return canvas;
   }
 
   // Made straight away (toDataURL, not toBlob's callback) so iPhone still treats
   // the tap as the reason for opening the share sheet
-  function build(model, theme) {
-    const bytes = atob(draw(model, theme).toDataURL("image/png").split(",")[1]);
+  function build(model, theme, size) {
+    const bytes = atob(draw(model, theme, size).toDataURL("image/png").split(",")[1]);
     const buffer = new Uint8Array(bytes.length);
     for (let i = 0; i < bytes.length; i++) buffer[i] = bytes.charCodeAt(i);
     return new Blob([buffer], { type: "image/png" });

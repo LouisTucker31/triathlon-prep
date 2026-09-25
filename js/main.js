@@ -563,8 +563,8 @@ function eventSummary() {
     { heading: "Race", fields: [
       { label: "Date", value: date },
       { label: "Start / wave time", value: value("raceStart") },
-      linkField("Venue", value("raceLocation"), "Open in maps"),
-      { label: "Distance", value: distance },
+      { ...linkField("Venue", value("raceLocation"), "Open in maps"), long: true },
+      { label: "Distance", value: distance, long: true },
       forType(["triathlon", "swimming"]) && { label: "Swim type", value: value("swimType") },
       forType(["triathlon", "swimming"]) && { label: "Wetsuit", value: value("wetsuitRule") },
       forType(["triathlon", "cycling"]) && { label: "Bike elevation", value: withUnit(value("bikeElevation"), "m") },
@@ -578,7 +578,7 @@ function eventSummary() {
       type === "triathlon" && { label: "British Triathlon no.", value: String(settings.fields.btNumber ?? "").trim() }
     ].filter(Boolean) },
     { heading: "Accommodation", fields: [
-      linkField("Location", value("raceStay"), "Open in maps"),
+      { ...linkField("Location", value("raceStay"), "Open in maps"), long: true },
       linkField("Booking link", value("raceStayLink"))
     ] }
   ].filter(Boolean);
@@ -687,52 +687,131 @@ function imageSummary() {
   };
 }
 
-// Both download buttons first ask for actual times (optional); the image then
-// asks for a light or dark style before downloading
-// Light and dark are toggles: tap to pick, tap the other to switch, tap again to
-// clear. The bottom button is Cancel until a style is picked, then Download.
-const styleDialog = document.getElementById("styleDialog");
-const styleButtons = [...document.querySelectorAll("[data-image-theme]")];
-const styleAction = document.getElementById("styleAction");
-let chosenStyle = null;
-function showChosenStyle() {
-  styleButtons.forEach(button => button.setAttribute("aria-pressed", String(button.dataset.imageTheme === chosenStyle)));
-  styleAction.textContent = chosenStyle ? "Download" : "Cancel";
-  styleAction.classList.toggle("is-download", !!chosenStyle);
-}
-function askForStyle() {
-  chosenStyle = null;
-  showChosenStyle();
-  styleDialog.showModal();
-}
-styleButtons.forEach(button => button.addEventListener("click", () => {
-  chosenStyle = chosenStyle === button.dataset.imageTheme ? null : button.dataset.imageTheme;
-  showChosenStyle();
-}));
-styleAction.addEventListener("click", () => {
-  styleDialog.close();
-  if (chosenStyle) saveFile(EventImage.build(imageSummary(), chosenStyle), summaryFilename("png"));
-});
-styleDialog.addEventListener("click", e => { if (e.target === styleDialog) styleDialog.close(); }); // tap outside
-const actualsDialog = document.getElementById("actualsDialog");
-const actualsDownload = document.getElementById("actualsDownload");
-const DOWNLOADS = {
-  pdf: { label: "Download PDF", save: () => saveFile(EventPdf.build(eventSummary()), summaryFilename("pdf")) },
-  image: { label: "Next", save: () => askForStyle() }   // asks light or dark first
+// Downloads: both buttons first ask for actual times (optional), then one or
+// more choices, one step at a time in the same pop-up, then download.
+//   PDF:   layout (portrait or landscape)
+//   Image: size (social formats), then style (light or dark)
+// Options are toggles: tap to pick, tap another to switch, tap again to clear.
+// The bottom button is Cancel until something is picked, then Next, or
+// Download on the last step.
+const CHOICES = {
+  pdfLayout: {
+    title: "Choose a layout", desc: "An A4 page, either way up.",
+    options: [
+      { value: "portrait", label: "Portrait", ratio: [210, 297] },
+      { value: "landscape", label: "Landscape", ratio: [297, 210] }
+    ]
+  },
+  imageSize: {
+    title: "Choose a size", desc: "Shaped for where you'll post it.",
+    options: [
+      { value: "square", label: "Square", note: "1:1 · posts", ratio: [1, 1] },
+      { value: "portrait", label: "Portrait", note: "4:5 · feed posts", ratio: [4, 5] },
+      { value: "story", label: "Story", note: "9:16 · stories, reels", ratio: [9, 16] },
+      { value: "landscape", label: "Landscape", note: "16:9 · X, Facebook", ratio: [16, 9] }
+    ]
+  },
+  imageStyle: {
+    title: "Choose a style", desc: "How your race card looks.",
+    options: [
+      { value: "light", label: "Light", swatch: "light" },
+      { value: "dark", label: "Dark", swatch: "dark" }
+    ]
+  }
 };
-let pendingDownload = "pdf";
-function askForActuals(kind) {
-  pendingDownload = kind;
-  actualsDownload.textContent = DOWNLOADS[kind].label;
-  actualsDialog.showModal();
+const DOWNLOAD_FLOWS = {
+  pdf: {
+    steps: ["pdfLayout"],
+    save: choices => saveFile(EventPdf.build(eventSummary(), choices.pdfLayout), summaryFilename("pdf"))
+  },
+  image: {
+    steps: ["imageSize", "imageStyle"],
+    save: choices => saveFile(EventImage.build(imageSummary(), choices.imageStyle, choices.imageSize), summaryFilename("png"))
+  }
+};
+
+const choiceDialog = document.getElementById("choiceDialog");
+const choiceOptions = document.getElementById("choiceOptions");
+const choiceAction = document.getElementById("choiceAction");
+let flow = null;   // { kind, step, choices, picked }
+
+// Preview for an option: the shape's outline (sizes, layouts) or a mini card (styles)
+function choicePreview(option) {
+  const preview = document.createElement("span");
+  preview.className = "choice-option__preview";
+  preview.setAttribute("aria-hidden", "true");
+  if (option.swatch) {
+    preview.className = `choice-option__swatch choice-option__swatch--${option.swatch}`;
+    preview.append(document.createElement("span"));
+    return preview;
+  }
+  const [w, h] = option.ratio, MAX = 56, shape = document.createElement("span");
+  shape.className = "choice-option__shape";
+  shape.style.width = `${Math.round(MAX * Math.min(1, w / h))}px`;
+  shape.style.height = `${Math.round(MAX * Math.min(1, h / w))}px`;
+  preview.append(shape);
+  return preview;
 }
-document.getElementById("downloadPdf").addEventListener("click", () => askForActuals("pdf"));
-document.getElementById("downloadImage").addEventListener("click", () => askForActuals("image"));
+function showStep() {
+  const { steps } = DOWNLOAD_FLOWS[flow.kind], choice = CHOICES[steps[flow.step]];
+  document.getElementById("choiceTitle").textContent = choice.title;
+  document.getElementById("choiceDesc").textContent = choice.desc;
+  flow.picked = null;
+  choiceOptions.textContent = "";
+  choice.options.forEach(option => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "choice-option";
+    button.dataset.value = option.value;
+    button.setAttribute("aria-pressed", "false");
+    button.append(choicePreview(option), option.label);
+    if (option.note) {
+      const note = document.createElement("span");
+      note.className = "choice-option__note";
+      note.textContent = option.note;
+      button.append(note);
+    }
+    button.addEventListener("click", () => {
+      flow.picked = flow.picked === option.value ? null : option.value;
+      showPicked();
+    });
+    choiceOptions.append(button);
+  });
+  showPicked();
+  document.getElementById("choiceTitle").focus();
+}
+function showPicked() {
+  const lastStep = flow.step === DOWNLOAD_FLOWS[flow.kind].steps.length - 1;
+  choiceOptions.querySelectorAll(".choice-option").forEach(button =>
+    button.setAttribute("aria-pressed", String(button.dataset.value === flow.picked)));
+  choiceAction.textContent = !flow.picked ? "Cancel" : lastStep ? "Download" : "Next";
+  choiceAction.classList.toggle("is-ready", !!flow.picked);
+}
+choiceAction.addEventListener("click", () => {
+  if (!flow.picked) return choiceDialog.close();
+  const { steps, save } = DOWNLOAD_FLOWS[flow.kind];
+  flow.choices[steps[flow.step]] = flow.picked;
+  if (flow.step < steps.length - 1) {
+    flow.step++;
+    showStep();
+    return;
+  }
+  choiceDialog.close();
+  save(flow.choices);
+});
+choiceDialog.addEventListener("click", e => { if (e.target === choiceDialog) choiceDialog.close(); }); // tap outside
+
+const actualsDialog = document.getElementById("actualsDialog");
+let pendingDownload = "pdf";
+document.getElementById("downloadPdf").addEventListener("click", () => { pendingDownload = "pdf"; actualsDialog.showModal(); });
+document.getElementById("downloadImage").addEventListener("click", () => { pendingDownload = "image"; actualsDialog.showModal(); });
 document.getElementById("actualsCancel").addEventListener("click", () => actualsDialog.close());
 actualsDialog.addEventListener("click", e => { if (e.target === actualsDialog) actualsDialog.close(); }); // tap outside
-actualsDownload.addEventListener("click", () => {
+document.getElementById("actualsDownload").addEventListener("click", () => {
   actualsDialog.close();
-  DOWNLOADS[pendingDownload].save();
+  flow = { kind: pendingDownload, step: 0, choices: {}, picked: null };
+  showStep();
+  choiceDialog.showModal();
 });
 
 // Theme: light / dark / system (js/theme.js applies it early to avoid a flash)
