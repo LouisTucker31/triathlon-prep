@@ -38,7 +38,7 @@ const PACKING_SECTIONS = [
   ]},
   { title: "On the bike", items: [
     "Boardman road bike", "Bike computer", "Bike number fitted", "Water bottle 1", "Water bottle 2",
-    "Electrolytes or hydration mix in bottles", "Bike gels", "Other bike nutrition", "Nutrition and tool bag", "Saddle bag",
+    "Electrolytes or hydration mix in bottles", "Bike gels", "Other bike nutrition", "Tool bag", "Saddle bag",
     "Spare inner tube", "Tyre levers", "Mini pump", "Multi-tool"
   ]},
   { title: "T2 transition bag: bike to run", items: [
