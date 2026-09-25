@@ -59,6 +59,9 @@ input[type=checkbox] { width: 18px; height: 18px; margin: 1px 0 0; flex-shrink: 
 input:checked + span { text-decoration: line-through; color: var(--faint); }
 
 /* Every text box at 16px or more, so iPhone never zooms in */
+/* Disable double-tap zoom */
+html { touch-action: manipulation; }
+
 input, select, textarea { font-size: max(16px, 1em) !important; }
 
 /* ---------- Settings ---------- */

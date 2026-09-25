@@ -1,6 +1,6 @@
 // Offline support: pre-cache the app shell, then serve from cache while
 // refreshing it in the background. Bump VERSION to force a clean re-cache.
-const VERSION = "v1";
+const VERSION = "v2";
 const CACHE = "tri-packing-" + VERSION;
 const ASSETS = [
   "./",

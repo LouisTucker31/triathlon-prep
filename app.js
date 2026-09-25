@@ -475,3 +475,7 @@ if ("serviceWorker" in navigator && location.protocol !== "file:") {
     navigator.serviceWorker.register("sw.js").catch(err => console.warn("Service worker registration failed:", err));
   });
 }
+
+// Block pinch-zoom (iOS Safari ignores user-scalable=no)
+["gesturestart", "gesturechange", "gestureend"].forEach(t => document.addEventListener(t, e => e.preventDefault(), { passive: false }));
+document.addEventListener("touchmove", e => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
