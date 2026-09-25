@@ -170,6 +170,13 @@ if (!settings.events.triathlon) {
 }
 // Fields on the events page save to the current event type; the rest are my details
 const storeFor = field => field.closest("#view-events") ? eventFields() : settings.fields;
+// Tyre pressure moved from the events page to settings (one bike, not one per
+// event type): carry over a saved value, triathlon first
+["tyreFront", "tyreRear"].forEach(key => {
+  const saved = ["triathlon", "cycling"].map(type => settings.events[type]?.[key]).find(Boolean);
+  if (saved && !settings.fields[key]) settings.fields[key] = saved;
+  Object.values(settings.events).forEach(event => { if (key in event) { delete event[key]; migratedGoals = true; } });
+});
 if (migratedGoals) saveSettings();
 
 // Formatted-as-you-type boxes (data-format="number"): digits and one decimal
@@ -551,9 +558,10 @@ function eventSummary() {
       forType(["triathlon", "running"]) && has("runElevation") && { label: "Run elevation", value: `${f.runElevation} m` },
       has("raceWebsite") && linkField("Event website", "raceWebsite")
     ]) },
+    // Tyre pressure lives in settings (one bike), shown for events with a bike
     forType(["triathlon", "cycling"]) && { heading: "Tyre pressure", fields: clean([
-      has("tyreFront") && { label: "Front", value: `${f.tyreFront} psi` },
-      has("tyreRear") && { label: "Rear", value: `${f.tyreRear} psi` }
+      settings.fields.tyreFront && { label: "Front", value: `${settings.fields.tyreFront} psi` },
+      settings.fields.tyreRear && { label: "Rear", value: `${settings.fields.tyreRear} psi` }
     ]) },
     { heading: "Entry", fields: clean([
       has("raceNumber") && { label: "Race number", value: f.raceNumber },
