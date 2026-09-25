@@ -186,12 +186,12 @@
 <!-- Light or dark card for the social image, asked after the actual times -->
 <dialog class="confirm" id="styleDialog" aria-labelledby="styleTitle" aria-describedby="styleDesc">
   <h2 id="styleTitle" tabindex="-1" autofocus>Choose a style</h2>
-  <p id="styleDesc">How your race card looks.</p>
+  <p id="styleDesc">Pick how your race card looks, then download it.</p>
   <div class="style-options">
-    <button type="button" class="style-option" data-image-theme="light"><span class="style-option__swatch style-option__swatch--light" aria-hidden="true"><span></span></span>Light</button>
-    <button type="button" class="style-option" data-image-theme="dark"><span class="style-option__swatch style-option__swatch--dark" aria-hidden="true"><span></span></span>Dark</button>
+    <button type="button" class="style-option" data-image-theme="light" aria-pressed="false"><span class="style-option__swatch style-option__swatch--light" aria-hidden="true"><span></span></span>Light</button>
+    <button type="button" class="style-option" data-image-theme="dark" aria-pressed="false"><span class="style-option__swatch style-option__swatch--dark" aria-hidden="true"><span></span></span>Dark</button>
   </div>
-  <button type="button" class="confirm__cancel style-cancel" id="styleCancel">Cancel</button>
+  <button type="button" class="confirm__cancel style-action" id="styleAction">Cancel</button>
 </dialog>
 
 <!-- Settings: a full-screen pop-up over everything, including the nav. The

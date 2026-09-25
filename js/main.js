@@ -689,18 +689,36 @@ function imageSummary() {
 
 // Both download buttons first ask for actual times (optional); the image then
 // asks for a light or dark style before downloading
+// Light and dark are toggles: tap to pick, tap the other to switch, tap again to
+// clear. The bottom button is Cancel until a style is picked, then Download.
 const styleDialog = document.getElementById("styleDialog");
-document.querySelectorAll("[data-image-theme]").forEach(button => button.addEventListener("click", () => {
-  styleDialog.close();
-  saveFile(EventImage.build(imageSummary(), button.dataset.imageTheme), summaryFilename("png"));
+const styleButtons = [...document.querySelectorAll("[data-image-theme]")];
+const styleAction = document.getElementById("styleAction");
+let chosenStyle = null;
+function showChosenStyle() {
+  styleButtons.forEach(button => button.setAttribute("aria-pressed", String(button.dataset.imageTheme === chosenStyle)));
+  styleAction.textContent = chosenStyle ? "Download" : "Cancel";
+  styleAction.classList.toggle("is-download", !!chosenStyle);
+}
+function askForStyle() {
+  chosenStyle = null;
+  showChosenStyle();
+  styleDialog.showModal();
+}
+styleButtons.forEach(button => button.addEventListener("click", () => {
+  chosenStyle = chosenStyle === button.dataset.imageTheme ? null : button.dataset.imageTheme;
+  showChosenStyle();
 }));
-document.getElementById("styleCancel").addEventListener("click", () => styleDialog.close());
+styleAction.addEventListener("click", () => {
+  styleDialog.close();
+  if (chosenStyle) saveFile(EventImage.build(imageSummary(), chosenStyle), summaryFilename("png"));
+});
 styleDialog.addEventListener("click", e => { if (e.target === styleDialog) styleDialog.close(); }); // tap outside
 const actualsDialog = document.getElementById("actualsDialog");
 const actualsDownload = document.getElementById("actualsDownload");
 const DOWNLOADS = {
   pdf: { label: "Download PDF", save: () => saveFile(EventPdf.build(eventSummary()), summaryFilename("pdf")) },
-  image: { label: "Next", save: () => styleDialog.showModal() }   // asks light or dark first
+  image: { label: "Next", save: () => askForStyle() }   // asks light or dark first
 };
 let pendingDownload = "pdf";
 function askForActuals(kind) {
