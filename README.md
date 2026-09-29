@@ -13,7 +13,7 @@ manifest.webmanifest    install details (name, icons, colours)
 sw.js                   service worker: offline support and updates (must stay in the root)
 css/styles.css
 js/theme.js             applies the saved theme before first paint
-js/lists.js             packing and task list content (triathlon; other event types have none yet)
+js/lists.js             packing and task list content (triathlon and running; cycling and swimming have none yet)
 js/main.js              app logic
 js/event-pdf.js         builds the one-page "Download this event" PDF (no library)
 js/event-image.js       draws the social image (PNG: square, 4:5, 9:16 or 5:4; light or dark)

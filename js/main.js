@@ -484,9 +484,12 @@ document.addEventListener("keydown", e => { if (e.key === "Tab") document.docume
 document.addEventListener("pointerdown", () => document.documentElement.classList.remove("using-keyboard"));
 
 // Event type: switches the packing and task lists, the events page fields and
-// the packing page title. Only triathlon has lists so far.
+// the packing page title. Triathlon and running have lists so far.
 const eventSelect = document.getElementById("eventType");
-const CHECKLISTS = { triathlon: { packing: PACKING_SECTIONS, tasks: TASK_SECTIONS } };
+const CHECKLISTS = {
+  triathlon: { packing: PACKING_SECTIONS, tasks: TASK_SECTIONS },
+  running: { packing: RUNNING_PACKING_SECTIONS, tasks: RUNNING_TASK_SECTIONS }
+};
 const checklistKeys = type => type === "triathlon"
   ? { packing: STORAGE_KEYS.packing, tasks: STORAGE_KEYS.tasks }  // original keys, so existing ticks carry over
   : { packing: `tri-packing-${type}`, tasks: `tri-tasks-${type}` };
