@@ -206,10 +206,16 @@
       <h2 class="settings-heading">My details</h2>
       <div class="field-group">
         <label class="field"><span>Name</span><input data-key="name" type="text" autocapitalize="words" placeholder="Your name" autocomplete="name"></label>
-        <label class="field"><span>Club (optional)</span><input data-key="club" type="text" autocapitalize="words" placeholder="Your triathlon club"></label>
+        <label class="field"><span>Club (optional)</span><input data-key="club" type="text" autocapitalize="words" placeholder="Your club"></label>
         <div class="field-row">
           <label class="field"><span>British Triathlon no.</span><input data-key="btNumber" type="text" autocapitalize="words" placeholder="Add number" autocomplete="off"></label>
           <label class="field"><span>Membership expiry</span><span class="date-field"><input data-key="btExpiry" type="date"><span class="date-field__text" aria-hidden="true"></span></span></label>
+        </div>
+        <label class="field"><span>British Cycling no.</span><input data-key="bcNumber" type="text" autocapitalize="words" placeholder="Add number" autocomplete="off"></label>
+        <div class="field">
+          <label for="parkrunId">parkrun barcode (optional)</label>
+          <input id="parkrunId" data-key="parkrunId" type="text" autocapitalize="characters" placeholder="Your ID, e.g. A1234567" autocomplete="off" spellcheck="false">
+          <div class="barcode" id="parkrunBarcode" hidden></div>
         </div>
         <label class="field"><span>Emergency contact</span><input data-key="iceName" type="text" autocapitalize="words" placeholder="Name" autocomplete="off"></label>
         <label class="field"><span>Emergency contact phone</span><input data-key="icePhone" type="tel" placeholder="Phone number" autocomplete="off"></label>
@@ -282,6 +288,7 @@
 <script src="js/lists.js"></script>
 <script src="js/event-pdf.js"></script>
 <script src="js/event-image.js"></script>
+<script src="js/barcode.js"></script>
 <script src="js/main.js"></script>
 <script src="js/liquid-glass-nav.js"></script>
 </body>

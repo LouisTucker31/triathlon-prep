@@ -135,6 +135,11 @@ input, textarea { caret-color: var(--accent); }   /* a green text cursor, as iOS
 .field-row[hidden], .field[hidden] { display: none; }
 .field-group > .field-row:last-child,
 .field-group > .is-last-visible { border-bottom: 0; }  /* set by main.js when later rows are hidden */
+/* parkrun barcode: always black on white, even in dark mode, so scanners can read it */
+.barcode { margin-top: 10px; padding: 12px 8px 8px; border-radius: var(--radius-sm); background: #fff; color: #000; text-align: center; }
+.barcode[hidden] { display: none; }
+.barcode svg { display: block; width: 100%; max-width: 360px; height: 72px; margin: 0 auto; }
+.barcode__text { display: block; margin-top: 4px; font-size: 0.85rem; letter-spacing: 0.08em; }
 .segmented { display: flex; gap: 4px; padding: 4px; border-radius: var(--radius); background: var(--seg-bg); border: 1px solid var(--border); }
 .segmented button {
   flex: 1; border: 0; background: none; padding: 8px; border-radius: var(--radius-sm); cursor: pointer;

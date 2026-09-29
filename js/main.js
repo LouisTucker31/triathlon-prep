@@ -159,6 +159,11 @@ OLD_GOAL_KEYS.forEach(key => { if (key in settings.fields) { delete settings.fie
 // actual times) and ticks are kept per type, so switching back restores them.
 // Only Reset clears them.
 const EVENT_TYPES = { triathlon: "Triathlon", running: "Running", cycling: "Cycling", swimming: "Swimming" };
+// Governing-body membership number (from settings) shown on each type's PDF
+const MEMBERSHIP_NUMBERS = {
+  triathlon: { label: "British Triathlon no.", key: "btNumber" },
+  cycling: { label: "British Cycling no.", key: "bcNumber" }
+};
 const SHARED_EVENT_KEYS = ["raceName", "raceWebsite", "raceDate", "raceStart", "raceLocation",
   "raceNumber", "raceRef", "raceStay", "raceStayLink"];
 const eventFields = () => (settings.events[settings.eventType] ||= {});
@@ -296,6 +301,18 @@ document.querySelectorAll("[data-key]").forEach(field => {
     renderRaceLine();
   });
 });
+
+// parkrun barcode: drawn under the ID once it looks like one ("A" then digits)
+const parkrunInput = document.getElementById("parkrunId");
+const parkrunBarcode = document.getElementById("parkrunBarcode");
+function renderParkrunBarcode() {
+  const id = parkrunInput.value.replace(/\s/g, "").toUpperCase();
+  const valid = /^A\d{3,}$/.test(id);
+  parkrunBarcode.hidden = !valid;
+  parkrunBarcode.innerHTML = valid ? Barcode.svg(id) + `<span class="barcode__text">${id}</span>` : "";
+}
+parkrunInput.addEventListener("input", renderParkrunBarcode);
+renderParkrunBarcode();
 
 function fillPresetDistances() {
   const preset = currentPresets()[distanceSelect.value];
@@ -571,6 +588,7 @@ function eventSummary() {
     value("raceDistance") !== "Other" && value("raceDistance"),
     (type === "triathlon" || !currentPresets()[f.raceDistance]) && legs
   ].filter(Boolean).join(": ");
+  const membership = MEMBERSHIP_NUMBERS[type];
 
   // Every field that applies to this event type is always included, so the PDF
   // is the same template each time; empty ones are left blank
@@ -586,11 +604,11 @@ function eventSummary() {
       forType(["triathlon", "running"]) && { label: "Run elevation", value: withUnit(value("runElevation"), "m") },
       linkField("Event website", value("raceWebsite"))
     ].filter(Boolean) },
-    // British Triathlon membership (from settings) sits beside the booking ref
-    { heading: "Entry", columns: type === "triathlon" ? 3 : 2, fields: [
+    // This event type's membership number (from settings) sits beside the booking ref
+    { heading: "Entry", columns: membership ? 3 : 2, fields: [
       { label: "Race number", value: value("raceNumber") },
       { label: "Booking ref", value: value("raceRef") },
-      type === "triathlon" && { label: "British Triathlon no.", value: String(settings.fields.btNumber ?? "").trim() }
+      membership && { label: membership.label, value: String(settings.fields[membership.key] ?? "").trim() }
     ].filter(Boolean) },
     { heading: "Accommodation", fields: [
       { ...linkField("Location", value("raceStay"), "Open in maps"), long: true },
