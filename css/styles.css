@@ -97,6 +97,9 @@ input, textarea { caret-color: var(--accent); }   /* a green text cursor, as iOS
 .settings-heading { font-size: 0.9rem; font-weight: 600;
              color: var(--muted-2); margin: 24px 4px 8px; }
 .settings-heading:first-of-type { margin-top: 16px; }
+/* Items within a settings section, e.g. Bike and Running shoes under Gear */
+.settings-subheading { font-size: 0.8rem; font-weight: 500; color: var(--muted-2); margin: 12px 4px 6px; }
+.settings-heading + .settings-subheading { margin-top: 0; }
 .field-group { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; background: var(--field); }
 .field { display: block; padding: 8px var(--gutter) 12px; border-bottom: 1px solid var(--line); }
 .field:last-child { border-bottom: 0; }
