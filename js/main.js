@@ -314,6 +314,17 @@ function renderParkrunBarcode() {
 parkrunInput.addEventListener("input", renderParkrunBarcode);
 renderParkrunBarcode();
 
+// Gear distances (data-warn-at, in km) turn red once they reach the limit,
+// e.g. running shoes at 500 km
+document.querySelectorAll("[data-warn-at]").forEach(input => {
+  const check = () => {
+    const km = parseFloat(input.value.replace(/,/g, ""));
+    input.closest(".unit-field").classList.toggle("is-warning", km >= Number(input.dataset.warnAt));
+  };
+  input.addEventListener("input", check);
+  check();
+});
+
 function fillPresetDistances() {
   const preset = currentPresets()[distanceSelect.value];
   if (!preset) return;
@@ -490,11 +501,16 @@ renderRaceLine();
 // can't be reformatted itself (written by hand as some browsers use "Sept")
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 function updateDateDisplays() {
+  // Expiry dates (data-expiry) turn red on the day they expire and after
+  const now = new Date();
+  const today = `${now.getFullYear()}-${pad2(now.getMonth() + 1)}-${pad2(now.getDate())}`;
   document.querySelectorAll(".date-field").forEach(wrapper => {
-    const [year, month, day] = wrapper.querySelector("input").value.split("-");
+    const input = wrapper.querySelector("input");
+    const [year, month, day] = input.value.split("-");
     const text = year ? `${day} ${MONTHS[Number(month) - 1]} ${year.slice(-2)}` : "";
     wrapper.querySelector(".date-field__text").textContent = text;
     wrapper.classList.toggle("has-value", !!text);
+    wrapper.classList.toggle("is-warning", !!text && "expiry" in input.dataset && input.value <= today);
   });
 }
 document.querySelectorAll(".date-field input").forEach(input => input.addEventListener("input", updateDateDisplays));

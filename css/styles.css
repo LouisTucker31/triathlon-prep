@@ -170,6 +170,10 @@ input, textarea { caret-color: var(--accent); }   /* a green text cursor, as iOS
 .field > .unit-field { display: flex; align-items: center; gap: 4px; margin: 0; font-size: inherit; color: inherit; }
 .unit-field input { flex: 1; min-width: 0; }
 .unit-field__unit { color: var(--muted-2); font-size: var(--input-size); }
+/* Expired membership dates and worn-out gear (set by main.js) */
+.date-field.is-warning .date-field__text,
+.unit-field.is-warning input,
+.unit-field.is-warning .unit-field__unit { color: var(--danger); }
 
 
 /* Worked-out values (goal total and paces): read-only */

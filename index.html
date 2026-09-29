@@ -209,9 +209,12 @@
         <label class="field"><span>Club (optional)</span><input data-key="club" type="text" autocapitalize="words" placeholder="Your club"></label>
         <div class="field-row">
           <label class="field"><span>British Triathlon no.</span><input data-key="btNumber" type="text" autocapitalize="words" placeholder="Add number" autocomplete="off"></label>
-          <label class="field"><span>Membership expiry</span><span class="date-field"><input data-key="btExpiry" type="date"><span class="date-field__text" aria-hidden="true"></span></span></label>
+          <label class="field"><span>Membership expiry</span><span class="date-field"><input data-key="btExpiry" data-expiry type="date"><span class="date-field__text" aria-hidden="true"></span></span></label>
         </div>
-        <label class="field"><span>British Cycling no.</span><input data-key="bcNumber" type="text" autocapitalize="words" placeholder="Add number" autocomplete="off"></label>
+        <div class="field-row">
+          <label class="field"><span>British Cycling no.</span><input data-key="bcNumber" type="text" autocapitalize="words" placeholder="Add number" autocomplete="off"></label>
+          <label class="field"><span>Membership expiry</span><span class="date-field"><input data-key="bcExpiry" data-expiry type="date"><span class="date-field__text" aria-hidden="true"></span></span></label>
+        </div>
         <div class="field">
           <label for="parkrunId">parkrun barcode (optional)</label>
           <input id="parkrunId" data-key="parkrunId" type="text" autocapitalize="characters" placeholder="Your ID, e.g. A1234567" autocomplete="off" spellcheck="false">
@@ -230,8 +233,8 @@
           <label class="field"><span>Model<span class="sr-only"> of bike</span></span><input data-key="bikeModel" type="text" autocapitalize="words" placeholder="e.g. Endurace" autocomplete="off"></label>
         </div>
         <div class="field-row">
-          <label class="field"><span>Date bought<span class="sr-only"> bike</span></span><span class="date-field"><input data-key="bikeBought" type="date"><span class="date-field__text" aria-hidden="true"></span></span></label>
-          <label class="field"><span>Distance<span class="sr-only"> ridden in km</span></span><span class="unit-field"><input data-key="bikeKm" data-format="number" type="text" inputmode="decimal" placeholder="0" autocomplete="off"><span class="unit-field__unit" aria-hidden="true">km</span></span></label>
+          <label class="field"><span>First used<span class="sr-only"> bike</span></span><span class="date-field"><input data-key="bikeBought" type="date"><span class="date-field__text" aria-hidden="true"></span></span></label>
+          <label class="field"><span>Distance<span class="sr-only"> ridden in km</span></span><span class="unit-field"><input data-key="bikeKm" data-format="number" data-warn-at="5000" type="text" inputmode="decimal" placeholder="0" autocomplete="off"><span class="unit-field__unit" aria-hidden="true">km</span></span></label>
         </div>
       </div>
       <h3 class="settings-subheading">Running shoes</h3>
@@ -241,8 +244,8 @@
           <label class="field"><span>Model<span class="sr-only"> of running shoes</span></span><input data-key="shoesModel" type="text" autocapitalize="words" placeholder="e.g. Pegasus 41" autocomplete="off"></label>
         </div>
         <div class="field-row">
-          <label class="field"><span>Date bought<span class="sr-only"> running shoes</span></span><span class="date-field"><input data-key="shoesBought" type="date"><span class="date-field__text" aria-hidden="true"></span></span></label>
-          <label class="field"><span>Distance<span class="sr-only"> run in km</span></span><span class="unit-field"><input data-key="shoesKm" data-format="number" type="text" inputmode="decimal" placeholder="0" autocomplete="off"><span class="unit-field__unit" aria-hidden="true">km</span></span></label>
+          <label class="field"><span>First used<span class="sr-only"> running shoes</span></span><span class="date-field"><input data-key="shoesBought" type="date"><span class="date-field__text" aria-hidden="true"></span></span></label>
+          <label class="field"><span>Distance<span class="sr-only"> run in km</span></span><span class="unit-field"><input data-key="shoesKm" data-format="number" data-warn-at="500" type="text" inputmode="decimal" placeholder="0" autocomplete="off"><span class="unit-field__unit" aria-hidden="true">km</span></span></label>
         </div>
       </div>
 
