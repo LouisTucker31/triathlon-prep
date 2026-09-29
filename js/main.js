@@ -153,9 +153,14 @@ GOAL_LEGS.forEach(leg => {
 });
 OLD_GOAL_KEYS.forEach(key => { if (key in settings.fields) { delete settings.fields[key]; migratedGoals = true; } });
 
-// Event types. Each keeps its own race details, goals and ticks, so switching
-// type and back loses nothing; only Reset clears them.
+// Event types. There is one event at a time; changing its type changes the sport,
+// not the event. Details that describe the race itself (SHARED_EVENT_KEYS) carry
+// over to the new type. Sport details (distances, elevation, swim type, goals,
+// actual times) and ticks are kept per type, so switching back restores them.
+// Only Reset clears them.
 const EVENT_TYPES = { triathlon: "Triathlon", running: "Running", cycling: "Cycling", swimming: "Swimming" };
+const SHARED_EVENT_KEYS = ["raceName", "raceWebsite", "raceDate", "raceStart", "raceLocation",
+  "raceNumber", "raceRef", "raceStay", "raceStayLink"];
 const eventFields = () => (settings.events[settings.eventType] ||= {});
 // Race details used to be stored with my details; they belong to triathlon
 const EVENT_FIELD_KEYS = [...document.querySelectorAll("#view-events [data-key]")].map(field => field.dataset.key);
@@ -516,7 +521,11 @@ function applyEventVisibility() {
 }
 eventSelect.value = settings.eventType;
 eventSelect.addEventListener("change", () => {
+  const previous = eventFields();
   settings.eventType = eventSelect.value;
+  const next = eventFields();
+  // The current event's race details win, including ones cleared since
+  SHARED_EVENT_KEYS.forEach(key => { if (key in previous) next[key] = previous[key]; else delete next[key]; });
   saveSettings();
   loadEventFields();
   updateDateDisplays();
