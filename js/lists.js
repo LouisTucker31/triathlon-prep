@@ -591,14 +591,14 @@ const RUNNING_TASK_SECTIONS = [
     "Enter correct start pen with time to spare",
     "Keep warm",
     "Do light mobility / warm-up if appropriate",
-    "Set Garmin to marathon / run activity",
+    "Set Garmin to run activity",
     "Wait for GPS lock",
     "Check heart-rate monitor connected",
     "Remind yourself of opening pace",
     "Avoid getting dragged into other runners' pace",
     "Start Garmin as you cross the start line"
   ]},
-  { title: "During the marathon", items: [
+  { title: "During the run", items: [
     "Stick to planned opening pace",
     "Keep effort controlled early",
     "Take gels according to nutrition plan",

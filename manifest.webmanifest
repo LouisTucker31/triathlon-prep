@@ -1,7 +1,7 @@
 {
-  "name": "Triathlon packing list",
-  "short_name": "Tri packing",
-  "description": "Race-day packing list and task checklist for triathlon.",
+  "name": "Race Ready",
+  "short_name": "Race Ready",
+  "description": "Race-day packing list and task checklist for triathlon, running, cycling and swimming.",
   "id": "./",
   "start_url": "./",
   "scope": "./",

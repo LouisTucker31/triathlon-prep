@@ -1,14 +1,15 @@
-# Triathlon packing list
+# Race Ready
 
-A packing list and race-prep checklist for triathlon, built as an installable
-web app (PWA) with plain HTML, CSS and JavaScript. No build step.
+A packing list and race-prep checklist for triathlon, running, cycling and
+swimming, built as an installable web app (PWA) with plain HTML, CSS and
+JavaScript. No build step.
 
 Live: https://louistucker31.github.io/triathlon-prep/
 
 ## Structure
 
 ```
-index.html              the whole app (packing, tasks, events; settings pop-up)
+index.html              the whole app (packing, prep, events; settings pop-up)
 manifest.webmanifest    install details (name, icons, colours)
 sw.js                   service worker: offline support and updates (must stay in the root)
 css/styles.css

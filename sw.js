@@ -4,8 +4,8 @@
 //
 // This file stays in the site root (not js/) because a service worker can only
 // control pages at or below its own folder.
-const VERSION = "v19";
-const CACHE = "tri-packing-" + VERSION;
+const VERSION = "v20";
+const CACHE = "race-ready-" + VERSION;
 const NETWORK_TIMEOUT = 3000;
 const ASSETS = [
   "./",
@@ -36,7 +36,7 @@ self.addEventListener("install", e => {
 self.addEventListener("activate", e => {
   e.waitUntil(
     caches.keys()
-      .then(keys => Promise.all(keys.filter(k => k.startsWith("tri-packing-") && k !== CACHE).map(k => caches.delete(k))))
+      .then(keys => Promise.all(keys.filter(k => (k.startsWith("race-ready-") || k.startsWith("tri-packing-")) && k !== CACHE).map(k => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });

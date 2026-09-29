@@ -454,7 +454,7 @@ function openWebsite(text) {
 }
 linkButtons("[data-link-for]", "linkFor", openWebsite);
 
-// Race name under the packing and tasks titles
+// Race name under the packing and prep titles
 function renderRaceLine() {
   const { raceName } = eventFields();
   document.querySelectorAll(".race-line").forEach(line => {
@@ -624,7 +624,7 @@ function eventSummary() {
     sections,
     // Landscape PDF: one large and one smaller section in each column
     landscapeColumns: [["Race", "Entry"], ["Goals and results", "Accommodation"]],
-    footer: `Made with the Tri packing app on ${pad2(today.getDate())} ${MONTHS[today.getMonth()]} ${today.getFullYear()}`
+    footer: `Made with the Race Ready app on ${pad2(today.getDate())} ${MONTHS[today.getMonth()]} ${today.getFullYear()}`
   };
 }
 
@@ -701,7 +701,7 @@ function imageSummary() {
     heroLabel: hasActuals ? "Finish time" : "Goal time",
     heroTime: total ? formatHMS(total) : "",
     legs,
-    footer: "Made with Tri packing"
+    footer: "Made with Race Ready"
   };
 }
 
@@ -852,14 +852,13 @@ document.querySelectorAll("[data-theme-choice]").forEach(button => button.addEve
 darkQuery.addEventListener("change", applyTheme);
 applyTheme();
 
-// Views: packing, tasks and events, one per nav tab (in that order)
+// Views: packing, prep (tasks) and events, one per nav tab (in that order)
 const VIEWS = ["packing", "tasks", "events"];
-const APP_TITLE = "Triathlon packing list";
+const APP_TITLE = "Race Ready";
 const nav = document.querySelector(".lg-nav");
 const tabs = [...nav.querySelectorAll(".lg-nav__item")];
-// The packing page title is the heading itself ("Running packing list"); others
-// add the app name, e.g. "Race prep tasks – Triathlon packing list"
-const pageTitle = title => title.endsWith("packing list") ? title : `${title} – ${APP_TITLE}`;
+// Page titles add the app name to the heading, e.g. "Running packing list – Race Ready"
+const pageTitle = title => `${title} – ${APP_TITLE}`;
 
 function showView(name) {
   VIEWS.forEach(view => { document.getElementById("view-" + view).hidden = view !== name; });

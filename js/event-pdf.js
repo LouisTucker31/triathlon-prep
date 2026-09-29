@@ -194,7 +194,7 @@ const EventPdf = (() => {
     links.forEach(l => add(`<< /Type /Annot /Subtype /Link /Border [0 0 0] ` +
       `/Rect [${n(l.x)} ${n(pageH - l.y - l.h)} ${n(l.x + l.w)} ${n(pageH - l.y)}] ` +
       `/A << /S /URI /URI ${pdfString(l.url)} >> >>`));
-    add(`<< /Title ${pdfString(model.title)} /Producer (Tri packing) >>`);
+    add(`<< /Title ${pdfString(model.title)} /Producer (Race Ready) >>`);
 
     // Everything above is plain ASCII, so string length equals byte length
     let pdf = "%PDF-1.4\n";

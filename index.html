@@ -8,7 +8,7 @@
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#ffffff">
 <script src="js/theme.js"></script>
-<title>Triathlon packing list</title>
+<title>Race Ready</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="assets/icons/icon.svg" type="image/svg+xml">
 <link rel="icon" href="assets/icons/icon-192.png" type="image/png" sizes="192x192">
@@ -16,7 +16,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Tri packing">
+<meta name="apple-mobile-web-app-title" content="Race Ready">
 <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
@@ -36,7 +36,7 @@
   </section>
 
   <section class="view view--has-button" id="view-tasks" hidden>
-    <h1 tabindex="-1">Race prep tasks</h1>
+    <h1 tabindex="-1">Race prep</h1>
     <div class="race-line" hidden></div>
     <div class="progress-text" id="tasksProgressText"></div>
     <div class="progress" aria-hidden="true"><div id="tasksProgressFill"></div></div>
@@ -234,11 +234,11 @@
 
       <h2 class="settings-heading">Reset</h2>
       <button type="button" class="button-danger" id="resetApp">Reset for a new race</button>
-      <p class="settings-note">Clears Packing, Tasks and Events for every event type. Everything on this Settings page is kept.</p>
+      <p class="settings-note">Clears Packing, Prep and Events for every event type. Everything on this Settings page is kept.</p>
 
       <dialog class="confirm" id="resetDialog" aria-labelledby="resetTitle" aria-describedby="resetDesc">
         <h2 id="resetTitle" tabindex="-1" autofocus>Reset for a new race?</h2>
-        <p id="resetDesc">This unticks everything on Packing and Tasks and clears Events. Your settings stay. You can't undo this.</p>
+        <p id="resetDesc">This unticks everything on Packing and Prep and clears Events. Your settings stay. You can't undo this.</p>
         <div class="confirm__actions">
           <button type="button" class="confirm__cancel" id="resetCancel">Keep everything</button>
           <button type="button" class="confirm__ok" id="resetConfirm">Reset</button>
@@ -270,7 +270,7 @@
     </button>
     <button type="button" class="lg-nav__item">
       <span class="lg-nav__icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960"><path d="m222-299 158-158q9-9 21-8.5t21.39 9.5q8.61 9 8.61 21t-9 21L243-235q-9 9-21 9t-21-9L101-335q-9-9-9-21t9-21q9-9 21-8.5t21 8.5l79 78Zm0-320 158-158q9-9 21-8.5t21.39 9.5q8.61 9 8.61 21t-9 21L243-555q-9 9-21 9t-21-9L101-655q-9-9-9-21t9-21q9-9 21-8.5t21 8.5l79 78Zm328 329q-12.75 0-21.37-8.68-8.63-8.67-8.63-21.5 0-12.82 8.63-21.32 8.62-8.5 21.37-8.5h300q12.75 0 21.38 8.68 8.62 8.67 8.62 21.5 0 12.82-8.62 21.32-8.63 8.5-21.38 8.5H550Zm0-320q-12.75 0-21.37-8.68-8.63-8.67-8.63-21.5 0-12.82 8.63-21.32 8.62-8.5 21.37-8.5h300q12.75 0 21.38 8.68 8.62 8.67 8.62 21.5 0 12.82-8.62 21.32-8.63 8.5-21.38 8.5H550Z"/></svg></span>
-      <span class="lg-nav__label">Tasks</span>
+      <span class="lg-nav__label">Prep</span>
     </button>
     <button type="button" class="lg-nav__item">
       <span class="lg-nav__icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960"><path d="M596.82-220Q556-220 528-248.18q-28-28.19-28-69Q500-358 528.18-386q28.19-28 69-28Q638-414 666-385.82q28 28.19 28 69Q694-276 665.82-248q-28.19 28-69 28ZM180-80q-24 0-42-18t-18-42v-620q0-24 18-42t42-18h65v-28q0-13.6 9.2-22.8 9.2-9.2 22.8-9.2 14.02 0 23.51 9.2Q310-861.6 310-848v28h340v-28q0-13.6 9.2-22.8 9.2-9.2 22.8-9.2 14.03 0 23.51 9.2Q715-861.6 715-848v28h65q24 0 42 18t18 42v620q0 24-18 42t-42 18H180Zm0-60h600v-430H180v430Z"/></svg></span>
