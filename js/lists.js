@@ -354,25 +354,30 @@ const TASK_SECTIONS = [
 
 // Running: same item formats and position rules as the triathlon lists above
 const RUNNING_PACKING_SECTIONS = [
+  // Race documents, lip balm and breakfast are packed in the race-day kit bag
+  // and nutrition sections; the waterproof coat is in race-morning clothes
   { title: "Overnight bag", items: [
-    "Friday / Saturday evening clothes", "Underwear", "Socks", "Sleepwear", "Casual trousers / joggers", "T-shirt",
-    "Comfortable trainers", "Warm hoodie / jumper", "Warm jacket", "Waterproof coat", "Toothbrush", "Toothpaste",
-    "Deodorant", "Shower gel", "Lip balm", "Vitamins / supplements normally taken", "Wallet",
-    "Race registration information", "Race-day instructions", "Race packet if already collected",
-    "Breakfast for race morning", "Evening snacks"
+    null, "Underwear", "Socks", null, "Casual trousers / joggers", "T-shirt",
+    "Comfortable trainers", "Warm hoodie / jumper", null, null, null, null,
+    "Deodorant", null, null, null, null,
+    null, null, null,
+    null, null
   ]},
   { title: "Electronics", items: [
     "Phone", "Phone charger", "Power bank", "Garmin watch", "Garmin charger", "Heart-rate monitor / chest strap", "AirPods"
   ]},
+  // Phone is in electronics; food and drink in nutrition; post-race clothes, coat
+  // and kit bag in the clothes for after
   { title: "Race-day kit bag", items: [
     "Race confirmation / QR code", "Race-day instructions", "Photo ID", "Race bib / number if already collected",
-    "Safety pins", "Phone", "Wallet / bank card", "Car keys", "Sunscreen", "Lip balm", "Vaseline",
-    "BodyGlide / anti-chafe", "Blister plasters", "Small first-aid kit", "Tissues", "Water", "Gels",
-    "Electrolytes / hydration tablets", "Oranges / pre-race food", "Meal replacement / recovery shake",
-    "Recovery snack", "Warm post-race clothes", "Waterproof coat", "Plastic bag for wet / dirty clothes"
+    "Safety pins", null, "Wallet / bank card", "Car keys", "Sunscreen", "Lip balm", "Vaseline",
+    "Anti-chafe cream", "Blister plasters", "Small first-aid kit", null, null, null,
+    null, null, null,
+    null, null, null, null,
+    "Spare running socks"
   ]},
   { title: "Morning-of-the-race clothes", items: [
-    "Race top / running top", "Running shorts", "Running underwear / liner if required", "Running socks",
+    "Race top / running top", "Running shorts", "Running underwear", "Running socks",
     "Running shoes", "Hoodie / warm jumper", "Joggers / warm trousers", "Waterproof coat",
     "Comfortable outer shoes if not wearing race shoes immediately", "Beanie / warm hat if cold", "Gloves if cold"
   ]},
@@ -380,21 +385,21 @@ const RUNNING_PACKING_SECTIONS = [
     "Running top / vest", "Running shorts", "Running socks", "Running shoes", "Running glasses",
     "Running cap / visor", "Garmin watch", "Heart-rate monitor", "Race bib", "Safety pins / bib attachment",
     "Running belt / waist belt if using one", "Phone if carrying it", "Headphones if permitted and wanted",
-    "Gels", "BodyGlide / anti-chafe applied", "Sunscreen applied"
+    null, "Anti-chafe cream applied", "Sunscreen applied"  // gels are under nutrition: during race
   ]},
   { title: "Nutrition & hydration", items: [
     { h: "Before race" },
-    "Race-morning breakfast", "Oranges / pre-race food", "Water", "Electrolyte drink", "Hydration tablets",
+    "Race-morning breakfast", "Oranges / pre-race food", "Water", "Electrolyte drink / hydration tablets", null,
     "Pre-race gel if planned",
     { h: "During race" },
-    "Gels", "Caffeine gels if part of your tested strategy", "Electrolytes if carrying your own",
-    "Water / sports drink from aid stations as planned", "Any solid food you have specifically trained with",
+    "Gels", null, "Electrolytes if carrying your own",
+    "Water / sports drink from aid stations", "Any solid food you plan to eat",
     { h: "After race" },
-    "Water", "Electrolytes", "Hydration tablet", "Meal replacement / recovery shake", "Recovery snack / food"
+    "Water", "Electrolytes / hydration tablet", null, "Meal replacement / recovery shake", "Recovery snack / food"
   ]},
-  { title: "Warm / dry clothes for immediately after", items: [
+  { title: "Warm / dry clothes for after", items: [
     "Dry underwear", "Dry socks", "Dry T-shirt", "Warm hoodie / jumper", "Warm trousers / joggers",
-    "Waterproof coat", "Warm jacket if particularly cold", "Comfortable dry trainers",
+    null, null, "Comfortable dry trainers",
     "Beanie / warm hat if cold", "Plastic bag for sweaty / wet race kit"
   ]}
 ];
