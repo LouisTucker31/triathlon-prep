@@ -419,7 +419,7 @@ const RUNNING_TASK_SECTIONS = [
     "Check course map",
     "Check elevation profile",
     "Identify aid-station locations",
-    "Check what nutrition / drinks are provided on course",
+    null,
     "Check toilet locations",
     "Confirm race-day clothing",
     "Check running shoes are in good condition",
@@ -447,7 +447,7 @@ const RUNNING_TASK_SECTIONS = [
     "Check Garmin",
     "Check heart-rate monitor battery",
     "Check phone / chargers",
-    "Make sure running belt is ready if using one",
+    "Make sure running belt is ready",
     "Check running glasses",
     "Start organising equipment into packing-list categories"
   ]},
